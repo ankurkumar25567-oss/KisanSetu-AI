@@ -4,14 +4,27 @@ import google.generativeai as genai
 # Page Config
 st.set_page_config(page_title="KisanSetu - Smart Ag", page_icon="🌾", layout="centered")
 
-# --- Custom Attractive CSS Theme ---
+# --- Custom Dark Mode CSS Theme ---
 st.markdown("""
 <style>
-    .stApp { background-color: #f7fcf7; }
-    .main-header { text-align: center; color: #1b5e20; font-size: 2.8rem; font-weight: 800; padding-top: 10px; }
-    .sub-header { text-align: center; color: #4caf50; font-size: 1.2rem; margin-bottom: 25px; font-weight: 600; }
-    .footer { text-align: center; font-size: 13px; color: #666; padding: 15px; border-top: 1px solid #ddd; margin-top: 40px; }
-    div[data-testid="stForm"] { border-radius: 15px; border: 2px solid #e8f5e9; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    /* Dark background */
+    .stApp { background-color: #121212; color: #ffffff; }
+    
+    /* Neon green headers */
+    .main-header { text-align: center; color: #4ade80; font-size: 2.8rem; font-weight: 800; padding-top: 10px; }
+    .sub-header { text-align: center; color: #86efac; font-size: 1.2rem; margin-bottom: 25px; font-weight: 600; }
+    
+    /* Subtle dark footer */
+    .footer { text-align: center; font-size: 13px; color: #888888; padding: 15px; border-top: 1px solid #333333; margin-top: 40px; }
+    
+    /* Dark themed form with neon border */
+    div[data-testid="stForm"] { border-radius: 15px; border: 2px solid #166534; background-color: #1a1a1a; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+    
+    /* Green metric text */
+    div[data-testid="stMetricValue"] { color: #4ade80 !important; }
+    
+    /* Transparent top header */
+    header[data-testid="stHeader"] { background-color: transparent !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -24,27 +37,43 @@ def get_model():
 
 model = get_model()
 
-# --- Language Data (Safe from line breaks) ---
-LOCATIONS = {
-    "English": {"Uttar Pradesh": ["Varanasi", "Lucknow", "Kanpur"], "Bihar": ["Patna", "Gaya"]},
-    "Hindi": {"उत्तर प्रदेश": ["वाराणसी", "लखनऊ", "कानपुर"], "बिहार": ["पटना", "गया"]}
-}
+# --- 23 Languages UI Dictionary (Safe Line-by-Line Format) ---
+UI = {}
+UI["English"] = {"title": "🌾 KisanSetu", "sub": "Smart Agriculture", "ask": "Ask about crop:", "btn": "Ask AI", "mandi": "Market", "iot": "IoT", "sim": "Simulate", "state": "State", "city": "City", "crop": "Crop"}
+UI["Hindi"] = {"title": "🌾 किसान सेतु", "sub": "स्मार्ट कृषि", "ask": "फसल के बारे में पूछें:", "btn": "सलाह लें", "mandi": "बाजार", "iot": "आईओटी", "sim": "सिमुलेट", "state": "राज्य", "city": "शहर", "crop": "फसल"}
+UI["Bengali"] = {"title": "🌾 কিষাণ সেতু", "sub": "স্মার্ট কৃষি", "ask": "ফসল সম্পর্কে জিজ্ঞাসা করুন:", "btn": "পরামর্শ নিন", "mandi": "বাজার", "iot": "IoT", "sim": "সিমুলেট", "state": "রাজ্য", "city": "শহর", "crop": "ফসল"}
+UI["Marathi"] = {"title": "🌾 किसान सेतू", "sub": "स्मार्ट शेती", "ask": "पिकाबद्दल विचारा:", "btn": "सल्ला घ्या", "mandi": "बाजार", "iot": "IoT", "sim": "सिम्युलेट", "state": "राज्य", "city": "शहर", "crop": "पीक"}
+UI["Telugu"] = {"title": "🌾 కిసాన్ సేతు", "sub": "స్మార్ట్ వ్యవసాయం", "ask": "పంట గురించి అడగండి:", "btn": "సలహా తీసుకోండి", "mandi": "మార్కెట్", "iot": "IoT", "sim": "అనుకరించండి", "state": "రాష్ట్రం", "city": "నగరం", "crop": "పంట"}
+UI["Tamil"] = {"title": "🌾 கிசான் சேது", "sub": "ஸ்மார்ட் விவசாயம்", "ask": "பயிர் பற்றி கேளுங்கள்:", "btn": "ஆலோசனை பெறவும்", "mandi": "சந்தை", "iot": "IoT", "sim": "உருவகப்படுத்து", "state": "மாநிலம்", "city": "நகரம்", "crop": "பயிர்"}
+UI["Gujarati"] = {"title": "🌾 કિસાન સેતુ", "sub": "સ્માર્ટ કૃષિ", "ask": "પાક વિશે પૂછો:", "btn": "સલાહ લો", "mandi": "બજાર", "iot": "IoT", "sim": "સિમ્યુલેટ કરો", "state": "રાજ્ય", "city": "શહેર", "crop": "પાક"}
+UI["Urdu"] = {"title": "🌾 کسان سیتی", "sub": "سمارٹ زراعت", "ask": "فصل کے بارے میں پوچھیں:", "btn": "مشورہ لیں", "mandi": "مارکیٹ", "iot": "IoT", "sim": "تخروپن", "state": "ریاست", "city": "شہر", "crop": "فصل"}
+UI["Kannada"] = {"title": "🌾 ಕಿಸಾನ್ ಸೇತು", "sub": "ಸ್ಮಾರ್ಟ್ ಕೃಷಿ", "ask": "ಬೆಳೆ ಬಗ್ಗೆ ಕೇಳಿ:", "btn": "ಸಲಹೆ ಪಡೆಯಿರಿ", "mandi": "ಮಾರುಕಟ್ಟೆ", "iot": "IoT", "sim": "ಸಿಮ್ಯುಲೇಟ್", "state": "ರಾಜ್ಯ", "city": "ನಗರ", "crop": "ಬೆಳೆ"}
+UI["Odia"] = {"title": "🌾 କିସାନ ସେତୁ", "sub": "ସ୍ମାର୍ଟ କୃଷି", "ask": "ଫସଲ ବିଷୟରେ ପଚାରନ୍ତୁ:", "btn": "ପରାମର୍ଶ ନିଅନ୍ତୁ", "mandi": "ବଜାର", "iot": "IoT", "sim": "ସିମୁଲେଟ୍", "state": "ରାଜ୍ୟ", "city": "ସହର", "crop": "ଫସଲ"}
+UI["Malayalam"] = {"title": "🌾 കിസാൻ സേതു", "sub": "സ്മാർട്ട് കൃഷി", "ask": "വിളയെക്കുറിച്ച് ചോദിക്കുക:", "btn": "ഉപദേശം നേടുക", "mandi": "മാർക്കറ്റ്", "iot": "IoT", "sim": "സിമുലേറ്റ്", "state": "സംസ്ഥാനം", "city": "നഗരം", "crop": "വിള"}
+UI["Punjabi"] = {"title": "🌾 ਕਿਸਾਨ ਸੇਤੂ", "sub": "ਸਮਾਰਟ ਖੇਤੀ", "ask": "ਫਸਲ ਬਾਰੇ ਪੁੱਛੋ:", "btn": "ਸਲਾਹ ਲਓ", "mandi": "ਬਾਜ਼ਾਰ", "iot": "IoT", "sim": "ਸਿਮੂਲੇਟ ਕਰੋ", "state": "ਸੂਬਾ", "city": "ਸ਼ਹਿਰ", "crop": "ਫਸਲ"}
+UI["Assamese"] = {"title": "🌾 কিষাণ সেতু", "sub": "স্মাৰ্ট কৃষি", "ask": "শস্যৰ বিষয়ে সুধক:", "btn": "পৰামৰ্শ লওক", "mandi": "বজাৰ", "iot": "IoT", "sim": "চিমুলেট", "state": "ৰাজ্য", "city": "চহৰ", "crop": "শস্য"}
+UI["Nepali"] = {"title": "🌾 किसान सेतू", "sub": "स्मार्ट कृषि", "ask": "बाली बारे सोध्नुहोस्:", "btn": "सल्लाह लिनुहोस्", "mandi": "बजार", "iot": "IoT", "sim": "सिमुलेट", "state": "राज्य", "city": "शहर", "crop": "बाली"}
+UI["Maithili"] = {"title": "🌾 किसान सेतु", "sub": "स्मार्ट कृषि", "ask": "फसलक विषयमे पूछू:", "btn": "सलाह लिअ", "mandi": "बाजार", "iot": "IoT", "sim": "सिमुलेट", "state": "राज्य", "city": "शहर", "crop": "फसल"}
+UI["Santali"] = {"title": "🌾 ᱠᱤᱥᱟᱱ ᱥᱮᱛᱩ", "sub": "Smart Agriculture", "ask": "Ask about crop:", "btn": "Ask AI", "mandi": "Market", "iot": "IoT", "sim": "Simulate", "state": "State", "city": "City", "crop": "Crop"}
+UI["Kashmiri"] = {"title": "🌾 किसान सेतु", "sub": "स्मार्ट कृषि", "ask": "फसल के बारे में पूछें:", "btn": "सलाह लें", "mandi": "बाजार", "iot": "IoT", "sim": "सिमुलेट", "state": "राज्य", "city": "शहर", "crop": "फसल"}
+UI["Sindhi"] = {"title": "🌾 ڪسان سيتو", "sub": "سمارٽ زراعت", "ask": "فصل بابت پڇو:", "btn": "صلاح وٺو", "mandi": "مارڪيٽ", "iot": "IoT", "sim": "Simulate", "state": "صوبو", "city": "شهر", "crop": "فصل"}
+UI["Konkani"] = {"title": "🌾 किसान सेतू", "sub": "स्मार्ट शेती", "ask": "पिकाबद्दल विचारा:", "btn": "सल्लो घेयात", "mandi": "बाजार", "iot": "IoT", "sim": "सिम्युलेट", "state": "राज्य", "city": "शहर", "crop": "पीक"}
+UI["Manipuri"] = {"title": "🌾 কিষাণ সেতু", "sub": "Smart Agriculture", "ask": "Ask about crop:", "btn": "Ask AI", "mandi": "Market", "iot": "IoT", "sim": "Simulate", "state": "State", "city": "City", "crop": "Crop"}
+UI["Dogri"] = {"title": "🌾 किसान सेतू", "sub": "स्मार्ट खेती", "ask": "फसल बारे पुच्छो:", "btn": "सलाह लो", "mandi": "बाजार", "iot": "IoT", "sim": "सिमुलेट", "state": "राज्य", "city": "शहर", "crop": "फसल"}
+UI["Sanskrit"] = {"title": "🌾 किसानसेतु", "sub": "स्मार्ट कृषि", "ask": "सस्यस्य विषये पृच्छतु:", "btn": "सल्लाहं प्राप्नुवन्तु", "mandi": "आपण", "iot": "IoT", "sim": "Simulate", "state": "राज्य", "city": "नगर", "crop": "सस्य"}
+UI["Bodo"] = {"title": "🌾 किसान सेतू", "sub": "स्मार्ट कृषि", "ask": "फसलनि सोमोन्दै सों:", "btn": "सल्लाह ला", "mandi": "बाजार", "iot": "IoT", "sim": "Simulate", "state": "राज्य", "city": "शहर", "crop": "फसल"}
 
-UI = {
-    "English": {"title": "🌾 KisanSetu", "sub": "Smart AI Agriculture", "ask": "Ask about your crop or soil:", "btn": "Get AI Advice", "mandi": "📊 Market", "iot": "📡 IoT Hub", "sim": "Simulate Sensor Data", "state": "Select State", "city": "Select City", "crop": "Select Crop"},
-    "Hindi": {"title": "🌾 किसान सेतु", "sub": "स्मार्ट एआई कृषि", "ask": "अपनी फसल या मिट्टी के बारे में पूछें:", "btn": "एआई सलाह लें", "mandi": "📊 बाजार", "iot": "📡 आईओटी", "sim": "सेंसर डेटा सिमुलेट करें", "state": "राज्य चुनें", "city": "शहर चुनें", "crop": "फसल चुनें"}
-}
+LOCATIONS = {"Uttar Pradesh": ["Varanasi", "Lucknow", "Kanpur"], "Bihar": ["Patna", "Gaya"], "Maharashtra": ["Mumbai", "Pune"], "Delhi": ["New Delhi"]}
 
 # --- Sidebar ---
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/2329/2329117.png", width=90)
-    lang = st.selectbox("Language / भाषा", ["English", "Hindi"])
+    lang = st.selectbox("Language / भाषा", list(UI.keys()))
     t = UI[lang]
     st.divider()
     
-    states = list(LOCATIONS[lang].keys())
-    sel_state = st.selectbox(t["state"], states)
-    sel_city = st.selectbox(t["city"], LOCATIONS[lang][sel_state])
+    sel_state = st.selectbox(t["state"], list(LOCATIONS.keys()))
+    sel_city = st.selectbox(t["city"], LOCATIONS[sel_state])
 
 # --- Main UI ---
 st.markdown(f"<div class='main-header'>{t['title']}</div>", unsafe_allow_html=True)
@@ -55,7 +84,7 @@ tab1, tab2, tab3 = st.tabs(["🤖 AI Advisor", t['mandi'], t['iot']])
 # Tab 1: AI
 with tab1:
     with st.form("ai_form"):
-        q = st.text_input(t['ask'], placeholder="e.g. Best fertilizer for wheat...")
+        q = st.text_input(t['ask'], placeholder="e.g. Best fertilizer...")
         if st.form_submit_button(t['btn']) and q:
             with st.spinner("⚡ Processing..."):
                 res = model.generate_content(f"Answer in {lang} concisely: {q}", generation_config={"max_output_tokens": 200})
@@ -64,7 +93,7 @@ with tab1:
 # Tab 2: Market
 with tab2:
     st.markdown("### 🌾 Live Rates")
-    crop = st.selectbox(t["crop"], ["Wheat / गेहूं", "Paddy / धान", "Potato / आलू", "Tomato / टमाटर"])
+    crop = st.selectbox(t["crop"], ["Wheat", "Paddy", "Potato", "Tomato"])
     st.metric(crop, "₹2,400 / Quintal", delta="+₹50 (Stable)")
 
 # Tab 3: Sensors
