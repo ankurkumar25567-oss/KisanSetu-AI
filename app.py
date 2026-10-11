@@ -1,34 +1,24 @@
 import streamlit as st
 import google.generativeai as genai
+import json
 
-# Page Config
+# --- Page Config ---
 st.set_page_config(page_title="KisanSetu - Smart Ag", page_icon="🌾", layout="centered")
 
 # --- Custom Dark Mode CSS Theme ---
 st.markdown("""
 <style>
-    /* Dark background */
     .stApp { background-color: #121212; color: #ffffff; }
-    
-    /* Neon green headers */
     .main-header { text-align: center; color: #4ade80; font-size: 2.8rem; font-weight: 800; padding-top: 10px; }
     .sub-header { text-align: center; color: #86efac; font-size: 1.2rem; margin-bottom: 25px; font-weight: 600; }
-    
-    /* Subtle dark footer */
     .footer { text-align: center; font-size: 13px; color: #888888; padding: 15px; border-top: 1px solid #333333; margin-top: 40px; }
-    
-    /* Dark themed form with neon border */
     div[data-testid="stForm"] { border-radius: 15px; border: 2px solid #166534; background-color: #1a1a1a; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-    
-    /* Green metric text */
     div[data-testid="stMetricValue"] { color: #4ade80 !important; }
-    
-    /* Transparent top header */
     header[data-testid="stHeader"] { background-color: transparent !important; }
 </style>
 """, unsafe_allow_html=True)
 
-# API Configuration
+# --- API Configuration ---
 genai.configure(api_key="AQ.Ab8RN6KFRLjANXg_wcXie-WdxgBIWRXXp_FT7bGXyPJQuYoIcQ")
 
 @st.cache_resource
@@ -36,6 +26,40 @@ def get_model():
     return genai.GenerativeModel("gemini-1.5-flash")
 
 model = get_model()
+
+# --- Dynamic AI Location Translator ---
+@st.cache_data(show_spinner=False)
+def get_localized_locations(lang):
+    # Base English Locations (Includes your key cities)
+    ENG_LOC = {
+        "Andhra Pradesh": ["Visakhapatnam", "Vijayawada"],
+        "Assam": ["Guwahati", "Silchar"],
+        "Bihar": ["Patna", "Gaya"],
+        "Delhi": ["New Delhi"],
+        "Gujarat": ["Ahmedabad", "Surat"],
+        "Karnataka": ["Bengaluru", "Mysuru"],
+        "Kerala": ["Thiruvananthapuram", "Kochi"],
+        "Madhya Pradesh": ["Bhopal", "Indore"],
+        "Maharashtra": ["Mumbai", "Pune"],
+        "Punjab": ["Amritsar", "Ludhiana"],
+        "Rajasthan": ["Jaipur", "Jodhpur"],
+        "Tamil Nadu": ["Chennai", "Coimbatore"],
+        "Telangana": ["Hyderabad", "Warangal"],
+        "Uttar Pradesh": ["Varanasi", "Lucknow", "Kanpur", "Prayagraj", "Etah"],
+        "West Bengal": ["Kolkata", "Howrah"]
+    }
+    
+    if lang == "English":
+        return ENG_LOC
+        
+    try:
+        # Instantly translates the dictionary into the selected language
+        prompt = f"Translate the keys and values of this JSON dictionary into {lang}. Return strictly ONLY valid JSON. No markdown, no backticks:\n{json.dumps(ENG_LOC)}"
+        res = model.generate_content(prompt, generation_config={"temperature": 0.1, "max_output_tokens": 1000})
+        clean_json = res.text.strip().replace("```json", "").replace("```", "")
+        return json.loads(clean_json)
+    except Exception:
+        return ENG_LOC # Safe fallback to English if translation hiccups
 
 # --- 23 Languages UI Dictionary (Safe Line-by-Line Format) ---
 UI = {}
@@ -63,8 +87,6 @@ UI["Dogri"] = {"title": "🌾 किसान सेतू", "sub": "स्म�
 UI["Sanskrit"] = {"title": "🌾 किसानसेतु", "sub": "स्मार्ट कृषि", "ask": "सस्यस्य विषये पृच्छतु:", "btn": "सल्लाहं प्राप्नुवन्तु", "mandi": "आपण", "iot": "IoT", "sim": "Simulate", "state": "राज्य", "city": "नगर", "crop": "सस्य"}
 UI["Bodo"] = {"title": "🌾 किसान सेतू", "sub": "स्मार्ट कृषि", "ask": "फसलनि सोमोन्दै सों:", "btn": "सल्लाह ला", "mandi": "बाजार", "iot": "IoT", "sim": "Simulate", "state": "राज्य", "city": "शहर", "crop": "फसल"}
 
-LOCATIONS = {"Uttar Pradesh": ["Varanasi", "Lucknow", "Kanpur"], "Bihar": ["Patna", "Gaya"], "Maharashtra": ["Mumbai", "Pune"], "Delhi": ["New Delhi"]}
-
 # --- Sidebar ---
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/2329/2329117.png", width=90)
@@ -72,7 +94,19 @@ with st.sidebar:
     t = UI[lang]
     st.divider()
     
-    sel_state = st.selectbox(t["state"], list(LOCATIONS.keys()))
+    # Load dynamically translated locations
+    with st.spinner("Translating locations..."):
+        LOCATIONS = get_localized_locations(lang)
+        
+    states_list = list(LOCATIONS.keys())
+    # Default to UP if it exists in the translated list
+    default_state_index = 0
+    for i, state_name in enumerate(states_list):
+        if "Uttar Pradesh" in state_name or "उत्तर प्रदेश" in state_name:
+            default_state_index = i
+            break
+            
+    sel_state = st.selectbox(t["state"], states_list, index=default_state_index)
     sel_city = st.selectbox(t["city"], LOCATIONS[sel_state])
 
 # --- Main UI ---
@@ -84,7 +118,7 @@ tab1, tab2, tab3 = st.tabs(["🤖 AI Advisor", t['mandi'], t['iot']])
 # Tab 1: AI
 with tab1:
     with st.form("ai_form"):
-        q = st.text_input(t['ask'], placeholder="e.g. Best fertilizer...")
+        q = st.text_input(t['ask'], placeholder="e.g. Best fertilizer for wheat...")
         if st.form_submit_button(t['btn']) and q:
             with st.spinner("⚡ Processing..."):
                 res = model.generate_content(f"Answer in {lang} concisely: {q}", generation_config={"max_output_tokens": 200})
@@ -109,7 +143,7 @@ with tab3:
 st.markdown(
     "<div class='footer'>"
     "⚠️ <b>Disclaimer:</b> AI can make mistakes. Please verify critical farming decisions.<br><br>"
-    "<b>Developed by Ankur Kumar & Vikalp Chaubay</b>"
+    "<b>Developed by Ankur Kumar & Vikalp Chaubey</b>"
     "</div>", 
     unsafe_allow_html=True
 )
