@@ -35,7 +35,7 @@ def ask_groq_ai(system_prompt, user_prompt):
         "User-Agent": "Mozilla/5.0"
     }
     data = {
-        "model": "llama-3.1-8b-instant",
+        "model": "llama3-8b-8192",  # Using Groq's most stable model ID
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
