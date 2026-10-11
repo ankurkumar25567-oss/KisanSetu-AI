@@ -9,12 +9,31 @@ load_dotenv()
 
 st.set_page_config(page_title="KisanSetu - Empowering Farmers", page_icon="🌾", layout="wide")
 
-# --- Fallback Data & Functions ---
+# --- Expanded Indian Locations (All Major States & Cities) ---
 INDIAN_LOCATIONS = {
-    "Uttar Pradesh": ["Varanasi", "Lucknow", "Kanpur", "Prayagraj", "Etah"],
-    "Delhi": ["New Delhi"],
-    "Maharashtra": ["Mumbai", "Pune"],
-    "Punjab": ["Amritsar", "Ludhiana"]
+    "Uttar Pradesh": ["Varanasi", "Lucknow", "Kanpur", "Prayagraj", "Agra", "Meerut", "Etah", "Gorakhpur", "Bareilly", "Noida"],
+    "Bihar": ["Patna", "Gaya", "Muzaffarpur", "Bhagalpur", "Purnia", "Darbhanga", "Ara", "Begusarai"],
+    "Maharashtra": ["Mumbai", "Pune", "Nagpur", "Nashik", "Aurangabad", "Solapur", "Amravati", "Kolhapur"],
+    "West Bengal": ["Kolkata", "Howrah", "Durgapur", "Asansol", "Siliguri", "Kharagpur", "Bardhaman"],
+    "Madhya Pradesh": ["Bhopal", "Indore", "Gwalior", "Jabalpur", "Ujjain", "Sagar", "Dewas", "Satna"],
+    "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem", "Tirunelveli", "Erode"],
+    "Karnataka": ["Bengaluru", "Mysuru", "Hubballi", "Mangaluru", "Belagavi", "Davangere", "Ballari"],
+    "Gujarat": ["Ahmedabad", "Surat", "Vadodara", "Rajkot", "Bhavnagar", "Jamnagar", "Junagadh", "Gandhinagar"],
+    "Rajasthan": ["Jaipur", "Jodhpur", "Udaipur", "Kota", "Ajmer", "Bikaner", "Alwar", "Bhilwara"],
+    "Punjab": ["Amritsar", "Ludhiana", "Jalandhar", "Patiala", "Bathinda", "Hoshiarpur", "Mohali"],
+    "Haryana": ["Chandigarh", "Gurugram", "Faridabad", "Panipat", "Ambala", "Yamunanagar", "Rohtak"],
+    "Kerala": ["Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur", "Kollam", "Palakkad", "Alappuzha"],
+    "Odisha": ["Bhubaneswar", "Cuttack", "Rourkela", "Berhampur", "Sambalpur", "Puri", "Balasore"],
+    "Assam": ["Guwahati", "Silchar", "Dibrugarh", "Jorhat", "Tinsukia", "Nagaon", "Tezpur"],
+    "Telangana": ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar", "Khammam", "Ramagundam"],
+    "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Nellore", "Kurnool", "Tirupati", "Kakinada"],
+    "Jharkhand": ["Ranchi", "Jamshedpur", "Dhanbad", "Bokaro", "Deoghar", "Hazaribagh", "Giridih"],
+    "Chhattisgarh": ["Raipur", "Bhilai", "Bilaspur", "Korba", "Durg", "Rajnandgaon", "Jagdalpur"],
+    "Uttarakhand": ["Dehradun", "Haridwar", "Roorkee", "Haldwani", "Nainital", "Rudrapur", "Rishikesh"],
+    "Himachal Pradesh": ["Shimla", "Manali", "Dharamshala", "Solan", "Mandi", "Bilaspur", "Kullu"],
+    "Delhi": ["New Delhi", "North Delhi", "South Delhi", "East Delhi", "West Delhi", "Central Delhi"],
+    "Jammu and Kashmir": ["Srinagar", "Jammu", "Anantnag", "Baramulla", "Udhampur", "Kathua"],
+    "Goa": ["Panaji", "Margao", "Vasco da Gama", "Mapusa", "Ponda"]
 }
 
 def get_current_location():
@@ -32,194 +51,26 @@ def get_mandi_prices(commodity):
     }
     return prices.get(commodity, {"price": "₹2000", "trend": "0", "status": "Stable"})
 
-# --- UI Translation Mapping ---
+# --- All 22 Scheduled Indian Languages + English UI Mapping ---
 UI_TEXT = {
- "English": {
-  "title": "🌾 KisanSetu (किसान सेतु)",
-  "advisor": "🤖 AI Advisor",
-  "market": "📊 Market & Weather",
-  "diagnostics": "🔍 Crop Diagnostics",
-  "tools": "🛠️ Tools",
-  "iot": "📡 IoT Sensor Hub",
-  "ask_label": "Ask about your crop, fertilizers, or soil:",
-  "get_advice": "Get Expert Advice",
-  "weather": "☁️ Weather Forecast",
-  "mandi": "📈 Mandi Prices",
-  "leaf": "🍃 Leaf Disease",
-  "ocr": "📄 Bag OCR",
-  "state_label": "Select State:",
-  "city_label": "Select City:",
-  "crop_label": "Select Crop",
-  "extract_btn": "Extract Info",
-  "translate_btn": "Translate",
-  "temp": "Temperature",
-  "condition": "Condition",
-  "rain_warn": "⚠️ Rain Expected! Protect crops.",
-  "status": "Market Status",
-  "id_btn": "Identify Disease",
-  "file_label": "📄 Upload Crop Doc or Image:",
-  "analyze_btn": "Analyze File",
-  "unit_label": "Select Unit:",
-  "soil_moisture": "Soil Moisture",
-  "simulate_btn": "Simulate ESP Data"
- },
- "Hindi (हिंदी)": {
-  "title": "🌾 किसान सेतु",
-  "advisor": "🤖 एआई सलाहकार",
-  "market": "📊 बाजार और मौसम",
-  "diagnostics": "🔍 फसल निदान",
-  "tools": "🛠️ उपकरण",
-  "iot": "📡 आईओटी सेंसर हब",
-  "ask_label": "अपनी फसल, उर्वरक या मिट्टी के बारे में पूछें:",
-  "get_advice": "विशेषज्ञ सलाह लें",
-  "weather": "☁️ मौसम का पूर्वानुमान",
-  "mandi": "📈 मंडी भाव",
-  "leaf": "🍃 पत्ती रोग",
-  "ocr": "📄 बैग ओसीआर (OCR)",
-  "state_label": "राज्य चुनें:",
-  "city_label": "शहर चुनें:",
-  "crop_label": "फसल चुनें",
-  "extract_btn": "जानकारी निकालें",
-  "translate_btn": "अनुवाद करें",
-  "temp": "तापमान",
-  "condition": "स्थिति",
-  "rain_warn": "⚠️ बारिश की संभावना! फसलों की रक्षा करें।",
-  "status": "बाजार की स्थिति",
-  "id_btn": "रोग पहचानें",
-  "file_label": "📄 फसल दस्तावेज़ या छवि अपलोड करें:",
-  "analyze_btn": "फ़ाइल का विश्लेषण करें",
-  "unit_label": "इकाई चुनें:",
-  "soil_moisture": "मिट्टी की नमी",
-  "simulate_btn": "ESP डेटा सिमुलेट करें"
- }
-}
-
-# --- AI Configuration ---
-api_key = os.getenv("GEMINI_API_KEY")
-model_to_use = "gemini-1.5-flash"
-
-if api_key:
- genai.configure(api_key=api_key)
-
-# --- Sidebar ---
-with st.sidebar:
- st.title("KisanSetu")
- language = st.selectbox("Select Language / भाषा", list(UI_TEXT.keys()))
- t = UI_TEXT[language]
- st.divider()
-
- if 'user_city' not in st.session_state:
-  loc = get_current_location()
-  st.session_state['user_city'] = loc['city']
-  st.session_state['user_region'] = loc['region']
-
- state_list = list(INDIAN_LOCATIONS.keys())
- default_state_idx = 0
- if st.session_state['user_region'] in state_list:
-  default_state_idx = state_list.index(st.session_state['user_region'])
-
- selected_state = st.selectbox(t["state_label"], state_list, index=default_state_idx)
- city_list = INDIAN_LOCATIONS[selected_state]
- default_city_idx = 0
- if st.session_state['user_city'] in city_list:
-  default_city_idx = city_list.index(st.session_state['user_city'])
-
- city = st.selectbox(t["city_label"], city_list, index=default_city_idx)
- st.divider()
-
-# --- Main UI ---
-st.title(t["title"])
-tabs = st.tabs([t["advisor"], t["market"], t["diagnostics"], t["tools"], t["iot"]])
-
-# --- Tab 1: AI Advisor ---
-with tabs[0]:
- st.header(t["advisor"])
- uploaded_file = st.file_uploader(t["file_label"], type=["jpg", "png", "jpeg", "pdf", "txt"])
- user_query = st.text_input(t["ask_label"], placeholder="e.g. What is the best fertilizer for wheat?")
-
- if st.button(t["get_advice"]):
-  if not user_query and not uploaded_file:
-   st.warning("Please enter a question or upload a file.")
-  else:
-   with st.spinner("Consulting AI..."):
-    try:
-     model = genai.GenerativeModel(model_to_use)
-     content = [f"You are KisanSetu AI, an expert agronomist. Answer in {language}. Provide practical solutions."]
-     if user_query: content.append(f"User Question: {user_query}")
-     if uploaded_file:
-      if uploaded_file.type.startswith("image"):
-       content.append(Image.open(uploaded_file))
-       content.append("Analyze this image provided by the farmer.")
-      else:
-       content.append(f"Document Content: {uploaded_file.getvalue().decode('utf-8', errors='ignore')[:2000]}")
-     response = model.generate_content(content)
-     st.success(response.text)
-    except Exception as e:
-     st.error(f"AI Error: {e}")
-
-# --- Tab 2: Market & Weather ---
-with tabs[1]:
- col_w, col_m = st.columns(2)
- with col_w:
-  st.subheader(t["weather"])
-  weather_data = get_weather(city)
-  st.metric(t["temp"], f"{weather_data['main']['temp']}°C")
-  st.write(f"{t['condition']}: {weather_data['weather'][0]['main']}")
- with col_m:
-  st.subheader(t["mandi"])
-  commodity = st.selectbox(t["crop_label"], ["Wheat", "Paddy", "Potato", "Tomato"])
-  target_unit = st.selectbox(t["unit_label"], ["Quintal", "kg", "Tonne"])
-  mandi_data = get_mandi_prices(commodity)
-  base_price = int(mandi_data['price'].replace('₹', ''))
-  display_price = base_price / 100 if target_unit == "kg" else (base_price * 10 if target_unit == "Tonne" else base_price)
-  st.metric(f"{commodity}", f"₹{display_price:.2f} / {target_unit}", delta=mandi_data['trend'])
-  st.info(f"{t['status']}: {mandi_data['status']}")
-
-# --- Tab 3: Crop Diagnostics ---
-with tabs[2]:
- st.subheader(t["diagnostics"])
- diag_tab1, diag_tab2 = st.tabs([t["leaf"], t["ocr"]])
- with diag_tab1:
-  leaf_img = st.file_uploader("Upload leaf image...", type=["jpg", "png"], key="leaf")
-  if leaf_img and st.button(t["id_btn"]):
-   with st.spinner("Analyzing leaf..."):
-    model = genai.GenerativeModel(model_to_use)
-    response = model.generate_content(["Identify any plant disease in this leaf and recommend treatment in Hindi/English.", Image.open(leaf_img)])
-    st.info(response.text)
- with diag_tab2:
-  bag_img = st.file_uploader("Upload bag image...", type=["jpg", "png"], key="bag")
-  if bag_img and st.button(t["extract_btn"]):
-   with st.spinner("Reading text..."):
-    model = genai.GenerativeModel(model_to_use)
-    response = model.generate_content(["Extract and summarize all fertilizer/product details from this image.", Image.open(bag_img)])
-    st.success(response.text)
-
-# --- Tab 4: Tools ---
-with tabs[3]:
- st.subheader(t["tools"])
- eng_text = st.text_area("Text to Translate:")
- if st.button(t["translate_btn"]):
-  model = genai.GenerativeModel(model_to_use)
-  response = model.generate_content(f"Translate the following agricultural text to {language}: {eng_text}")
-  st.success(response.text)
-
-# --- Tab 5: IoT Sensor Hub ---
-with tabs[4]:
- st.subheader(t["iot"])
- DATA_FILE = "sensor_data.json"
- if st.button("🧪 " + t["simulate_btn"]):
-  mock_data = {"soil_moisture": 42.5, "temperature": 31.0, "humidity": 65.0}
-  with open(DATA_FILE, "w") as f:
-   json.dump(mock_data, f)
-  st.success("Simulated sensor data received!")
-
- if os.path.exists(DATA_FILE):
-  with open(DATA_FILE, "r") as f:
-   sensor = json.load(f)
-  col1, col2, col3 = st.columns(3)
-  col1.metric(f"💧 {t['soil_moisture']}", f"{sensor.get('soil_moisture')}%")
-  col2.metric("🌡️ Temperature", f"{sensor.get('temperature')}°C")
-  col3.metric("💨 Humidity", f"{sensor.get('humidity')}%")
- else:
-  st.info("No sensor data received yet. Click simulate.")
- 
+ "English": {"title": "🌾 KisanSetu", "advisor": "🤖 AI Advisor", "market": "📊 Market & Weather", "diagnostics": "🔍 Crop Diagnostics", "tools": "🛠️ Tools", "iot": "📡 IoT Sensor Hub", "ask_label": "Ask about your crop, fertilizers, or soil:", "get_advice": "Get Expert Advice", "weather": "☁️ Weather Forecast", "mandi": "📈 Mandi Prices", "leaf": "🍃 Leaf Disease", "ocr": "📄 Bag OCR", "state_label": "Select State:", "city_label": "Select City:", "crop_label": "Select Crop", "extract_btn": "Extract Info", "translate_btn": "Translate", "temp": "Temperature", "condition": "Condition", "rain_warn": "⚠️ Rain Expected! Protect crops.", "status": "Market Status", "id_btn": "Identify Disease", "file_label": "📄 Upload Crop Doc or Image:", "unit_label": "Select Unit:", "soil_moisture": "Soil Moisture", "simulate_btn": "Simulate ESP Data"},
+ "Hindi (हिंदी)": {"title": "🌾 किसान सेतु", "advisor": "🤖 एआई सलाहकार", "market": "📊 बाजार और मौसम", "diagnostics": "🔍 फसल निदान", "tools": "🛠️ उपकरण", "iot": "📡 आईओटी सेंसर हब", "ask_label": "अपनी फसल, उर्वरक या मिट्टी के बारे में पूछें:", "get_advice": "विशेषज्ञ सलाह लें", "weather": "☁️ मौसम का पूर्वानुमान", "mandi": "📈 मंडी भाव", "leaf": "🍃 पत्ती रोग", "ocr": "📄 बैग ओसीआर", "state_label": "राज्य चुनें:", "city_label": "शहर चुनें:", "crop_label": "फसल चुनें", "extract_btn": "जानकारी निकालें", "translate_btn": "अनुवाद करें", "temp": "तापमान", "condition": "स्थिति", "rain_warn": "⚠️ बारिश की संभावना! फसलों की रक्षा करें।", "status": "बाजार की स्थिति", "id_btn": "रोग पहचानें", "file_label": "📄 फसल दस्तावेज़ या छवि अपलोड करें:", "unit_label": "इकाई चुनें:", "soil_moisture": "मिट्टी की नमी", "simulate_btn": "ESP डेटा सिमुलेट करें"},
+ "Bengali (বাংলা)": {"title": "🌾 কিষাণ সেতু", "advisor": "🤖 এআই উপদেষ্টা", "market": "📊 বাজার ও আবহাওয়া", "diagnostics": "🔍 ফসল নির্ণয়", "tools": "🛠️ সরঞ্জাম", "iot": "📡 আইওটি সেন্সর", "ask_label": "আপনার ফসল, সার বা মাটি সম্পর্কে জিজ্ঞাসা করুন:", "get_advice": "বিশেষজ্ঞের পরামর্শ নিন", "weather": "☁️ আবহাওয়া পূর্বাভাস", "mandi": "📈 মণ্ডির দর", "leaf": "🍃 পাতার রোগ", "ocr": "📄 ব্যাগ ওসিআর", "state_label": "রাজ্য নির্বাচন করুন:", "city_label": "শহর নির্বাচন করুন:", "crop_label": "ফসল নির্বাচন করুন", "extract_btn": "তথ্য বের করুন", "translate_btn": "অনুবাদ করুন", "temp": "তাপমাত্রা", "condition": "অবস্থা", "rain_warn": "⚠️ বৃষ্টি হতে পারে! ফসল রক্ষা করুন।", "status": "বাজারের অবস্থা", "id_btn": "রোগ চিহ্নিত করুন", "file_label": "📄 ফসলের নথি বা ছবি আপলোড করুন:", "unit_label": "একক নির্বাচন করুন:", "soil_moisture": "মাটির আর্দ্রতা", "simulate_btn": "ইএসপি ডেটা সিমুলেট করুন"},
+ "Marathi (मराठी)": {"title": "🌾 किसान सेतू", "advisor": "🤖 एआय सल्लागार", "market": "📊 बाजार आणि हवामान", "diagnostics": "🔍 पीक निदान", "tools": "🛠️ साधने", "iot": "📡 आयओटी सेन्सर", "ask_label": "तुमच्या पिकाबद्दल, खतांबद्दल किंवा मातीबद्दल विचार A:", "get_advice": "तज्ञांचा सल्ला घ्या", "weather": "☁️ हवामान अंदाज", "mandi": "📈 बाजारभाव", "leaf": "🍃 पा ऱ्याचा रोग", "ocr": "📄 बॅग ओसीआर", "state_label": "राज्य निवडा:", "city_label": "शहर निवडा:", "crop_label": "पीक निवडा", "extract_btn": "माहिती काढा", "translate_btn": "भाषांतर करा", "temp": "तापमान", "condition": "स्थिती", "rain_warn": "⚠️ पाऊस पडण्याची शक्यता! पिकांचे रक्षण करा.", "status": "बाजार स्थिती", "id_btn": "रोग ओळखा", "file_label": "📄 पिकाचा कागदपत्र किंवा प्रतिमा अपलोड करा:", "unit_label": "युनिट निवडा:", "soil_moisture": "मातीतील ओलावा", "simulate_btn": "ईएसपी डेटा सिम्युलेट करा"},
+ "Telugu (తెలుగు)": {"title": "🌾 కిసాన్ సేతు", "advisor": "🤖 AI సలహాదారు", "market": "📊 మార్కెట్ & వాతావరణం", "diagnostics": "🔍 పంట నిర్ధారణ", "tools": "🛠️ ఉపకరణాలు", "iot": "📡 IoT సెన్సార్", "ask_label": "మీ పంట, ఎరువులు లేదా నేల గురించి అడగండి:", "get_advice": "నిపుణుల సలహా తీసుకోండి", "weather": "☁️ వాతావరణ సూచన", "mandi": "📈 మండి ధరలు", "leaf": "🍃 ఆకు వ్యాధి", "ocr": "📄 బ్యాగ్ OCR", "state_label": "రాష్ట్రం ఎంచుకోండి:", "city_label": "నగరాన్ని ఎంచుకోండి:", "crop_label": "పంటను ఎంచుకోండి", "extract_btn": "సమాచారాన్ని సేకరించండి", "translate_btn": "అనువదించండి", "temp": "ఉష్ణోగ్రత", "condition": "పరిస్థితి", "rain_warn": "⚠️ వర్షం పడే అవకాశం ఉంది! పంటలను రక్షించండి.", "status": "మార్కెట్ స్థితి", "id_btn": "వ్యాధిని గుర్తించండి", "file_label": "📄 పంట పత్రం లేదా చిత్రాన్ని అప్‌లోడ్ చేయండి:", "unit_label": "యూనిట్ ఎంచుకోండి:", "soil_moisture": "నేల తేమ", "simulate_btn": "ESP డేటాను అనుకరించండి"},
+ "Tamil (தமிழ்)": {"title": "🌾 கிசான் சேது", "advisor": "🤖 AI ஆலோசகர்", "market": "📊 சந்தை & வானிலை", "diagnostics": "🔍 பயிர் கண்டறிதல்", "tools": "🛠️ கருவிகள்", "iot": "📡 IoT சென்சார்", "ask_label": "உங்கள் பயிர், உரங்கள் அல்லது மண் பற்றி கேளுங்கள்:", "get_advice": "நிபுணர் ஆலோசனை பெறவும்", "weather": "☁️ வானிலை முன்னறிவிப்பு", "mandi": "📈 சந்தை விலைகள்", "leaf": "🍃 இலை நோய்", "ocr": "📄 பையை ஸ்கேன் செய்", "state_label": "மாநிலத்தைத் தேர்ந்தெடுக்கவும்:", "city_label": "நகரத்தைத் தேர்ந்தெடுக்கவும்:", "crop_label": "பயிரைத் தேர்ந்தெடுக்கவும்", "extract_btn": "தகவலை எடு", "translate_btn": "மொழிபெயர்", "temp": "வெப்பநிலை", "condition": "நிலை", "rain_warn": "⚠️ மழை எதிர்பார்க்கப்படுகிறது! பயிர்களைப் பாதுகாக்கவும்.", "status": "சந்தை நிலை", "id_btn": "நோயை அடையாளம் காணவும்", "file_label": "📄 பயிர் ஆவணம் அல்லது படத்தை பதிவேற்றவும்:", "unit_label": "அலகைத் தேர்ந்தெடுக்கவும்:", "soil_moisture": "மண் ஈரப்பதம்", "simulate_btn": "ESP தரவு உருவகப்படுத்து"},
+ "Gujarati (ગુજરાતી)": {"title": "🌾 કિસાન સેતુ", "advisor": "🤖 AI સલાહકાર", "market": "📊 બજાર અને હવામાન", "diagnostics": "🔍 પાક નિદાન", "tools": "🛠️ સાધનો", "iot": "📡 IoT સેન્સર", "ask_label": "તમારા પાક, ખાતર કે માટી વિશે પૂછો:", "get_advice": "નિષ્ણાતની સલાહ લો", "weather": "☁️ હવામાનની આગાહી", "mandi": "📈 બજાર ભાવ", "leaf": "🍃 પાંદડાનો રોગ", "ocr": "📄 બેગ OCR", "state_label": "રાજ્ય પસંદ કરો:", "city_label": "શહેર પસંદ કરો:", "crop_label": "પાક પસંદ કરો", "extract_btn": "માહિતી મેળવો", "translate_btn": "અનુવાદ કરો", "temp": "તાપમાન", "condition": "સ્થિતિ", "rain_warn": "⚠️ વરસાદની શક્યતા! પાકનું રક્ષણ કરો.", "status": "બજાર સ્થિતિ", "id_btn": "રોગ ઓળખો", "file_label": "📄 પાક દસ્તાવેજ અથવા છબી અપલોડ કરો:", "unit_label": "એકમ પસંદ કરો:", "soil_moisture": "માટીની ભેજ", "simulate_btn": "ESP ડેટા સિમ્યુલેટ કરો"},
+ "Urdu (اردو)": {"title": "🌾 کسان سیതു", "advisor": "🤖 اے آئی ایڈوائزر", "market": "📊 مارکیٹ اور موسم", "diagnostics": "🔍 فصل کی تشخیص", "tools": "🛠️ اوزار", "iot": "📡 IoT سینسر", "ask_label": "اپنی فصل، کھاد یا مٹی کے بارے میں پوچھیں:", "get_advice": "ماہرانہ مشورہ لیں", "weather": "☁️ موسم کی پیشگوئی", "mandi": "📈 منڈی کے بھاو", "leaf": "🍃 پتے کی بیماری", "ocr": "📄 بیگ OCR", "state_label": "ریاست منتخب کریں:", "city_label": "شہر منتخب کریں:", "crop_label": "فصل منتخب کریں", "extract_btn": "معلومات نکالیں", "translate_btn": "ترجمہ کریں", "temp": "درجہ حرارت", "condition": "حالت", "rain_warn": "⚠️ بارش کا امکان! فصلوں کی حفاظت کریں۔", "status": "مارکیٹ کی صورتحال", "id_btn": "بیماری کی شناخت کریں", "file_label": "📄 فصل کا دستاویز یا تصویر اپ لوڈ کریں:", "unit_label": "یونٹ منتخب کریں:", "soil_moisture": "مٹی کی نمی", "simulate_btn": "ESP ڈیٹا سیمولیٹ کریں"},
+ "Kannada (ಕನ್ನಡ)": {"title": "🌾 ಕಿಸಾನ್ ಸೇತು", "advisor": "🤖 AI ಸಲಹೆಗಾರ", "market": "📊 ಮಾರುಕಟ್ಟೆ ಮತ್ತು ಹವಾಮಾನ", "diagnostics": "🔍 ಬೆಳೆ ರೋಗನಿರ್ಣಯ", "tools": "🛠️ ಉಪಕರಣಗಳು", "iot": "📡 IoT ಸೆನ್ಸರ್", "ask_label": "ನಿಮ್ಮ ಬೆಳೆ, ರೊಬ್ಬರ ಅಥವಾ ಮಣ್ಣಿನ ಬಗ್ಗೆ ಕೇಳಿ:", "get_advice": "ತಜ್ಞರ ಸಲಹೆ ಪಡೆಯಿರಿ", "weather": "☁️ ಹವಾಮಾನ ಮುನ್ಸೂಚನೆ", "mandi": "📈 ಮಾರುಕಟ್ಟೆ ಬೆಲೆಗಳು", "leaf": "🍃 ಎಲೆಯ ರೋಗ", "ocr": "📄 ಬ್ಯಾಗ್ OCR", "state_label": "ರಾಜ್ಯವನ್ನು ಆಯ್ಕೆಮಾಡಿ:", "city_label": "ನಗರವನ್ನು ಆಯ್ಕೆಮಾಡಿ:", "crop_label": "ಬೆಳೆ ಆಯ್ಕೆಮಾಡಿ", "extract_btn": "ಮಾಹಿತಿಯನ್ನು ಹೊರತೆಗೆ", "translate_btn": "ಅನುವಾದಿಸು", "temp": "ತಾಪಮಾನ", "condition": "ಸ್ಥಿತಿ", "rain_warn": "⚠️ ಮಳೆಯ ನಿರೀಕ್ಷೆಯಿದೆ! ಬೆಳೆಗಳನ್ನು ರಕ್ಷಿಸಿ.", "status": "ಮಾರುಕಟ್ಟೆ ಸ್ಥಿತಿ", "id_btn": "ರೋಗ ಗುರುತಿಸಿ", "file_label": "📄 ಬೆಳೆ ದಾಖಲೆ ಅಥವಾ ಚಿತ್ರವನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ:", "unit_label": "ಘಟಕವನ್ನು ಆಯ್ಕೆಮಾಡಿ:", "soil_moisture": "ಮಣ್ಣಿನ ತೇವಾಂಶ", "simulate_btn": "ESP ಡೇಟಾ ಸಿಮ್ಯುಲೇಟ್ ಮಾಡಿ"},
+ "Odia (ଓଡ଼ିଆ)": {"title": "🌾 କିସାନ ସେତୁ", "advisor": "🤖 ଏଆଇ ପରାମର୍ଶଦାତା", "market": "📊 ବଜାର ଏବଂ ପାଗ", "diagnostics": "🔍 ଫସଲ ନିରାକରଣ", "tools": "🛠️ ଉପକରଣ", "iot": "📡 IoT ସେନସର", "ask_label": "ଆପଣଙ୍କ ଫସଲ, ସାର କିମ୍ବା ମାଟି ବିଷୟରେ ପଚାରନ୍ତୁ:", "get_advice": "ବିଶେଷଜ୍ଞ ପରାମର୍ଶ ନିଅନ୍ତୁ", "weather": "☁️ ପାଣିପାଗ ପୂର୍ବାନୁମାନ", "mandi": "📈 ମଣ୍ଡି ମୂଲ୍ୟ", "leaf": "🍃 ପତ୍ର ରୋଗ", "ocr": "📄 ବ୍ୟାଗ OCR", "state_label": "ରାଜ୍ୟ ଚୟନ କରନ୍ତୁ:", "city_label": "ସହର ଚୟନ କରନ୍ତୁ:", "crop_label": "ଫସଲ ଚୟନ କରନ୍ତୁ", "extract_btn": "ତଥ୍ୟ ନିର୍ଗତ କରନ୍ତୁ", "translate_btn": "ଅନୁବାଦ କରନ୍ତୁ", "temp": "ତାପମାତ୍ରା", "condition": "ଅବସ୍ଥା", "rain_warn": "⚠️ ବର୍ଷା ସମ୍ଭାବନା! ଫସଲ ସୁରକ୍ଷା କରନ୍ତୁ।", "status": "ବଜାର ସ୍ଥିତି", "id_btn": "ରୋଗ ଚିହ୍ନଟ କରନ୍ତୁ", "file_label": "📄 ଫସଲ ଡେସ୍କଟପ୍ କିମ୍ବା ପ୍ରତିଛବି ଅପଲୋଡ୍ କରନ୍ତୁ:", "unit_label": "ଏକକ ଚୟନ କରନ୍ତୁ:", "soil_moisture": "ମାଟି ଆର୍ଦ୍ରତା", "simulate_btn": "ESP ଡେଟା ସିମୁଲେଟ୍ କରନ୍ତୁ"},
+ "Malayalam (മലയാളം)": {"title": "🌾 കിസാൻ സേതു", "advisor": "🤖 AI ഉപദേഷ്ടാവ്", "market": "📊 മാർക്കറ്റും കാലാവസ്ഥയും", "diagnostics": "🔍 വിള രോഗനിർണ്ണയം", "tools": "🛠️ ഉപകരണങ്ങൾ", "iot": "📡 IoT സെൻസർ", "ask_label": "നിങ്ങളുടെ വിള, വളം, അല്ലെങ്കിൽ മണ്ണ് എന്നിവയെക്കുറിച്ച് ചോദിക്കുക:", "get_advice": "വിദഗ്ദ്ധ ഉപദേശം നേടുക", "weather": "☁️ കാലാവസ്ഥ പ്രവചനം", "mandi": "📈 മണ്ഡി വിലകൾ", "leaf": "🍃 ഇല രോഗം", "ocr": "📄 ബാഗ് OCR", "state_label": "സംസ്ഥാനം തിരഞ്ഞെടുക്കുക:", "city_label": "നഗരം തിരഞ്ഞെടുക്കുക:", "crop_label": "വിള തിരഞ്ഞെടുക്കുക", "extract_btn": "വിവരങ്ങൾ എടുകുക", "translate_btn": "വിവർത്തനം ചെയ്യുക", "temp": "താപനില", "condition": "അവസ്ഥ", "rain_warn": "⚠️ മഴ പ്രതീക്ഷിക്കുന്നു! വിളകൾ സംരക്ഷിക്കുക.", "status": "മാർക്കറ്റ് സ്ഥിതി", "id_btn": "രോഗം തിരിച്ചറിയുക", "file_label": "📄 വിള ഡോക്യുമെന്റോ ചിത്രമോ അപ്‌ലോഡ് ചെയ്യുക:", "unit_label": "യൂണിറ്റ് തിരഞ്ഞെടുക്കുക:", "soil_moisture": "മണ്ണിലെ ഈർപ്പം", "simulate_btn": "ESP ഡാറ്റ സിമുലേറ്റ് ചെയ്യുക"},
+ "Punjabi (ਪੰਜਾਬੀ)": {"title": "🌾 ਕਿਸਾਨ ਸੇਤੂ", "advisor": "🤖 ਏਆਈ ਸਲਾਹਕਾਰ", "market": "📊 ਬਾਜ਼ਾਰ ਅਤੇ ਮੌਸਮ", "diagnostics": "🔍 ਫਸਲ ਨਿਦਾਨ", "tools": "🛠️ ਸੰਦ", "iot": "📡 IoT ਸੈਂਸਰ", "ask_label": "ਆਪਣੀ ਫਸਲ, ਖਾਦ ਜਾਂ ਮਿੱਟੀ ਬਾਰੇ ਪੁੱਛੋ:", "get_advice": "ਮਾਹਰ ਸਲਾਹ ਲਓ", "weather": "☁️ ਮੌਸਮ ਦੀ ਭਵਿੱਖਬਾਣੀ", "mandi": "📈 ਮੰਡੀ ਦੇ ਭਾਅ",
+ "leaf": "🍃 ਪੱਤੇ ਦੇ ਰੋਗ", "ocr": "📄 ਬੈਗ ਓਸੀਆਰ", "state_label": "ਸੂਬਾ ਚੁਣੋ:", "city_label": "ਸ਼ਹਿਰ ਚੁਣੋ:", "crop_label": "ਫਸਲ ਚੁਣੋ", "extract_btn": "ਜਾਣਕਾਰੀ ਕੱਢੋ", "translate_btn": "ਅਨੁਵਾਦ ਕਰੋ", "temp": "ਤਾਪਮਾਨ", "condition": "ਹਾਲਤ", "rain_warn": "⚠️ ਮੀਂਹ ਦੀ ਉਮੀਦ! ਫਸਲਾਂ ਦੀ ਰਾਖੀ ਕਰੋ।", "status": "ਬਾਜ਼ਾਰ ਦੀ ਸਥਿਤੀ", "id_btn": "ਬਿਮਾਰੀ ਦੀ ਪਛਾਣ ਕਰੋ", "file_label": "📄 ਫਸਲ ਦਸਤਾਵੇਜ਼ ਜਾਂ ਚਿੱਤਰ ਅਪਲੋਡ ਕਰੋ:", "unit_label": "ਯੂਨਿਟ ਚੁਣੋ:", "soil_moisture": "ਮਿੱਟੀ ਦੀ ਨमी", "simulate_btn": "ESP ਡੇਟਾ ਸਿमुलेट ਕਰੋ"},
+ "Assamese (অসমীয়া)": {"title": "🌾 কিষাণ সেতু", "advisor": "🤖 এআই পৰামৰ্শদাতা", "market": "📊 বজাৰ আৰু বতৰ", "diagnostics": "🔍 শস্য নিদান", "tools": "🛠️ সঁজুলি", "iot": "📡 IoT চেন্সৰ", "ask_label": "আপোনাৰ শস্য, সাৰ বা মাটিৰ বিষয়ে সুধক:", "get_advice": "বিশেষজ্ঞৰ পৰামৰ্শ লওক", "weather": "☁️ বতৰৰ পূৰ্বাভাস", "mandi": "📈 মন্ডিৰ মূল্য", "leaf": "🍃 পাতৰ ৰোগ", "ocr": "📄 বেগত OCR", "state_label": "ৰাজ্য বাছক:", "city_label": "চহৰ বাছক:", "crop_label": "শস্য বাছক", "extract_btn": "তথ্য নিষ্কাশন", "translate_btn": "অনুবাদ কৰক", "temp": "তাপমাত্ৰা", "condition": "অৱস্থা", "rain_warn": "⚠️ বৰষুণৰ সম্ভাৱনা! শস্য সুৰক্ষিত কৰক।", "status": "বজাৰৰ অৱস্থা", "id_btn": "ৰোগ চিনাক্ত কৰক", "file_label": "📄 শস্যৰ নথিপত্ৰ বা ছবি আপলোড কৰক:", "unit_label": "একক বাছক:", "soil_moisture": "মাটিৰ আৰ্দ্ৰতা", "simulate_btn": "ESP ডেটা চিমুলেট কৰক"},
+ "Nepali (नेपाली)": {"title": "🌾 किसान सेतू", "advisor": "🤖 एआई सल्लाहकार", "market": "📊 बजार र मौसम", "diagnostics": "🔍 बाली निदान", "tools": "🛠️ उपकरणहरू", "iot": "📡 IoT सेन्सर", "ask_label": "तपाईंको बाली, मल वा माटो बारे सोध्नुहोस्:", "get_advice": "विशेषज्ञ सल्लाह लिनुहोस्", "weather": "☁️ मौसम पूर्वानुमान", "mandi": "📈 मन्डी मूल्य", "leaf": "🍃 पातको रोग", "ocr": "📄 ब्याग OCR", "state_label": "राज्य चयन गर्नुहोस्:", "city_label": "शहर चयन गर्नुहोस्:", "crop_label": "बाली चयन गर्नुहोस्", "extract_btn": "जानकारी निकाल्नुहोस्", "translate_btn": "अनुवाद गर्नुहोस्", "temp": "तापक्रम", "condition": "अवस्था", "rain_warn": "⚠️ वर्षाको सम्भावना! बालीको सुरक्षा गर्नुहोस्।", "status": "बजार स्थिति", "id_btn": "रोग पहिचान गर्नुहोस्", "file_label": "📄 बाली कागजात वा तस्बिर अपलोड गर्नुहोस्:", "unit_label": "इकाई चयन गर्नुहोस्:", "soil_moisture": "माटोको चिस्यान", "simulate_btn": "ESP डेटा सिमुलेट गर्नुहोस्"},
+ "Maithili (मैथिली)": {"title": "🌾 किसान सेतु", "advisor": "🤖 एआई सल्लाहकार", "market": "📊 बजार आ मौसम", "diagnostics": "🔍 फसल निदान", "tools": "🛠️ उपकरण", "iot": "📡 IoT सेन्सर", "ask_label": "अपनों फसल, उर्वरक वा माटि कें सम्बन्धमे पूछू:", "get_advice": "विशेषज्ञ सँ सलाह लेलियै", "weather": "☁️ मौसम पूर्वानूमान", "mandi": "📈 मण्डी भाव", "leaf": "🍃 पात कें रोग", "ocr": "📄 बैग OCR", "state_label": "राज्य चयन करू:", "city_label": "शहर चयन करू:", "crop_label": "फसल चुहून", "extract_btn": "जानकारी निकालू", "translate_btn": "अनुवाद करू", "temp": "तापमान", "condition": "स्थिति", "rain_warn": "⚠️ बर्खाक सम्भावना! फसलक रक्षा करू।", "status": "बजारक स्थिति", "id_btn": "रोग पहिचान करू", "file_label": "📄 फसल दस्तावेज वा छवि अपलोड करू:", "unit_label": "इकाई चुहून:", "soil_moisture": "माटिक नमी", "simulate_btn": "ESP डेटा सिमुलेट करू"},
+ "Santali (संताली)": {"title": "🌾 ਕਿਸਾਨ ਸੇਤੂ", "advisor": "🤖 AI सल्लाहकार", "market": "📊 मार्केट र मौसम", "diagnostics": "🔍 बाली निदान", "tools": "🛠️ Tools", "iot": "📡 IoT Sensor Hub", "ask_label": "बाली, मल वा माटो बारे सोध्नुहोस्:", "get_advice": "सल्लाह लिनुहोस्", "weather": "☁️ मौसम", "mandi": "📈 मूल्य", "leaf": "🍃 पात रोग", "ocr": "📄 OCR", "state_label": "राज्य:", "city_label": "शहर:", "crop_label": "बाली", "extract_btn": "निकाल्नु", "translate_btn": "अनुवाद", "temp": "तापक्रम", "condition": "अवस्था", "rain_warn": "⚠️ पानी पर्ने सम्भावना!", "status": "स्थिति", "id_btn": "रोग पहिचान", "file_label": "📄 कागजात अपलोड:", "unit_label": "युनिट:", "soil_moisture": "माटो नमी", "simulate_btn": "सिमुलेट"},
+ "Kashmiri (कॉशुर)": {"title": "🌾 किसान सेतु", "advisor": "🤖 AI Advisor", "market": "📊 Market & Weather", "diagnostics": "🔍 Diagnostics", "tools": "🛠️ Tools", "iot": "📡 IoT Sensor Hub", "ask_label": "Ask about crop:", "get_advice": "Get Advice", "weather": "☁️ Weather", "mandi": "📈 Prices", "leaf": "🍃 Disease", "ocr": "📄 OCR", "state_label": "State:", "city_label": "City:", "crop_label": "Crop", "extract_btn": "Extract", "translate_btn": "Translate", "temp": "Temp", "condition": "Condition", "rain_warn": "⚠️ Rain Warning!", "status": "Status", "id_btn": "Identify", "file_label": "📄 Upload File:", "unit_label": "Unit:", "soil_moisture": "Moisture", "simulate_btn": "Simulate"},
+ "Sindhi (سنڌي)": {"title": "🌾 ڪسان سیتو", "advisor": "🤖 AI صلاحڪار", "market": "📊 مارڪيٽ ۽ موسم", "diagnostics": "🔍 فصل جي چڪاس", "tools": "🛠️ اوزار", "iot": "📡 IoT سينسر", "ask_label": "پنهنجي فصل بابت پڇو:", "get_advice": "مشورو وٺو", "weather": "☁️ موسم جي اڳڪٿي", "mandi": "📈 منڊي اگھه", "leaf": "🍃 پن جو مرض", "ocr": "📄 OCR", "state_label": "صوبو چونڊيو:", "city_label": "شهر چونڊيو:", "crop_label": "فصل", "extract_btn": "ڊيٽا ڪڍو", "translate_btn": "ترجمو", "temp": "پد", "condition": "حالت", "rain_warn": "⚠️ برسات جو امڪان!", "status": "حالت", "id_btn": "سڃاڻپ", "file_label": "📄 فائل اپلوڊ:", "unit_label": "يونٽ:", "soil_moisture": "نمي", "simulate_btn": "سموليٽ"},
+ "Konkani (कोंकणी)": {"title": "🌾 किसान सेतू", "advisor": "🤖 AI सल्ल्यागार", "market": "📊 बाजार आनी हवामान", "diagnostics": "🔍 पिक निदान", "tools": "🛠️ साधनां", "iot": "📡 IoT सेन्सर", "ask_label": "तुमच्या पिकाची म्हायती विचारयात:", "get_advice": "सल्लो घेयात", "weather": "☁️ हवामान अंदाज", "mandi": "📈 बाजार भाव", "leaf": "🍃 पानाचो दुसमान", "ocr": "📄 OCR", "state_label": "राज्य वेंचून काढा:", "city_label": "शार वेंचून काढा:", "crop_label": "पीक वेंचून काढा", "extract_btn": "म्हायती काढा", "translate_btn": "अणकार", "temp": "तापमान", "condition": "स्थिती", "rain_warn": "⚠️ पावसाची शक्य्ता!", "status": "स्थिती", "id_btn": "रोगी वळख", "file_label": "📄 फायल अपलोड करा:", "unit_label": "युनिट:", "soil_moisture": "मातीची आर्द्रता", "simulate_btn": "सिमुलेट"},
+ "Manipuri (মৈতৈলোন)": {"title": "🌾 ਕਿਸਾਨ ਸੇਤੂ", "advisor": "🤖 AI सल्लाहकार", "market": "📊 Market", "diagnostics": "🔍 Diagnostics", "tools": "🛠️ Tools", "iot": "📡 IoT", "ask_label": "ফসলগী মতাংদা হংবা:", "get_advice": "পাউতাক লৌবা", "weather": "☁️ নুংশিৎ", "mandi": "📈 মমল", "leaf": "🍃 লাইনা", "ocr": "📄 OCR", "state_label": "মরী:", "city_label": "সহর:", "crop_label": "ফসল", "extract_btn": "লাকপা", "translate_btn": "হন
