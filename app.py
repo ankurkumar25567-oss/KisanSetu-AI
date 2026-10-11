@@ -1,136 +1,178 @@
 import streamlit as st
-import google.generativeai as genai
+import urllib.request
 import json
 
-# --- Page Config ---
+# --- Page Configuration ---
 st.set_page_config(page_title="KisanSetu - Smart Ag", page_icon="🌾", layout="centered")
 
-# --- Custom Dark Mode CSS Theme ---
+# --- Dark Mode Styling ---
 st.markdown("""
 <style>
     .stApp { background-color: #121212; color: #ffffff; }
-    .main-header { text-align: center; color: #4ade80; font-size: 2.8rem; font-weight: 800; padding-top: 10px; }
-    .sub-header { text-align: center; color: #86efac; font-size: 1.2rem; margin-bottom: 25px; font-weight: 600; }
+    .main-header { text-align: center; color: #4ade80; font-size: 2.6rem; font-weight: 800; padding-top: 10px; }
+    .sub-header { text-align: center; color: #86efac; font-size: 1.1rem; margin-bottom: 25px; font-weight: 600; }
     .footer { text-align: center; font-size: 13px; color: #888888; padding: 15px; border-top: 1px solid #333333; margin-top: 40px; }
-    div[data-testid="stForm"] { border-radius: 15px; border: 2px solid #166534; background-color: #1a1a1a; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+    div[data-testid="stForm"] { border-radius: 12px; border: 2px solid #166534; background-color: #1a1a1a; }
     div[data-testid="stMetricValue"] { color: #4ade80 !important; }
     header[data-testid="stHeader"] { background-color: transparent !important; }
 </style>
 """, unsafe_allow_html=True)
 
-# --- API Configuration ---
-# Your working key is safely hardcoded here
-genai.configure(api_key="AQ.Ab8RN6IuVnj4GdAJ8R2H326II7X31iAXmTncU7PmMfyHL26OpA")
+# --- Built-in Groq AI Engine (No external SDK needed) ---
+def ask_groq_ai(system_prompt, user_prompt):
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {
+        "Authorization": "Bearer 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",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "model": "llama-3.1-8b-instant",
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ],
+        "max_tokens": 300
+    }
+    try:
+        req = urllib.request.Request(url, headers=headers, data=json.dumps(data).encode('utf-8'))
+        with urllib.request.urlopen(req, timeout=15) as response:
+            res_data = json.loads(response.read().decode('utf-8'))
+            return res_data['choices'][0]['message']['content']
+    except Exception as e:
+        return f"Error connecting to AI: {e}"
 
-@st.cache_resource
-def get_model():
-    return genai.GenerativeModel("gemini-1.5-flash")
+# --- UI Localization Data ---
+LANGUAGES = ["English", "Hindi (हिंदी)", "Punjabi (ਪੰਜਾਬੀ)", "Telugu (తెలుగు)"]
 
-model = get_model()
-
-# --- The Master Dictionary (105 Crops safely formatted for mobile) ---
-ENG_DATA = {
-    "ui": {
-        "title": "🌾 KisanSetu",
-        "sub": "Smart AI Agriculture",
-        "tab_ai": "🤖 AI Advisor",
-        "tab_mandi": "📊 Market Rates",
-        "tab_iot": "📡 Field Sensors",
-        "tab_tr": "🔄 Text Converter",
+UI_DATA = {
+    "English": {
+        "title": "🌾 KisanSetu", "sub": "Smart AI Agriculture",
+        "tab_ai": "🤖 AI Advisor", "tab_mandi": "📊 Market Rates",
+        "tab_iot": "📡 Field Sensors", "tab_tr": "🔄 Text Converter",
         "ask_crop": "Ask about your crop, soil, or fertilizer:",
-        "btn_ai": "Ask AI Expert",
-        "live_rates": "🌾 Live Market Rates",
-        "lbl_crop": "Select Crop:",
-        "lbl_unit": "Select Unit:",
-        "sensors": "📡 Live Field Sensors",
-        "btn_sim": "Refresh Sensor Data",
-        "moisture": "💧 Soil Moisture",
-        "temp": "🌡️ Temperature",
-        "humidity": "💨 Air Humidity",
-        "tr_title": "🔄 Text Converter",
-        "tr_input": "Paste text to translate:",
-        "btn_tr": "Translate Text",
-        "lbl_lang": "Select Language",
-        "lbl_state": "Select State:",
-        "lbl_city": "Select City:",
-        "disclaimer": "⚠️ Disclaimer: AI can make mistakes. Please verify critical farming decisions with local experts.",
-        "devs": "Developed by Ankur Kumar & Vikalp Chaubey"
+        "btn_ai": "Ask AI Expert", "lbl_crop": "Select Crop:",
+        "lbl_unit": "Select Unit:", "btn_sim": "Refresh Sensors",
+        "lbl_state": "Select State:", "lbl_city": "Select City:"
     },
-    "crops": [
-        "Wheat", "Paddy", "Maize", "Barley", "Sorghum", "Pearl Millet", 
-        "Finger Millet", "Oats", "Rye", "Buckwheat", "Chickpea", "Pigeon Pea", 
-        "Black Gram", "Green Gram", "Lentil", "Soybean", "Cowpea", "Moth Bean", 
-        "Horse Gram", "Peas", "Potato", "Tomato", "Onion", "Cabbage", 
-        "Cauliflower", "Carrot", "Radish", "Brinjal", "Lady Finger", "Spinach", 
-        "Pumpkin", "Bitter Gourd", "Bottle Gourd", "Capsicum", "Cucumber", 
-        "Green Chilli", "Garlic", "Ginger", "Coriander", "Mint", "Turnip", 
-        "Sweet Potato", "Beetroot", "French Beans", "Cluster Beans", "Ridge Gourd", 
-        "Snake Gourd", "Ash Gourd", "Drumstick", "Broccoli", "Apple", "Banana", 
-        "Mango", "Orange", "Grapes", "Papaya", "Guava", "Pineapple", 
-        "Watermelon", "Muskmelon", "Pomegranate", "Strawberry", "Lemon", 
-        "Sweet Lime", "Chikoo", "Litchi", "Kiwi", "Plum", "Peach", "Pear", 
-        "Cherry", "Custard Apple", "Jackfruit", "Fig", "Coconut", "Black Pepper", 
-        "Cardamom", "Clove", "Cinnamon", "Turmeric", "Cumin", "Mustard", 
-        "Fennel", "Fenugreek", "Nutmeg", "Mace", "Asafoetida", "Tamarind", 
-        "Tejpatta", "Sugarcane", "Cotton", "Jute", "Tobacco", "Tea", "Coffee", 
-        "Rubber", "Arecanut", "Cashewnut", "Castor Seed", "Sesame", "Linseed", 
-        "Safflower", "Sunflower", "Groundnut"
-    ],
-    "units": ["Quintal (100kg)", "Kilogram (1kg)", "Tonne (1000kg)"],
-    "states": {
-        "Uttar Pradesh": ["Varanasi", "Lucknow", "Kanpur", "Etah", "Prayagraj"],
-        "Bihar": ["Patna", "Gaya", "Muzaffarpur"],
-        "Punjab": ["Amritsar", "Ludhiana", "Patiala"],
-        "Maharashtra": ["Mumbai", "Pune", "Nagpur"],
-        "Delhi": ["New Delhi"]
+    "Hindi (हिंदी)": {
+        "title": "🌾 किसान सेतु", "sub": "स्मार्ट एआई कृषि",
+        "tab_ai": "🤖 एआई सलाहकार", "tab_mandi": "📊 बाजार भाव",
+        "tab_iot": "📡 खेत सेंसर", "tab_tr": "🔄 अनुवादक",
+        "ask_crop": "अपनी फसल या मिट्टी के बारे में पूछें:",
+        "btn_ai": "सलाह लें", "lbl_crop": "फसल चुनें:",
+        "lbl_unit": "इकाई चुनें:", "btn_sim": "सेंसर रीफ्रेश करें",
+        "lbl_state": "राज्य चुनें:", "lbl_city": "शहर चुनें:"
+    },
+    "Punjabi (ਪੰਜਾਬੀ)": {
+        "title": "🌾 ਕਿਸਾਨ ਸੇਤੂ", "sub": "ਸਮਾਰਟ ਏਆਈ ਖੇਤੀ",
+        "tab_ai": "🤖 ਏਆਈ ਸਲਾਹਕਾਰ", "tab_mandi": "📊 ਬਾਜ਼ਾਰ ਦੇ ਭਾਅ",
+        "tab_iot": "📡 ਖੇਤ ਸੈਂਸਰ", "tab_tr": "🔄 ਅਨੁਵਾਦਕ",
+        "ask_crop": "ਆਪਣੀ ਫਸਲ ਜਾਂ ਮਿੱਟੀ ਬਾਰੇ ਪੁੱਛੋ:",
+        "btn_ai": "ਸਲਾਹ ਲਓ", "lbl_crop": "ਫਸਲ ਚੁਣੋ:",
+        "lbl_unit": "ਯੂਨਿਟ ਚੁਣੋ:", "btn_sim": "ਸੈਂਸਰ ਰਿਫ੍ਰੈਸ਼ ਕਰੋ",
+        "lbl_state": "ਸੂਬਾ ਚੁਣੋ:", "lbl_city": "ਸ਼ਹਿਰ ਚੁਣੋ:"
+    },
+    "Telugu (తెలుగు)": {
+        "title": "🌾 కిసాన్ సేతు", "sub": "స్మార్ట్ AI వ్యవసాయం",
+        "tab_ai": "🤖 AI సలహాదారు", "tab_mandi": "📊 మార్కెట్ ధరలు",
+        "tab_iot": "📡 సెన్సార్లు", "tab_tr": "🔄 అనువాదకుడు",
+        "ask_crop": "మీ పంట లేదా నేల గురించి అడగండి:",
+        "btn_ai": "సలహా తీసుకోండి", "lbl_crop": "పంటను ఎంచుకోండి:",
+        "lbl_unit": "యూనిట్ ఎంచుకోండి:", "btn_sim": "రిఫ్రెష్ చేయండి",
+        "lbl_state": "రాష్ట్రం ఎంచుకోండి:", "lbl_city": "నగరాన్ని ఎంచుకోండి:"
     }
 }
 
-# --- Dynamic AI Translator ---
-@st.cache_data(show_spinner=False)
-def get_translated_data(lang):
-    if lang == "English":
-        return ENG_DATA
-        
-    prompt = f"""
-    Translate ALL string values in this JSON object into {lang}. 
-    CRITICAL: Keep the JSON keys and structure exactly the same. Only translate values.
-    Return ONLY valid JSON format.
-    \n{json.dumps(ENG_DATA)}
-    """
-    try:
-        res = model.generate_content(prompt, generation_config={"temperature": 0.1, "max_output_tokens": 4096})
-        clean_text = res.text.strip().replace("```json", "").replace("```", "")
-        return json.loads(clean_text)
-    except Exception:
-        return ENG_DATA 
+CROPS = ["Wheat", "Paddy", "Potato", "Tomato", "Onion", "Sugarcane", "Cotton", "Maize"]
+UNITS = ["Quintal (100kg)", "Kilogram (1kg)", "Tonne (1000kg)"]
+BASE_PRICES = [2400, 2200, 1500, 3000, 2500, 350, 7000, 2100]
 
-# --- AI Real Price Fetcher ---
-@st.cache_data(show_spinner=False)
-def get_real_price(crop_name):
-    try:
-        prompt = f"What is the current realistic average Mandi market price for {crop_name} in India per Quintal in INR? Reply with ONLY the digits. No symbols, no text."
-        res = model.generate_content(prompt, generation_config={"max_output_tokens": 10})
-        price = int(''.join(filter(str.isdigit, res.text)))
-        return price if price > 0 else 2500
-    except Exception:
-        return 2500 # Safe fallback
+# --- 28 States and 8 Union Territories ---
+STATES = {
+    "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Tirupati"],
+    "Arunachal Pradesh": ["Itanagar", "Tawang", "Pasighat", "Ziro"],
+    "Assam": ["Guwahati", "Dibrugarh", "Silchar", "Tezpur"],
+    "Bihar": ["Patna", "Gaya", "Muzaffarpur", "Darbhanga"],
+    "Chhattisgarh": ["Raipur", "Bhilai", "Bilaspur", "Korba"],
+    "Goa": ["Panaji", "Margao", "Vasco da Gama", "Mapusa"],
+    "Gujarat": ["Ahmedabad", "Surat", "Vadodara", "Rajkot"],
+    "Haryana": ["Gurugram", "Faridabad", "Panipat", "Ambala"],
+    "Himachal Pradesh": ["Shimla", "Manali", "Dharamshala", "Mandi"],
+    "Jharkhand": ["Ranchi", "Jamshedpur", "Dhanbad", "Bokaro"],
+    "Karnataka": ["Bengaluru", "Mysuru", "Mangaluru", "Hubballi"],
+    "Kerala": ["Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur"],
+    "Madhya Pradesh": ["Bhopal", "Indore", "Gwalior", "Jabalpur"],
+    "Maharashtra": ["Mumbai", "Pune", "Nagpur", "Nashik"],
+    "Manipur": ["Imphal", "Churachandpur", "Thoubal", "Bishnupur"],
+    "Meghalaya": ["Shillong", "Cherrapunji", "Tura", "Jowai"],
+    "Mizoram": ["Aizawl", "Lunglei", "Champhai", "Serchhip"],
+    "Nagaland": ["Kohima", "Dimapur", "Mokokchung", "Tuensang"],
+    "Odisha": ["Bhubaneswar", "Cuttack", "Rourkela", "Puri"],
+    "Punjab": ["Amritsar", "Ludhiana", "Jalandhar", "Patiala"],
+    "Rajasthan": ["Jaipur", "Jodhpur", "Udaipur", "Kota"],
+    "Sikkim": ["Gangtok", "Namchi", "Pelling", "Mangan"],
+    "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Salem"],
+    "Telangana": ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar"],
+    "Tripura": ["Agartala", "Udaipur", "Dharmanagar", "Kailashahar"],
+    "Uttar Pradesh": ["Lucknow", "Varanasi", "Kanpur", "Agra", "Prayagraj"],
+    "Uttarakhand": ["Dehradun", "Haridwar", "Roorkee", "Nainital"],
+    "West Bengal": ["Kolkata", "Darjeeling", "Siliguri", "Asansol"],
+    "Andaman and Nicobar Islands": ["Port Blair", "Havelock", "Diglipur"],
+    "Chandigarh": ["Chandigarh"],
+    "Dadra and Nagar Haveli and Daman and Diu": ["Daman", "Diu", "Silvassa"],
+    "Delhi": ["New Delhi", "Dwarka", "Rohini", "Saket"],
+    "Jammu and Kashmir": ["Srinagar", "Jammu", "Anantnag", "Baramulla"],
+    "Ladakh": ["Leh", "Kargil"],
+    "Lakshadweep": ["Kavaratti", "Agatti", "Minicoy"],
+    "Puducherry": ["Puducherry", "Auroville", "Karaikal", "Mahe"]
+}
 
-LANGUAGES = ["English", "Hindi", "Bengali", "Marathi", "Telugu", "Tamil", "Gujarati", "Urdu", "Kannada", "Odia", "Malayalam", "Punjabi", "Assamese", "Nepali", "Maithili", "Santali", "Kashmiri", "Sindhi", "Konkani", "Manipuri", "Dogri", "Sanskrit", "Bodo"]
+# --- Session State ---
+if "loc_state" not in st.session_state: st.session_state["loc_state"] = "Uttar Pradesh"
+if "loc_city" not in st.session_state: st.session_state["loc_city"] = "Varanasi"
 
 # --- Sidebar ---
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/2329/2329117.png", width=90)
     lang = st.selectbox("Language / भाषा", LANGUAGES)
-    
-    with st.spinner("🌍 Translating App & 100+ Crops..."):
-        DATA = get_translated_data(lang)
-        ui = DATA["ui"]
-        
+    ui = UI_DATA[lang]
     st.divider()
-    states_list = list(DATA["states"].keys())
-    sel_state = st.selectbox(ui["lbl_state"], states_list)
-    sel_city = st.selectbox(ui["lbl_city"], DATA["states"][sel_state])
+
+    if st.button("🛰️ Auto-Locate (GPS)"):
+        with st.spinner("Finding location..."):
+            try:
+                # Built-in request for IP geolocation
+                req = urllib.request.Request("https://ipapi.co/json/", headers={'User-Agent': 'Mozilla/5.0'})
+                with urllib.request.urlopen(req, timeout=5) as response:
+                    loc_data = json.loads(response.read().decode('utf-8'))
+                    reg = loc_data.get('region')
+                    cit = loc_data.get('city')
+                    if reg in STATES:
+                        st.session_state["loc_state"] = reg
+                        if cit and cit not in STATES[reg]:
+                            STATES[reg].insert(0, cit)
+                        if cit:
+                            st.session_state["loc_city"] = cit
+                        st.rerun()
+                    else:
+                        st.warning("Location could not be determined.")
+            except:
+                st.error("Network error. GPS failed.")
+
+    state_list = list(STATES.keys())
+    current_state_idx = state_list.index(st.session_state["loc_state"]) if st.session_state["loc_state"] in state_list else 0
+    sel_state = st.selectbox(ui["lbl_state"], state_list, index=current_state_idx)
+    
+    if sel_state != st.session_state["loc_state"]:
+        st.session_state["loc_state"] = sel_state
+        st.session_state["loc_city"] = STATES[sel_state][0] 
+        st.rerun()
+
+    city_list = STATES[sel_state]
+    current_city_idx = city_list.index(st.session_state["loc_city"]) if st.session_state["loc_city"] in city_list else 0
+    sel_city = st.selectbox(ui["lbl_city"], city_list, index=current_city_idx)
+    if sel_city != st.session_state["loc_city"]:
+        st.session_state["loc_city"] = sel_city
 
 # --- Main UI ---
 st.markdown(f"<div class='main-header'>{ui['title']}</div>", unsafe_allow_html=True)
@@ -138,58 +180,49 @@ st.markdown(f"<div class='sub-header'>{ui['sub']}</div>", unsafe_allow_html=True
 
 tab1, tab2, tab3, tab4 = st.tabs([ui['tab_ai'], ui['tab_mandi'], ui['tab_iot'], ui['tab_tr']])
 
-# Tab 1: AI
 with tab1:
     with st.form("ai_form"):
-        q = st.text_input(ui['ask_crop'], placeholder="...")
+        q = st.text_input(ui['ask_crop'], placeholder="e.g. Best fertilizer for wheat?")
         if st.form_submit_button(ui['btn_ai']) and q:
-            with st.spinner("⚡..."):
-                res = model.generate_content(f"Answer in {lang} concisely: {q}", generation_config={"max_output_tokens": 250})
-                st.success(res.text)
+            with st.spinner("⚡ Consulting Groq AI..."):
+                sys_prompt = f"You are KisanSetu AI, an agronomist expert. Answer concisely, practically, and in {lang}. Frame advice based on the farmer's location: {sel_city}, {sel_state}."
+                response = ask_groq_ai(sys_prompt, q)
+                st.success(response)
 
-# Tab 2: Simple Market Tab (105 Crops)
 with tab2:
-    st.markdown(f"### {ui['live_rates']}")
+    st.markdown(f"### {ui['tab_mandi']} in {sel_city}")
+    c_idx = st.selectbox(ui["lbl_crop"], range(len(CROPS)), format_func=lambda x: CROPS[x])
+    u_idx = st.selectbox(ui["lbl_unit"], range(len(UNITS)), format_func=lambda x: UNITS[x])
     
-    c_idx = st.selectbox(ui["lbl_crop"], range(len(DATA["crops"])), format_func=lambda x: DATA["crops"][x])
-    u_idx = st.selectbox(ui["lbl_unit"], range(len(DATA["units"])), format_func=lambda x: DATA["units"][x])
-
-    english_crop_name = ENG_DATA["crops"][c_idx] 
-    
-    # Dynamically fetch real price using AI
-    with st.spinner("Fetching live market estimates..."):
-        base_price = get_real_price(english_crop_name)
-    
-    # Unit Math
-    if u_idx == 1: final_price = base_price / 100  # KG
-    elif u_idx == 2: final_price = base_price * 10 # Tonne
-    else: final_price = base_price                 # Quintal
+    price = BASE_PRICES[c_idx]
+    if u_idx == 1: final_price = price / 100
+    elif u_idx == 2: final_price = price * 10
+    else: final_price = price
         
-    st.metric(DATA["crops"][c_idx], f"₹{final_price:,.2f} / {DATA['units'][u_idx]}")
+    st.metric(CROPS[c_idx], f"₹{final_price:,.2f} / {UNITS[u_idx]}")
 
-# Tab 3: Sensors
 with tab3:
-    st.markdown(f"### {ui['sensors']}")
+    st.markdown(f"### {ui['tab_iot']}")
     if st.button(ui['btn_sim']):
         c1, c2, c3 = st.columns(3)
-        c1.metric(ui["moisture"], "42.5%")
-        c2.metric(ui["temp"], "31°C")
-        c3.metric(ui["humidity"], "65%")
+        c1.metric("💧 Soil Moisture", "42.5%")
+        c2.metric("🌡️ Temperature", "31°C")
+        c3.metric("💨 Humidity", "65%")
 
-# Tab 4: Text Converter
 with tab4:
-    st.markdown(f"### {ui['tr_title']}")
-    txt_input = st.text_area(ui["tr_input"])
-    if st.button(ui["btn_tr"]) and txt_input:
-        with st.spinner("⚡..."):
-            res = model.generate_content(f"Translate the following text to {lang}: {txt_input}", generation_config={"max_output_tokens": 300})
-            st.success(res.text)
+    st.markdown(f"### {ui['tab_tr']}")
+    txt_input = st.text_area("Paste text to translate:")
+    if st.button("Translate") and txt_input:
+        with st.spinner("Translating..."):
+            sys_prompt = f"Translate this text directly into {lang}. Return only the translated text. Do not add any extra commentary."
+            response = ask_groq_ai(sys_prompt, txt_input)
+            st.success(response)
 
-# --- Footer & Credits ---
+# --- Footer ---
 st.markdown(
     f"<div class='footer'>"
-    f"<b>{ui['disclaimer']}</b><br><br>"
-    f"<b>{ui['devs']}</b>"
+    f"<b>Developed by Ankur Kumar & Vikalp Chaubey</b><br>"
+    f"The Aryan International School, Varanasi"
     f"</div>", 
     unsafe_allow_html=True
-)
+    )
