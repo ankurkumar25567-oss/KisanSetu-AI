@@ -1,5 +1,6 @@
 import streamlit as st
 import urllib.request
+import urllib.error
 import json
 
 # --- Page Configuration ---
@@ -31,24 +32,31 @@ def ask_groq_ai(system_prompt, user_prompt):
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {
         "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0"
+        "Content-Type": "application/json"
     }
+    
+    # Stripped down to the absolute basics to prevent 400 Bad Request
     data = {
-        "model": "llama3-8b-8192",  # Using Groq's most stable model ID
+        "model": "llama-3.1-8b-instant", 
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
-        ],
-        "max_tokens": 300
+        ]
     }
+    
     try:
-        req = urllib.request.Request(url, headers=headers, data=json.dumps(data).encode('utf-8'))
+        # Explicitly forcing a POST request
+        req = urllib.request.Request(url, headers=headers, data=json.dumps(data).encode('utf-8'), method="POST")
         with urllib.request.urlopen(req, timeout=15) as response:
             res_data = json.loads(response.read().decode('utf-8'))
             return res_data['choices'][0]['message']['content']
+            
+    except urllib.error.HTTPError as e:
+        # If Groq rejects it, this will pull their EXACT hidden error reason
+        error_body = e.read().decode('utf-8')
+        return f"Groq API Error {e.code}: {error_body}"
     except Exception as e:
-        return f"Error connecting to AI: {e}"
+        return f"System Error: {str(e)}"
 
 # --- UI Localization Data ---
 LANGUAGES = ["English", "Hindi (हिंदी)", "Punjabi (ਪੰਜਾਬੀ)", "Telugu (తెలుగు)"]
