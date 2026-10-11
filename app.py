@@ -19,7 +19,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- API Configuration ---
-genai.configure(api_key="AQ.Ab8RN6KFRLjANXg_wcXie-WdxgBIWRXXp_FT7bGXyPJQuYoIcQ")
+# Your working key is safely hardcoded here
+genai.configure(api_key="AQ.Ab8RN6IuVnj4GdAJ8R2H326II7X31iAXmTncU7PmMfyHL26OpA")
 
 @st.cache_resource
 def get_model():
@@ -110,7 +111,6 @@ def get_real_price(crop_name):
     try:
         prompt = f"What is the current realistic average Mandi market price for {crop_name} in India per Quintal in INR? Reply with ONLY the digits. No symbols, no text."
         res = model.generate_content(prompt, generation_config={"max_output_tokens": 10})
-        # Extract just the numbers to prevent crashes
         price = int(''.join(filter(str.isdigit, res.text)))
         return price if price > 0 else 2500
     except Exception:
@@ -183,5 +183,13 @@ with tab4:
     if st.button(ui["btn_tr"]) and txt_input:
         with st.spinner("⚡..."):
             res = model.generate_content(f"Translate the following text to {lang}: {txt_input}", generation_config={"max_output_tokens": 300})
-            st.success
-            
+            st.success(res.text)
+
+# --- Footer & Credits ---
+st.markdown(
+    f"<div class='footer'>"
+    f"<b>{ui['disclaimer']}</b><br><br>"
+    f"<b>{ui['devs']}</b>"
+    f"</div>", 
+    unsafe_allow_html=True
+)
