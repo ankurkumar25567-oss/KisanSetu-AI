@@ -150,4 +150,95 @@ if "loc_city" not in st.session_state: st.session_state["loc_city"] = "Varanasi"
 
 # --- Sidebar ---
 with st.sidebar:
-    st.image("
+    st.image("https://cdn-icons-png.flaticon.com/512/2329/2329117.png", width=90)
+    lang = st.selectbox("Language / भाषा", LANGUAGES)
+    ui = UI_DATA[lang]
+    st.divider()
+
+    if st.button("🛰️ Auto-Locate (GPS)"):
+        with st.spinner("Finding location..."):
+            try:
+                req = urllib.request.Request("https://ipapi.co/json/", headers={'User-Agent': 'Mozilla/5.0'})
+                with urllib.request.urlopen(req, timeout=5) as response:
+                    loc_data = json.loads(response.read().decode('utf-8'))
+                    reg = loc_data.get('region')
+                    cit = loc_data.get('city')
+                    if reg in STATES:
+                        st.session_state["loc_state"] = reg
+                        if cit and cit not in STATES[reg]:
+                            STATES[reg].insert(0, cit)
+                        if cit:
+                            st.session_state["loc_city"] = cit
+                        st.rerun()
+                    else:
+                        st.warning("Location could not be determined.")
+            except:
+                st.error("Network error. GPS failed.")
+
+    state_list = list(STATES.keys())
+    current_state_idx = state_list.index(st.session_state["loc_state"]) if st.session_state["loc_state"] in state_list else 0
+    sel_state = st.selectbox(ui["lbl_state"], state_list, index=current_state_idx)
+    
+    if sel_state != st.session_state["loc_state"]:
+        st.session_state["loc_state"] = sel_state
+        st.session_state["loc_city"] = STATES[sel_state][0] 
+        st.rerun()
+
+    city_list = STATES[sel_state]
+    current_city_idx = city_list.index(st.session_state["loc_city"]) if st.session_state["loc_city"] in city_list else 0
+    sel_city = st.selectbox(ui["lbl_city"], city_list, index=current_city_idx)
+    if sel_city != st.session_state["loc_city"]:
+        st.session_state["loc_city"] = sel_city
+
+# --- Main UI ---
+st.markdown(f"<div class='main-header'>{ui['title']}</div>", unsafe_allow_html=True)
+st.markdown(f"<div class='sub-header'>{ui['sub']}</div>", unsafe_allow_html=True)
+
+tab1, tab2, tab3, tab4 = st.tabs([ui['tab_ai'], ui['tab_mandi'], ui['tab_iot'], ui['tab_tr']])
+
+with tab1:
+    with st.form("ai_form"):
+        q = st.text_input(ui['ask_crop'], placeholder="e.g. Best fertilizer for wheat?")
+        if st.form_submit_button(ui['btn_ai']) and q:
+            with st.spinner("⚡ Consulting Groq AI..."):
+                sys_prompt = f"You are KisanSetu AI, an agronomist expert. Answer concisely, practically, and in {lang}. Frame advice based on the farmer's location: {sel_city}, {sel_state}."
+                response = ask_groq_ai(sys_prompt, q)
+                st.success(response)
+
+with tab2:
+    st.markdown(f"### {ui['tab_mandi']} in {sel_city}")
+    c_idx = st.selectbox(ui["lbl_crop"], range(len(CROPS)), format_func=lambda x: CROPS[x])
+    u_idx = st.selectbox(ui["lbl_unit"], range(len(UNITS)), format_func=lambda x: UNITS[x])
+    
+    price = BASE_PRICES[c_idx]
+    if u_idx == 1: final_price = price / 100
+    elif u_idx == 2: final_price = price * 10
+    else: final_price = price
+        
+    st.metric(CROPS[c_idx], f"₹{final_price:,.2f} / {UNITS[u_idx]}")
+
+with tab3:
+    st.markdown(f"### {ui['tab_iot']}")
+    if st.button(ui['btn_sim']):
+        c1, c2, c3 = st.columns(3)
+        c1.metric("💧 Soil Moisture", "42.5%")
+        c2.metric("🌡️ Temperature", "31°C")
+        c3.metric("💨 Humidity", "65%")
+
+with tab4:
+    st.markdown(f"### {ui['tab_tr']}")
+    txt_input = st.text_area("Paste text to translate:")
+    if st.button("Translate") and txt_input:
+        with st.spinner("Translating..."):
+            sys_prompt = f"Translate this text directly into {lang}. Return only the translated text. Do not add any extra commentary."
+            response = ask_groq_ai(sys_prompt, txt_input)
+            st.success(response)
+
+# --- Footer ---
+st.markdown(
+    f"<div class='footer'>"
+    f"<b>Developed by Ankur Kumar & Vikalp Chaubey</b><br>"
+    f"The Aryan International School, Varanasi"
+    f"</div>", 
+    unsafe_allow_html=True
+)
