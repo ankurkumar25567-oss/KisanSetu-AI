@@ -14,59 +14,40 @@ st.set_page_config(
     initial_sidebar_state="auto"
 )
 
-# --- 📱 DEVICE-ADAPTIVE RESPONSIVE CSS & VECTOR SCROLLBAR 📱 ---
+# --- 📱 DEVICE-ADAPTIVE CSS, ANTI-REFRESH & VECTOR SCROLLBAR 📱 ---
 st.markdown("""
 <style>
-    /* Kill Mobile / BlueStacks pull-to-refresh loop */
-    html, body {
+    /* 1. Stop Pull-to-Refresh FOREVER without breaking the layout */
+    html, body, [data-testid="stAppViewContainer"], .main, .stApp {
+        overscroll-behavior: none !important;
         overscroll-behavior-y: none !important;
         overscroll-behavior-x: none !important;
     }
 
-    /* CUSTOM VERTICAL SCROLLBAR (MATCHING VECTOR IMAGE) */
+    /* 2. CUSTOM VERTICAL SCROLLBAR (Vector Style) */
     ::-webkit-scrollbar {
-        width: 22px !important;
+        width: 20px !important;
     }
     ::-webkit-scrollbar-track {
-        background: #ffffff !important; /* White track */
-        border-radius: 12px;
+        background: #1a1c23 !important; /* Dark track to match theme */
+        border-left: 1px solid #0f1117;
     }
     ::-webkit-scrollbar-thumb {
-        background-color: #3f3f3f !important; /* Dark grey pill */
+        background-color: #3f3f46 !important; /* Dark grey pill */
         border-radius: 12px !important;
-        border: 4px solid #ffffff !important; /* Creates the gap between track and thumb */
+        border: 3px solid #1a1c23 !important; /* Gap between track and thumb */
         
         /* The 3 horizontal grip lines */
         background-image: 
             linear-gradient(#ffffff, #ffffff),
             linear-gradient(#ffffff, #ffffff),
             linear-gradient(#ffffff, #ffffff) !important;
-        background-size: 10px 1px, 10px 1px, 10px 1px !important;
-        background-position: center calc(50% - 4px), center, center calc(50% + 4px) !important;
+        background-size: 10px 2px, 10px 2px, 10px 2px !important;
+        background-position: center calc(50% - 6px), center, center calc(50% + 6px) !important;
         background-repeat: no-repeat !important;
     }
     ::-webkit-scrollbar-thumb:hover {
-        background-color: #2a2a2a !important;
-    }
-    
-    /* Top Up Arrow Button */
-    ::-webkit-scrollbar-button:single-button:vertical:decrement {
-        height: 22px;
-        background-color: #3f3f3f;
-        border-radius: 12px 12px 0 0;
-        background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 8l-6 6h12z'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: center;
-    }
-    
-    /* Bottom Down Arrow Button */
-    ::-webkit-scrollbar-button:single-button:vertical:increment {
-        height: 22px;
-        background-color: #3f3f3f;
-        border-radius: 0 0 12px 12px;
-        background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 16l-6-6h12z'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: center;
+        background-color: #52525b !important;
     }
 
     /* Global Dark Theme */
@@ -78,27 +59,34 @@ st.markdown("""
     /* Device-Adaptive Responsive Container */
     .block-container {
         max-width: 980px !important;
-        padding-top: 1.2rem !important;
+        padding-top: 1rem !important;
         padding-bottom: 3.5rem !important;
         padding-left: 1.2rem !important;
         padding-right: 1.2rem !important;
     }
 
-    /* Fluid Responsive Typography */
+    /* 3. FIX FOR THE CUT-OFF TEXT */
     .main-header { 
         text-align: center; 
         color: #4ade80; 
-        font-size: clamp(1.8rem, 4vw, 2.7rem); 
+        font-size: clamp(2rem, 5vw, 3rem); 
         font-weight: 800; 
-        margin-bottom: 2px;
+        margin-top: 50px !important; /* Safely pushes the title down */
+        margin-bottom: 5px;
     }
     .sub-header { 
         text-align: center; 
         color: #86efac; 
-        font-size: clamp(0.95rem, 2vw, 1.15rem); 
-        margin-bottom: 20px; 
+        font-size: clamp(1rem, 2.5vw, 1.25rem); 
+        margin-bottom: 25px; 
         font-weight: 600; 
     }
+    
+    /* Hide Streamlit's default top bar that was overlapping */
+    header[data-testid="stHeader"] {
+        background-color: transparent !important;
+    }
+
     .footer { 
         text-align: center; 
         font-size: 13px; 
@@ -111,7 +99,7 @@ st.markdown("""
     /* Touch & Click Friendly Buttons */
     .stButton>button {
         width: 100% !important;
-        min-height: 2.85rem !important;
+        min-height: 3rem !important;
         border-radius: 10px !important;
         font-weight: 600 !important;
         border: 1px solid #16a34a !important;
