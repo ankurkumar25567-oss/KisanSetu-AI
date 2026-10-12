@@ -251,5 +251,56 @@ st.markdown(f"<div class='sub-header'>{u['sub']}</div>", unsafe_allow_html=True)
 tab1, tab2, tab3, tab4 = st.tabs([u['tab_ai'], u['tab_mandi'], u['tab_iot'], u['tab_tr']])
 
 with tab1:
-    q = st.text_input(
-        
+    q = st.text_input(u['ask_crop'])
+    
+    c1, c2 = st.columns(2)
+    with c1: cam_image = st.camera_input(u['cam_prompt'], key="cam")
+    with c2: up_image = st.file_uploader(u['up_prompt'], type=["png", "jpg", "jpeg"], key="up")
+    
+    final_img = cam_image if cam_image else up_image
+    
+    if st.button(u['btn_ai']):
+        if not q and not final_img:
+            st.warning("Please enter a question or upload a photo.")
+        else:
+            with st.spinner("⚡ AI is working..."):
+                sys_prompt = f"You are KisanSetu AI, an expert agronomist. Answer concisely in {lang}. Farmer location: {sel_city}, {sel_state}."
+                
+                if final_img:
+                    b64 = base64.b64encode(final_img.getvalue()).decode('utf-8')
+                    user_msg = [{"type": "text", "text": f"Examine this crop. User question (if any): {q}"}, {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}}]
+                    ans = ask_groq("llama-3.2-11b-vision-preview", [{"role": "user", "content": user_msg}])
+                else:
+                    ans = ask_groq("openai/gpt-oss-20b", [{"role": "system", "content": sys_prompt}, {"role": "user", "content": q}])
+                st.success(ans)
+
+with tab2:
+    CROPS = ["Wheat", "Paddy", "Potato", "Tomato", "Onion", "Sugarcane", "Cotton", "Maize"]
+    UNITS = ["Quintal (100kg)", "Kilogram (1kg)", "Tonne (1000kg)"]
+    BASE_PRICES = [2400, 2200, 1500, 3000, 2500, 350, 7000, 2100]
+
+    st.markdown(f"### {u['tab_mandi']} ({sel_city})")
+    c_idx = st.selectbox(u["lbl_crop"], range(len(CROPS)), format_func=lambda x: CROPS[x])
+    u_idx = st.selectbox(u["lbl_unit"], range(len(UNITS)), format_func=lambda x: UNITS[x])
+    
+    price = BASE_PRICES[c_idx] / 100 if u_idx == 1 else (BASE_PRICES[c_idx] * 10 if u_idx == 2 else BASE_PRICES[c_idx])
+    st.metric(CROPS[c_idx], f"₹{price:,.2f} / {UNITS[u_idx]}")
+
+with tab3:
+    st.markdown(f"### {u['tab_iot']}")
+    if st.button(u['btn_sim']):
+        c1, c2, c3 = st.columns(3)
+        c1.metric(u["soil"], "42.5%")
+        c2.metric(u["temp"], "31°C")
+        c3.metric(u["hum"], "65%")
+
+with tab4:
+    st.markdown(f"### {u['tab_tr']}")
+    txt_input = st.text_area(u["tr_prompt"])
+    if st.button(u["btn_tr"]) and txt_input:
+        with st.spinner("..."):
+            ans = ask_groq("openai/gpt-oss-20b", [{"role": "system", "content": f"Translate to {lang}. No other text."}, {"role": "user", "content": txt_input}])
+            st.success(ans)
+
+st.markdown(f"<div class='footer'>{u['dev']}</div>", unsafe_allow_html=True)
+                
