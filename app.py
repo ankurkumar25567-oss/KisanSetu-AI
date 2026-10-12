@@ -3,6 +3,8 @@ import urllib.request
 import urllib.error
 import json
 import base64
+from PIL import Image
+import io
 
 # --- Page Configuration ---
 st.set_page_config(page_title="KisanSetu - Smart Ag", page_icon="🌾", layout="centered")
@@ -17,16 +19,16 @@ st.markdown("""
     
     /* THE CUSTOM VERTICAL SCROLLBAR (SLIDER) */
     ::-webkit-scrollbar {
-        width: 16px !important; /* Thick enough to grab easily on mobile/emulator */
+        width: 16px !important; 
     }
     ::-webkit-scrollbar-track {
-        background: #1a1a1a !important; /* Dark track */
+        background: #1a1a1a !important; 
         border-left: 1px solid #333;
     }
     ::-webkit-scrollbar-thumb {
-        background-color: #4ade80 !important; /* Bright green slider */
+        background-color: #4ade80 !important; 
         border-radius: 10px !important;
-        border: 4px solid #1a1a1a !important; /* Gives it a neat padding effect */
+        border: 4px solid #1a1a1a !important; 
     }
     ::-webkit-scrollbar-thumb:hover {
         background-color: #22c55e !important;
@@ -47,7 +49,7 @@ st.markdown("""
     }
     
     /* Text Overflow Fix */
-    .stMarkdown, .stSuccess, p { 
+    .stMarkdown, .stSuccess, .stError, p { 
         word-wrap: break-word !important; 
         overflow-wrap: break-word !important; 
         white-space: pre-wrap !important; 
@@ -252,10 +254,12 @@ def ask_groq(model, messages):
         req = urllib.request.Request(url, headers=headers, data=json.dumps({"model": model, "messages": messages, "max_tokens": 300}).encode('utf-8'), method="POST")
         with urllib.request.urlopen(req, timeout=20) as response:
             return json.loads(response.read().decode('utf-8'))['choices'][0]['message']['content']
-    except urllib.error.HTTPError:
-        return f"API Error: Ensure the image is clear or try text only."
+    except urllib.error.HTTPError as e:
+        # PULLING THE EXACT HIDDEN GROQ ERROR IF IT FAILS AGAIN
+        err = e.read().decode('utf-8')
+        return f"🚨 API Error {e.code}: {err}"
     except Exception as e:
-        return f"System Error: {str(e)}"
+        return f"🚨 System Error: {str(e)}"
 
 # --- Main App Interface ---
 st.markdown(f"<div class='main-header'>{u['title']}</div>", unsafe_allow_html=True)
@@ -280,12 +284,23 @@ with tab1:
                 sys_prompt = f"You are KisanSetu AI, an expert agronomist. Answer concisely in {lang}. Farmer location: {sel_city}, {sel_state}."
                 
                 if final_img:
-                    b64 = base64.b64encode(final_img.getvalue()).decode('utf-8')
+                    # --- IMAGE COMPRESSOR TO FIX THE GROQ PAYLOAD ERROR ---
+                    img = Image.open(final_img).convert("RGB")
+                    img.thumbnail((800, 800)) # Shrinks massive HD photos to a safe size
+                    buffer = io.BytesIO()
+                    img.save(buffer, format="JPEG", quality=75) # Compresses the file size
+                    b64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+                    
                     user_msg = [{"type": "text", "text": f"Examine this crop. User question (if any): {q}"}, {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}}]
                     ans = ask_groq("llama-3.2-11b-vision-preview", [{"role": "user", "content": user_msg}])
                 else:
                     ans = ask_groq("openai/gpt-oss-20b", [{"role": "system", "content": sys_prompt}, {"role": "user", "content": q}])
-                st.success(ans)
+                
+                # Check if it returned an error code
+                if "🚨" in ans:
+                    st.error(ans)
+                else:
+                    st.success(ans)
 
 with tab2:
     CROPS = ["Wheat", "Paddy", "Potato", "Tomato", "Onion", "Sugarcane", "Cotton", "Maize"]
@@ -313,6 +328,10 @@ with tab4:
     if st.button(u["btn_tr"], use_container_width=True) and txt_input:
         with st.spinner("..."):
             ans = ask_groq("openai/gpt-oss-20b", [{"role": "system", "content": f"Translate to {lang}. No other text."}, {"role": "user", "content": txt_input}])
-            st.success(ans)
+            
+            if "🚨" in ans:
+                st.error(ans)
+            else:
+                st.success(ans)
 
 st.markdown(f"<div class='footer'>{u['dev']}</div>", unsafe_allow_html=True)
