@@ -163,69 +163,53 @@ if (not st.session_state["has_started"]) or st.session_state.get("presenter_mode
     with c2: st.button(u['tut_btn'], on_click=enter_app)
     st.stop()
 
-# --- 🚀 VIP WHITELIST AI ENGINE 🚀 ---
+# --- 🚀 THE BRUTE FORCE AI ENGINE (UNBREAKABLE) 🚀 ---
 def get_api_key():
     return "gsk_dqY6y3W" + "jaq9M1sUxQQ" + "3YWGdyb3FY5" + "SRXwexaQggJ" + "lfk2h4RoDqWf"
 
 def ask_groq(messages, is_vision=False):
+    """If Groq blocks a model, this engine instantly fires the request at the next one until it succeeds."""
     key = get_api_key()
     headers = {
         "Authorization": f"Bearer {key}",
         "Content-Type": "application/json",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "*/*"
     }
     
-    # 1. Ask Groq what models are alive right now
-    fetched_models = []
-    try:
-        req_models = urllib.request.Request("https://api.groq.com/openai/v1/models", headers=headers)
-        with urllib.request.urlopen(req_models, timeout=5) as response:
-            models_data = json.loads(response.read().decode('utf-8'))['data']
-            fetched_models = [m['id'] for m in models_data]
-    except:
-        pass # Will rely on fallbacks below if this fails
-
-    # 2. THE VIP LIST: Only select guaranteed smart conversational models
-    safe_text_models = [
-        "llama-3.1-8b-instant", 
-        "gemma2-9b-it", 
-        "llama-3.2-3b-preview",
+    # Master list of models. Ordered from most likely to be unrestricted to least.
+    text_models = [
+        "gemma2-9b-it",             # Very reliable on free tier
+        "llama-3.2-3b-preview",     # Newest, lightweight, completely unrestricted
         "llama-3.2-1b-preview",
-        "mixtral-8x7b-32768", 
-        "llama3-8b-8192"
+        "llama-3.1-8b-instant", 
+        "llama3-8b-8192",
+        "mixtral-8x7b-32768"
     ]
-    safe_vision_models = [
+    vision_models = [
         "llama-3.2-11b-vision-preview",
         "llama-3.2-90b-vision-preview"
     ]
 
-    target_model = ""
-    if is_vision:
-        for m in safe_vision_models:
-            if m in fetched_models:
-                target_model = m
-                break
-        if not target_model: target_model = "llama-3.2-11b-vision-preview" # Hard fallback
-    else:
-        for m in safe_text_models:
-            if m in fetched_models:
-                target_model = m
-                break
-        if not target_model: target_model = "llama-3.1-8b-instant" # Hard fallback
+    models_to_try = vision_models if is_vision else text_models
+    last_error = ""
 
-    # 3. Process the request with a safer token limit (500)
-    url = "https://api.groq.com/openai/v1/chat/completions"
-    try:
-        # Reduced max_tokens to 500 to completely avoid the 512 guardrail limit
-        req = urllib.request.Request(url, headers=headers, data=json.dumps({"model": target_model, "messages": messages, "max_tokens": 500}).encode('utf-8'), method="POST")
-        with urllib.request.urlopen(req, timeout=25) as response: 
-            return json.loads(response.read().decode('utf-8'))['choices'][0]['message']['content']
-    except urllib.error.HTTPError as e: 
-        err_msg = e.read().decode('utf-8', errors='ignore')
-        return f"🚨 API Error on {target_model}: Code {e.code} - {err_msg}"
-    except Exception as e: 
-        return f"🚨 System Error: {str(e)}"
+    # The Brute Force Loop
+    for model in models_to_try:
+        try:
+            data = json.dumps({"model": model, "messages": messages, "max_tokens": 400}).encode('utf-8')
+            req = urllib.request.Request("https://api.groq.com/openai/v1/chat/completions", headers=headers, data=data, method="POST")
+            with urllib.request.urlopen(req, timeout=12) as response: 
+                return json.loads(response.read().decode('utf-8'))['choices'][0]['message']['content']
+        except urllib.error.HTTPError as e: 
+            # If the model is blocked, deleted, or you don't have access, catch it and loop to the next!
+            err_msg = e.read().decode('utf-8', errors='ignore')
+            last_error = f"{model} -> Code {e.code}: {err_msg}"
+            continue 
+        except Exception as e: 
+            last_error = str(e)
+            continue
+            
+    return f"🚨 All AI models failed. Your API key might be temporarily locked. Last Error: {last_error}"
 
 # --- Main Interface ---
 st.markdown(f"<div class='main-header'>{u['title']}</div><div class='sub-header'>{u['sub']}</div>", unsafe_allow_html=True)
