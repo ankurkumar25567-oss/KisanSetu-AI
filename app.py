@@ -7,22 +7,23 @@ import base64
 # --- Page Configuration ---
 st.set_page_config(page_title="KisanSetu - Smart Ag", page_icon="🌾", layout="centered")
 
-# --- 🛑 HEAVY-DUTY ANTI-REFRESH LOCK & STYLING 🛑 ---
+# --- 🛑 INTERNAL SCROLL BAR FIX & STYLING 🛑 ---
 st.markdown("""
 <style>
-    /* Aggressive Pull-to-Refresh Block */
+    /* Locks the outer browser window completely to kill pull-to-refresh */
     html, body {
+        position: fixed !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        overflow: hidden !important;
         overscroll-behavior: none !important;
-        overscroll-behavior-y: none !important;
-        overflow: hidden !important; /* Locks the outer browser window */
     }
     
-    /* Forces only the inside of the Streamlit app to scroll */
+    /* Forces a custom internal scrollbar on the app container */
     [data-testid="stAppViewContainer"] {
-        overflow-y: auto !important;
-        overscroll-behavior: none !important;
-        overscroll-behavior-y: none !important;
+        overflow-y: scroll !important;
         height: 100vh !important;
+        padding-bottom: 50px !important;
     }
     
     /* Dark Mode Theme */
@@ -303,4 +304,3 @@ with tab4:
             st.success(ans)
 
 st.markdown(f"<div class='footer'>{u['dev']}</div>", unsafe_allow_html=True)
-                
