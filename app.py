@@ -208,7 +208,6 @@ TRANSLATIONS = {
         "gps_btn": "🛰️ ఆటో-లొకేట్ (GPS)", "soil": "💧 నేల తేమ", "temp": "🌡️ ఉష్ణోగ్రత", "hum": "💨 తేమ",
         "tr_prompt": "అనువదించడానికి వచనాన్ని అతికించండి:", "btn_tr": "అనువదించు"
     }
-    # (Other languages automatically fallback to English cleanly to maintain speed)
 }
 
 def get_ui(language):
@@ -381,7 +380,6 @@ with tab1:
                     ]
                     ans = ask_groq("llama-3.2-11b-vision-instruct", [{"role": "user", "content": user_msg}])
                 else:
-                    # UPDATED: Using the latest, permanent 70B model 
                     ans = ask_groq("llama-3.3-70b-versatile", [{"role": "system", "content": sys_prompt}, {"role": "user", "content": q}])
                 
                 if "🚨" in ans:
@@ -418,7 +416,6 @@ with tab4:
     txt_input = st.text_area(u["tr_prompt"])
     if st.button(u["btn_tr"]) and txt_input:
         with st.spinner("Translating..."):
-            # UPDATED: Using the latest, permanent 70B model 
             ans = ask_groq("llama-3.3-70b-versatile", [
                 {"role": "system", "content": f"You are an expert translator. Translate the given text accurately and directly into {lang}. Output ONLY the translated text. Do not add any conversational filler or notes."},
                 {"role": "user", "content": txt_input}
@@ -428,4 +425,5 @@ with tab4:
             else:
                 st.success(ans)
 
-st.markdown(f"<div clas
+st.markdown(f"<div class='footer'>{u['dev']}</div>", unsafe_allow_html=True)
+    
