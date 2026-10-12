@@ -37,7 +37,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Session State Initialization ---
-# "show_tutorial" connects directly to the toggle switch
 if "show_tutorial" not in st.session_state: st.session_state["show_tutorial"] = True
 if "loc_state" not in st.session_state: st.session_state["loc_state"] = "Uttar Pradesh"
 if "loc_city" not in st.session_state: st.session_state["loc_city"] = "Varanasi"
@@ -46,7 +45,6 @@ if "loc_city" not in st.session_state: st.session_state["loc_city"] = "Varanasi"
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/2329/2329117.png", width=90)
     
-    # UI Localization Data needs to be defined early for the sidebar
     LANGUAGES = ["English", "Hindi (हिंदी)", "Punjabi (ਪੰਜਾਬੀ)", "Telugu (తెలుగు)"]
     lang = st.selectbox("Language / भाषा", LANGUAGES)
     
@@ -151,7 +149,6 @@ with st.sidebar:
     if sel_city != st.session_state["loc_city"]:
         st.session_state["loc_city"] = sel_city
 
-    # --- SECRET PRESENTER TOGGLE ---
     st.divider()
     # A tiny toggle switch with just an icon. Flips the tutorial on/off instantly.
     st.toggle("🎓", key="show_tutorial", help="Presenter Mode: Toggle Tutorial Screen")
@@ -171,12 +168,14 @@ if st.session_state["show_tutorial"]:
     </div>
     """, unsafe_allow_html=True)
     
+    # THE FIX: We use a callback function to change the toggle's state safely
+    def close_tutorial():
+        st.session_state["show_tutorial"] = False
+        
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button("✅ Start Using KisanSetu", use_container_width=True):
-            # Clicking this flips the toggle OFF automatically
-            st.session_state["show_tutorial"] = False
-            st.rerun()
+        # We attach the callback to the on_click trigger
+        st.button("✅ Start Using KisanSetu", use_container_width=True, on_click=close_tutorial)
             
     # Pauses the code here so the main app hides behind the tutorial
     st.stop() 
@@ -312,4 +311,4 @@ st.markdown(
     f"The Aryan International School, Varanasi"
     f"</div>", 
     unsafe_allow_html=True
-    )
+                            )
