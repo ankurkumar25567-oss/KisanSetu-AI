@@ -14,39 +14,40 @@ st.set_page_config(
     initial_sidebar_state="auto"
 )
 
-# --- 📱 DEVICE-ADAPTIVE CSS, ANTI-REFRESH & VECTOR SCROLLBAR 📱 ---
+# --- 📱 FLUENT SCROLL & HARD ANTI-REFRESH LOCK 📱 ---
 st.markdown("""
 <style>
-    /* 1. Stop Pull-to-Refresh FOREVER without breaking the layout */
-    html, body, [data-testid="stAppViewContainer"], .main, .stApp {
+    /* 1. Absolute Lock on the background to prevent Pull-To-Refresh */
+    html, body {
+        position: fixed !important;
+        width: 100% !important;
+        height: 100% !important;
+        overflow: hidden !important; 
         overscroll-behavior: none !important;
-        overscroll-behavior-y: none !important;
-        overscroll-behavior-x: none !important;
+        touch-action: none !important;
     }
 
-    /* 2. CUSTOM VERTICAL SCROLLBAR (Vector Style) */
+    /* 2. Fluent Native Scrolling inside the app */
+    [data-testid="stAppViewContainer"] {
+        overflow-y: scroll !important;
+        height: 100vh !important;
+        -webkit-overflow-scrolling: touch !important; /* Buttery smooth mobile scrolling */
+        overscroll-behavior-y: contain !important; /* Traps scroll events inside */
+        padding-bottom: 80px !important;
+    }
+
+    /* 3. Clean, high-performance scrollbar (No laggy gradients) */
     ::-webkit-scrollbar {
-        width: 20px !important;
+        width: 14px !important;
     }
     ::-webkit-scrollbar-track {
         background: #1a1c23 !important;
-        border-left: 1px solid #0f1117;
+        border-radius: 8px;
     }
     ::-webkit-scrollbar-thumb {
-        background-color: #3f3f46 !important;
-        border-radius: 12px !important;
+        background-color: #4ade80 !important;
+        border-radius: 8px !important;
         border: 3px solid #1a1c23 !important;
-        
-        background-image: 
-            linear-gradient(#ffffff, #ffffff),
-            linear-gradient(#ffffff, #ffffff),
-            linear-gradient(#ffffff, #ffffff) !important;
-        background-size: 10px 2px, 10px 2px, 10px 2px !important;
-        background-position: center calc(50% - 6px), center, center calc(50% + 6px) !important;
-        background-repeat: no-repeat !important;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-        background-color: #52525b !important;
     }
 
     /* Global Dark Theme */
@@ -55,22 +56,20 @@ st.markdown("""
         color: #f3f4f6; 
     }
     
-    /* Device-Adaptive Responsive Container */
     .block-container {
         max-width: 980px !important;
         padding-top: 1rem !important;
-        padding-bottom: 3.5rem !important;
         padding-left: 1.2rem !important;
         padding-right: 1.2rem !important;
     }
 
-    /* 3. FIX FOR THE CUT-OFF TEXT */
+    /* Typography */
     .main-header { 
         text-align: center; 
         color: #4ade80; 
         font-size: clamp(2rem, 5vw, 3rem); 
         font-weight: 800; 
-        margin-top: 50px !important;
+        margin-top: 40px !important;
         margin-bottom: 5px;
     }
     .sub-header { 
@@ -94,24 +93,21 @@ st.markdown("""
         margin-top: 35px; 
     }
 
-    /* Touch & Click Friendly Buttons */
+    /* Touch Friendly Buttons */
     .stButton>button {
         width: 100% !important;
-        min-height: 3rem !important;
+        min-height: 3.2rem !important;
         border-radius: 10px !important;
         font-weight: 600 !important;
         border: 1px solid #16a34a !important;
         background-color: #15803d !important;
         color: #ffffff !important;
-        transition: all 0.2s ease-in-out;
     }
     .stButton>button:hover {
         background-color: #16a34a !important;
         border-color: #4ade80 !important;
-        color: #ffffff !important;
     }
 
-    /* Device Card Metric Styling */
     div[data-testid="stMetric"] {
         background: #181a20 !important;
         padding: 14px 18px !important;
@@ -123,14 +119,11 @@ st.markdown("""
         font-size: clamp(1.2rem, 3vw, 1.8rem) !important;
     }
 
-    /* Text Wrapping Fix */
     .stMarkdown, .stSuccess, .stError, .stInfo, p { 
         word-wrap: break-word !important; 
-        overflow-wrap: break-word !important; 
         white-space: pre-wrap !important; 
     }
 
-    /* Tutorial Box */
     .tutorial-box {
         background-color: #181a20;
         padding: 22px;
@@ -216,54 +209,38 @@ def get_ui(language):
         res.update(TRANSLATIONS[language])
     return res
 
-# --- Session State & URL Memory Fix ---
+# --- Session State Fix ---
 if "has_started" not in st.session_state:
     st.session_state["has_started"] = True if st.query_params.get("started") == "yes" else False
 
 if "loc_state" not in st.session_state: st.session_state["loc_state"] = "Uttar Pradesh"
 if "loc_city" not in st.session_state: st.session_state["loc_city"] = "Varanasi"
 
-# --- All 28 States and 8 Union Territories ---
+# --- State Database ---
 STATES = {
     "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Tirupati"],
-    "Arunachal Pradesh": ["Itanagar", "Tawang", "Pasighat", "Ziro"],
     "Assam": ["Guwahati", "Dibrugarh", "Silchar", "Tezpur"],
     "Bihar": ["Patna", "Gaya", "Muzaffarpur", "Darbhanga"],
     "Chhattisgarh": ["Raipur", "Bhilai", "Bilaspur", "Korba"],
-    "Goa": ["Panaji", "Margao", "Vasco da Gama", "Mapusa"],
     "Gujarat": ["Ahmedabad", "Surat", "Vadodara", "Rajkot"],
     "Haryana": ["Gurugram", "Faridabad", "Panipat", "Ambala"],
-    "Himachal Pradesh": ["Shimla", "Manali", "Dharamshala", "Mandi"],
     "Jharkhand": ["Ranchi", "Jamshedpur", "Dhanbad", "Bokaro"],
     "Karnataka": ["Bengaluru", "Mysuru", "Mangaluru", "Hubballi"],
     "Kerala": ["Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur"],
     "Madhya Pradesh": ["Bhopal", "Indore", "Gwalior", "Jabalpur"],
     "Maharashtra": ["Mumbai", "Pune", "Nagpur", "Nashik"],
-    "Manipur": ["Imphal", "Churachandpur", "Thoubal", "Bishnupur"],
-    "Meghalaya": ["Shillong", "Cherrapunji", "Tura", "Jowai"],
-    "Mizoram": ["Aizawl", "Lunglei", "Champhai", "Serchhip"],
-    "Nagaland": ["Kohima", "Dimapur", "Mokokchung", "Tuensang"],
     "Odisha": ["Bhubaneswar", "Cuttack", "Rourkela", "Puri"],
     "Punjab": ["Amritsar", "Ludhiana", "Jalandhar", "Patiala"],
     "Rajasthan": ["Jaipur", "Jodhpur", "Udaipur", "Kota"],
-    "Sikkim": ["Gangtok", "Namchi", "Pelling", "Mangan"],
     "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Salem"],
     "Telangana": ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar"],
-    "Tripura": ["Agartala", "Udaipur", "Dharmanagar", "Kailashahar"],
     "Uttar Pradesh": ["Lucknow", "Varanasi", "Kanpur", "Agra", "Prayagraj"],
     "Uttarakhand": ["Dehradun", "Haridwar", "Roorkee", "Nainital"],
     "West Bengal": ["Kolkata", "Darjeeling", "Siliguri", "Asansol"],
-    "Andaman and Nicobar Islands": ["Port Blair", "Havelock", "Diglipur"],
-    "Chandigarh": ["Chandigarh"],
-    "Dadra and Nagar Haveli and Daman and Diu": ["Daman", "Diu", "Silvassa"],
-    "Delhi": ["New Delhi", "Dwarka", "Rohini", "Saket"],
-    "Jammu and Kashmir": ["Srinagar", "Jammu", "Anantnag", "Baramulla"],
-    "Ladakh": ["Leh", "Kargil"],
-    "Lakshadweep": ["Kavaratti", "Agatti", "Minicoy"],
-    "Puducherry": ["Puducherry", "Auroville", "Karaikal", "Mahe"]
+    "Delhi": ["New Delhi", "Dwarka", "Rohini", "Saket"]
 }
 
-# --- Sidebar UI ---
+# --- Sidebar ---
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/2329/2329117.png", width=85)
     lang = st.selectbox("🌐 Language / भाषा (20)", LANGUAGES)
@@ -335,11 +312,11 @@ def ask_groq(model, messages):
             data=json.dumps({"model": model, "messages": messages, "max_tokens": 600}).encode('utf-8'), 
             method="POST"
         )
-        with urllib.request.urlopen(req, timeout=22) as response:
+        with urllib.request.urlopen(req, timeout=25) as response:
             return json.loads(response.read().decode('utf-8'))['choices'][0]['message']['content']
     except urllib.error.HTTPError as e:
-        err = e.read().decode('utf-8')
-        return f"🚨 API Error {e.code}: {err}"
+        err_msg = e.read().decode('utf-8')
+        return f"🚨 API Error {e.code}: {err_msg}"
     except Exception as e:
         return f"🚨 System Error: {str(e)}"
 
@@ -365,7 +342,7 @@ with tab1:
             st.warning("Please enter a question or upload/capture a photo.")
         else:
             with st.spinner("⚡ AI is working..."):
-                sys_prompt = f"You are KisanSetu AI, an elite agricultural scientist and agronomist. Provide highly accurate, professional, and easily understandable farming advice directly in {lang}. Do not use conversational filler. Always factor in the local climate, soil conditions, and geography of {sel_city}, {sel_state} into your advice. Be practical and precise."
+                sys_prompt = f"You are KisanSetu AI, an elite agricultural scientist and agronomist. Provide highly accurate, professional, and easily understandable farming advice directly in {lang}. Factor in the local climate of {sel_city}, {sel_state}."
                 
                 if final_img:
                     img = Image.open(final_img).convert("RGB")
@@ -375,12 +352,13 @@ with tab1:
                     b64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
                     
                     user_msg = [
-                        {"type": "text", "text": f"You are an elite agronomist and plant pathologist. Examine this crop leaf carefully. Diagnose the disease, list the exact symptoms, and provide step-by-step chemical and organic remedies directly in {lang}. Factor in the climate of {sel_city}, {sel_state}. User question (if any): {q}"},
+                        {"type": "text", "text": f"Examine this crop leaf carefully. Diagnose the disease, list symptoms, and provide step-by-step chemical and organic remedies directly in {lang}. Factor in the climate of {sel_city}, {sel_state}. User question (if any): {q}"},
                         {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}}
                     ]
                     ans = ask_groq("llama-3.2-11b-vision-instruct", [{"role": "user", "content": user_msg}])
                 else:
-                    ans = ask_groq("llama-3.3-70b-versatile", [{"role": "system", "content": sys_prompt}, {"role": "user", "content": q}])
+                    # FIX: Safest, fully supported 100% free model on Groq
+                    ans = ask_groq("mixtral-8x7b-32768", [{"role": "system", "content": sys_prompt}, {"role": "user", "content": q}])
                 
                 if "🚨" in ans:
                     st.error(ans)
@@ -416,7 +394,8 @@ with tab4:
     txt_input = st.text_area(u["tr_prompt"])
     if st.button(u["btn_tr"]) and txt_input:
         with st.spinner("Translating..."):
-            ans = ask_groq("llama-3.3-70b-versatile", [
+            # FIX: Safest, fully supported 100% free model on Groq
+            ans = ask_groq("mixtral-8x7b-32768", [
                 {"role": "system", "content": f"You are an expert translator. Translate the given text accurately and directly into {lang}. Output ONLY the translated text. Do not add any conversational filler or notes."},
                 {"role": "user", "content": txt_input}
             ])
@@ -426,4 +405,4 @@ with tab4:
                 st.success(ans)
 
 st.markdown(f"<div class='footer'>{u['dev']}</div>", unsafe_allow_html=True)
-    
+            
