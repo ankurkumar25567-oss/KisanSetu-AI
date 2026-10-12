@@ -38,9 +38,9 @@ def ask_groq_ai(system_prompt, user_prompt):
         "User-Agent": "OpenAI/Python" 
     }
     
-    # THE FIX: Using the active, supported 3.1 model
+    # THE FIX: Using the active, supported 2026 model
     data = {
-        "model": "llama-3.1-8b-instant", 
+        "model": "openai/gpt-oss-20b", 
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
@@ -85,7 +85,7 @@ UI_DATA = {
         "title": "🌾 ਕਿਸਾਨ ਸੇਤੂ", "sub": "ਸਮਾਰਟ ਏਆਈ ਖੇਤੀ",
         "tab_ai": "🤖 ਏਆਈ ਸਲਾਹਕਾਰ", "tab_mandi": "📊 ਬਾਜ਼ਾਰ ਦੇ ਭਾਅ",
         "tab_iot": "📡 ਖੇਤ ਸੈਂਸਰ", "tab_tr": "🔄 ਅਨੁਵਾਦਕ",
-        "ask_crop": "ਆਪਣੀ ਫਸਲ ਜਾਂ ਮਿੱਟੀ ਬਾਰੇ ਪੁੱਛੋ:",
+        "ask_crop": "ਆਪਣੀ ਫਸਲ ਜਾਂ ਮਿੱਟੀ બਾਰੇ ਪੁੱਛੋ:",
         "btn_ai": "ਸਲਾਹ ਲਓ", "lbl_crop": "ਫਸਲ ਚੁਣੋ:",
         "lbl_unit": "ਯੂਨਿਟ ਚੁਣੋ:", "btn_sim": "ਸੈਂਸਰ ਰਿਫ੍ਰੈਸ਼ ਕਰੋ",
         "lbl_state": "ਸੂਬਾ ਚੁਣੋ:", "lbl_city": "ਸ਼ਹਿਰ ਚੁਣੋ:"
@@ -193,53 +193,5 @@ with st.sidebar:
 
 # --- Main UI ---
 st.markdown(f"<div class='main-header'>{ui['title']}</div>", unsafe_allow_html=True)
-st.markdown(f"<div class='sub-header'>{ui['sub']}</div>", unsafe_allow_html=True)
-
-tab1, tab2, tab3, tab4 = st.tabs([ui['tab_ai'], ui['tab_mandi'], ui['tab_iot'], ui['tab_tr']])
-
-with tab1:
-    with st.form("ai_form"):
-        q = st.text_input(ui['ask_crop'], placeholder="e.g. Best fertilizer for wheat?")
-        if st.form_submit_button(ui['btn_ai']) and q:
-            with st.spinner("⚡ Consulting Groq AI..."):
-                sys_prompt = f"You are KisanSetu AI, an agronomist expert. Answer concisely, practically, and in {lang}. Frame advice based on the farmer's location: {sel_city}, {sel_state}."
-                response = ask_groq_ai(sys_prompt, q)
-                st.success(response)
-
-with tab2:
-    st.markdown(f"### {ui['tab_mandi']} in {sel_city}")
-    c_idx = st.selectbox(ui["lbl_crop"], range(len(CROPS)), format_func=lambda x: CROPS[x])
-    u_idx = st.selectbox(ui["lbl_unit"], range(len(UNITS)), format_func=lambda x: UNITS[x])
-    
-    price = BASE_PRICES[c_idx]
-    if u_idx == 1: final_price = price / 100
-    elif u_idx == 2: final_price = price * 10
-    else: final_price = price
+st.
         
-    st.metric(CROPS[c_idx], f"₹{final_price:,.2f} / {UNITS[u_idx]}")
-
-with tab3:
-    st.markdown(f"### {ui['tab_iot']}")
-    if st.button(ui['btn_sim']):
-        c1, c2, c3 = st.columns(3)
-        c1.metric("💧 Soil Moisture", "42.5%")
-        c2.metric("🌡️ Temperature", "31°C")
-        c3.metric("💨 Humidity", "65%")
-
-with tab4:
-    st.markdown(f"### {ui['tab_tr']}")
-    txt_input = st.text_area("Paste text to translate:")
-    if st.button("Translate") and txt_input:
-        with st.spinner("Translating..."):
-            sys_prompt = f"Translate this text directly into {lang}. Return only the translated text. Do not add any extra commentary."
-            response = ask_groq_ai(sys_prompt, txt_input)
-            st.success(response)
-
-# --- Footer ---
-st.markdown(
-    f"<div class='footer'>"
-    f"<b>Developed by Ankur Kumar & Vikalp Chaubey</b><br>"
-    f"The Aryan International School, Varanasi"
-    f"</div>", 
-    unsafe_allow_html=True
-    )
