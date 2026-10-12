@@ -524,8 +524,7 @@ with tab1:
                     ]
                     ans = ask_groq("llama-3.2-11b-vision-instruct", [{"role": "user", "content": user_msg}])
                 else:
-                    # FIX: Swapped to the ultra-stable, actively supported llama3-70b-8192 model
-                    ans = ask_groq("llama3-70b-8192", [{"role": "system", "content": sys_prompt}, {"role": "user", "content": q}])
+                    ans = ask_groq("mixtral-8x7b-32768", [{"role": "system", "content": sys_prompt}, {"role": "user", "content": q}])
                 
                 if "🚨" in ans:
                     st.error(ans)
@@ -561,8 +560,7 @@ with tab4:
     txt_input = st.text_area(u["tr_prompt"])
     if st.button(u["btn_tr"]) and txt_input:
         with st.spinner("Translating..."):
-            # FIX: Swapped to the ultra-stable, actively supported llama3-70b-8192 model
-            ans = ask_groq("llama3-70b-8192", [
+            ans = ask_groq("mixtral-8x7b-32768", [
                 {"role": "system", "content": f"You are an expert translator. Translate the given text accurately and directly into {lang}. Output ONLY the translated text. Do not add any conversational filler or notes."},
                 {"role": "user", "content": txt_input}
             ])
