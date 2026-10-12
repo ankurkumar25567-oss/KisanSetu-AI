@@ -7,25 +7,31 @@ import base64
 # --- Page Configuration ---
 st.set_page_config(page_title="KisanSetu - Smart Ag", page_icon="🌾", layout="centered")
 
-# --- 🛑 INTERNAL SCROLL BAR FIX & STYLING 🛑 ---
+# --- 🎨 RESPONSIVE UI & CUSTOM VISIBLE SCROLL SLIDER 🎨 ---
 st.markdown("""
 <style>
-    /* Locks the outer browser window completely to kill pull-to-refresh */
+    /* Stop Pull-to-Refresh without breaking the layout */
     html, body {
-        position: fixed !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        overflow: hidden !important;
-        overscroll-behavior: none !important;
+        overscroll-behavior-y: none !important;
     }
     
-    /* Forces a custom internal scrollbar on the app container */
-    [data-testid="stAppViewContainer"] {
-        overflow-y: scroll !important;
-        height: 100vh !important;
-        padding-bottom: 50px !important;
+    /* THE CUSTOM VERTICAL SCROLLBAR (SLIDER) */
+    ::-webkit-scrollbar {
+        width: 16px !important; /* Thick enough to grab easily on mobile/emulator */
     }
-    
+    ::-webkit-scrollbar-track {
+        background: #1a1a1a !important; /* Dark track */
+        border-left: 1px solid #333;
+    }
+    ::-webkit-scrollbar-thumb {
+        background-color: #4ade80 !important; /* Bright green slider */
+        border-radius: 10px !important;
+        border: 4px solid #1a1a1a !important; /* Gives it a neat padding effect */
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: #22c55e !important;
+    }
+
     /* Dark Mode Theme */
     .stApp { background-color: #121212; color: #ffffff; }
     .main-header { text-align: center; color: #4ade80; font-size: 2.6rem; font-weight: 800; padding-top: 10px; }
@@ -33,6 +39,12 @@ st.markdown("""
     .footer { text-align: center; font-size: 13px; color: #888888; padding: 15px; border-top: 1px solid #333333; margin-top: 40px; }
     div[data-testid="stMetricValue"] { color: #4ade80 !important; }
     header[data-testid="stHeader"] { background-color: transparent !important; }
+    
+    /* Touch-Friendly Taller Buttons for BlueStacks/Mobile */
+    .stButton>button {
+        min-height: 3rem !important;
+        border-radius: 8px !important;
+    }
     
     /* Text Overflow Fix */
     .stMarkdown, .stSuccess, p { 
@@ -180,7 +192,7 @@ with st.sidebar:
     u = UI[lang]
     st.divider()
 
-    if st.button(u["gps_btn"]):
+    if st.button(u["gps_btn"], use_container_width=True):
         with st.spinner("..."):
             try:
                 req = urllib.request.Request("https://ipapi.co/json/", headers={'User-Agent': 'Mozilla/5.0'})
@@ -260,7 +272,7 @@ with tab1:
     
     final_img = cam_image if cam_image else up_image
     
-    if st.button(u['btn_ai']):
+    if st.button(u['btn_ai'], use_container_width=True):
         if not q and not final_img:
             st.warning("Please enter a question or upload a photo.")
         else:
@@ -289,7 +301,7 @@ with tab2:
 
 with tab3:
     st.markdown(f"### {u['tab_iot']}")
-    if st.button(u['btn_sim']):
+    if st.button(u['btn_sim'], use_container_width=True):
         c1, c2, c3 = st.columns(3)
         c1.metric(u["soil"], "42.5%")
         c2.metric(u["temp"], "31°C")
@@ -298,7 +310,7 @@ with tab3:
 with tab4:
     st.markdown(f"### {u['tab_tr']}")
     txt_input = st.text_area(u["tr_prompt"])
-    if st.button(u["btn_tr"]) and txt_input:
+    if st.button(u["btn_tr"], use_container_width=True) and txt_input:
         with st.spinner("..."):
             ans = ask_groq("openai/gpt-oss-20b", [{"role": "system", "content": f"Translate to {lang}. No other text."}, {"role": "user", "content": txt_input}])
             st.success(ans)
