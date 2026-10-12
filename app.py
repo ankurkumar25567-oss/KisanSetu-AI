@@ -7,13 +7,21 @@ import base64
 # --- Page Configuration ---
 st.set_page_config(page_title="KisanSetu - Smart Ag", page_icon="🌾", layout="centered")
 
-# --- Anti-Refresh CSS & Full Styling ---
-# The overscroll-behavior physically prevents mobile browsers from pull-to-refreshing!
+# --- 🛑 HEAVY-DUTY ANTI-REFRESH LOCK & STYLING 🛑 ---
 st.markdown("""
 <style>
-    html, body, [data-testid="stAppViewContainer"] {
-        overscroll-behavior-y: none !important; 
+    /* Absolutely disables the browser's pull-to-refresh feature on mobile/emulators */
+    html, body {
+        overscroll-behavior-y: none !important;
+        overscroll-behavior: none !important;
     }
+    /* Traps the scroll inside the app so it never triggers a page reload */
+    [data-testid="stAppViewContainer"], .stApp, main {
+        overscroll-behavior-y: contain !important;
+        overscroll-behavior: contain !important;
+    }
+    
+    /* Dark Mode Theme */
     .stApp { background-color: #121212; color: #ffffff; }
     .main-header { text-align: center; color: #4ade80; font-size: 2.6rem; font-weight: 800; padding-top: 10px; }
     .sub-header { text-align: center; color: #86efac; font-size: 1.1rem; margin-bottom: 25px; font-weight: 600; }
@@ -21,12 +29,14 @@ st.markdown("""
     div[data-testid="stMetricValue"] { color: #4ade80 !important; }
     header[data-testid="stHeader"] { background-color: transparent !important; }
     
+    /* Text Overflow Fix */
     .stMarkdown, .stSuccess, p { 
         word-wrap: break-word !important; 
         overflow-wrap: break-word !important; 
         white-space: pre-wrap !important; 
     }
     
+    /* Tutorial Box Styling */
     .tutorial-box {
         background-color: #1a1a1a;
         padding: 20px;
@@ -179,9 +189,8 @@ with st.sidebar:
                             st.session_state["loc_city"] = loc_data.get('city')
                         st.rerun()
             except:
-                pass # Fail silently on network errors
+                pass 
 
-    # Completely rewritten location dropdown logic to fix scroll-refresh glitch!
     sel_state = st.selectbox(u["lbl_state"], list(STATES.keys()), index=list(STATES.keys()).index(st.session_state["loc_state"]), key="loc_state")
     
     valid_cities = STATES[sel_state]
@@ -226,7 +235,7 @@ def ask_groq(model, messages):
         req = urllib.request.Request(url, headers=headers, data=json.dumps({"model": model, "messages": messages, "max_tokens": 300}).encode('utf-8'), method="POST")
         with urllib.request.urlopen(req, timeout=20) as response:
             return json.loads(response.read().decode('utf-8'))['choices'][0]['message']['content']
-    except urllib.error.HTTPError as e:
+    except urllib.error.HTTPError:
         return f"API Error: Ensure the image is clear or try text only."
     except Exception as e:
         return f"System Error: {str(e)}"
@@ -238,7 +247,6 @@ st.markdown(f"<div class='sub-header'>{u['sub']}</div>", unsafe_allow_html=True)
 tab1, tab2, tab3, tab4 = st.tabs([u['tab_ai'], u['tab_mandi'], u['tab_iot'], u['tab_tr']])
 
 with tab1:
-    # --- UNIFIED AI INTERFACE ---
     q = st.text_input(u['ask_crop'])
     
     c1, c2 = st.columns(2)
@@ -291,4 +299,3 @@ with tab4:
             st.success(ans)
 
 st.markdown(f"<div class='footer'>{u['dev']}</div>", unsafe_allow_html=True)
-    
