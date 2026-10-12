@@ -163,37 +163,26 @@ if (not st.session_state["has_started"]) or st.session_state.get("presenter_mode
     with c2: st.button(u['tut_btn'], on_click=enter_app)
     st.stop()
 
-# --- 🚀 THE BRUTE FORCE AI ENGINE (UNBREAKABLE) 🚀 ---
-def get_api_key():
-    return "gsk_dqY6y3W" + "jaq9M1sUxQQ" + "3YWGdyb3FY5" + "SRXwexaQggJ" + "lfk2h4RoDqWf"
-
+# --- 🚀 SECURE STREAMLIT SECRETS AI ENGINE 🚀 ---
 def ask_groq(messages, is_vision=False):
-    """If Groq blocks a model, this engine instantly fires the request at the next one until it succeeds."""
-    key = get_api_key()
+    # Safely pull the key from Streamlit Cloud Secrets (No code leaks!)
+    try:
+        key = st.secrets["GROQ_API_KEY"]
+    except Exception:
+        return "🚨 ERROR: API Key missing. Please add your key to the Streamlit Cloud Secrets dashboard."
+
     headers = {
         "Authorization": f"Bearer {key}",
         "Content-Type": "application/json",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     }
     
-    # Master list of models. Ordered from most likely to be unrestricted to least.
-    text_models = [
-        "gemma2-9b-it",             # Very reliable on free tier
-        "llama-3.2-3b-preview",     # Newest, lightweight, completely unrestricted
-        "llama-3.2-1b-preview",
-        "llama-3.1-8b-instant", 
-        "llama3-8b-8192",
-        "mixtral-8x7b-32768"
-    ]
-    vision_models = [
-        "llama-3.2-11b-vision-preview",
-        "llama-3.2-90b-vision-preview"
-    ]
+    text_models = ["gemma2-9b-it", "llama-3.2-3b-preview", "llama-3.1-8b-instant", "llama3-8b-8192"]
+    vision_models = ["llama-3.2-11b-vision-preview", "llama-3.2-90b-vision-preview"]
 
     models_to_try = vision_models if is_vision else text_models
     last_error = ""
 
-    # The Brute Force Loop
     for model in models_to_try:
         try:
             data = json.dumps({"model": model, "messages": messages, "max_tokens": 400}).encode('utf-8')
@@ -201,7 +190,6 @@ def ask_groq(messages, is_vision=False):
             with urllib.request.urlopen(req, timeout=12) as response: 
                 return json.loads(response.read().decode('utf-8'))['choices'][0]['message']['content']
         except urllib.error.HTTPError as e: 
-            # If the model is blocked, deleted, or you don't have access, catch it and loop to the next!
             err_msg = e.read().decode('utf-8', errors='ignore')
             last_error = f"{model} -> Code {e.code}: {err_msg}"
             continue 
@@ -209,7 +197,7 @@ def ask_groq(messages, is_vision=False):
             last_error = str(e)
             continue
             
-    return f"🚨 All AI models failed. Your API key might be temporarily locked. Last Error: {last_error}"
+    return f"🚨 All AI models failed. Your API key might be locked. Please generate a new one at console.groq.com. Last Error: {last_error}"
 
 # --- Main Interface ---
 st.markdown(f"<div class='main-header'>{u['title']}</div><div class='sub-header'>{u['sub']}</div>", unsafe_allow_html=True)
