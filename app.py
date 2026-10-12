@@ -31,15 +31,16 @@ def ask_groq_ai(system_prompt, user_prompt):
 
     url = "https://api.groq.com/openai/v1/chat/completions"
     
-    # THE FIX: Mimicking the official OpenAI/Groq Python SDK to bypass Cloudflare 1010
+    # Mimicking the official OpenAI/Groq Python SDK to bypass Cloudflare 1010
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
         "User-Agent": "OpenAI/Python" 
     }
     
+    # THE FIX: Using the active, supported 3.1 model
     data = {
-        "model": "llama3-8b-8192", 
+        "model": "llama-3.1-8b-instant", 
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
@@ -241,4 +242,4 @@ st.markdown(
     f"The Aryan International School, Varanasi"
     f"</div>", 
     unsafe_allow_html=True
-                    )
+    )
