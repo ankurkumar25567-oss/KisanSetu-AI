@@ -18,14 +18,12 @@ st.markdown("""
     div[data-testid="stMetricValue"] { color: #4ade80 !important; }
     header[data-testid="stHeader"] { background-color: transparent !important; }
     
-    /* THE TEXT OVERFLOW FIX */
     .stMarkdown, .stSuccess, p { 
         word-wrap: break-word !important; 
         overflow-wrap: break-word !important; 
         white-space: pre-wrap !important; 
     }
     
-    /* Tutorial Box Styling */
     .tutorial-box {
         background-color: #1a1a1a;
         padding: 20px;
@@ -36,10 +34,58 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- Session State Initialization ---
-if "show_tutorial" not in st.session_state: st.session_state["show_tutorial"] = True
-if "loc_state" not in st.session_state: st.session_state["loc_state"] = "Uttar Pradesh"
-if "loc_city" not in st.session_state: st.session_state["loc_city"] = "Varanasi"
+# --- Session State & Memory Fix ---
+if "has_started" not in st.session_state:
+    # URL Memory Fix: Survives aggressive browser refreshes caused by mobile cameras
+    if st.query_params.get("started") == "yes":
+        st.session_state["has_started"] = True
+    else:
+        st.session_state["has_started"] = False
+
+if "loc_state" not in st.session_state:
+    st.session_state["loc_state"] = "Uttar Pradesh"
+if "loc_city" not in st.session_state:
+    st.session_state["loc_city"] = "Varanasi"
+
+# --- All 28 States and 8 Union Territories ---
+STATES = {
+    "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Tirupati"],
+    "Arunachal Pradesh": ["Itanagar", "Tawang", "Pasighat", "Ziro"],
+    "Assam": ["Guwahati", "Dibrugarh", "Silchar", "Tezpur"],
+    "Bihar": ["Patna", "Gaya", "Muzaffarpur", "Darbhanga"],
+    "Chhattisgarh": ["Raipur", "Bhilai", "Bilaspur", "Korba"],
+    "Goa": ["Panaji", "Margao", "Vasco da Gama", "Mapusa"],
+    "Gujarat": ["Ahmedabad", "Surat", "Vadodara", "Rajkot"],
+    "Haryana": ["Gurugram", "Faridabad", "Panipat", "Ambala"],
+    "Himachal Pradesh": ["Shimla", "Manali", "Dharamshala", "Mandi"],
+    "Jharkhand": ["Ranchi", "Jamshedpur", "Dhanbad", "Bokaro"],
+    "Karnataka": ["Bengaluru", "Mysuru", "Mangaluru", "Hubballi"],
+    "Kerala": ["Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur"],
+    "Madhya Pradesh": ["Bhopal", "Indore", "Gwalior", "Jabalpur"],
+    "Maharashtra": ["Mumbai", "Pune", "Nagpur", "Nashik"],
+    "Manipur": ["Imphal", "Churachandpur", "Thoubal", "Bishnupur"],
+    "Meghalaya": ["Shillong", "Cherrapunji", "Tura", "Jowai"],
+    "Mizoram": ["Aizawl", "Lunglei", "Champhai", "Serchhip"],
+    "Nagaland": ["Kohima", "Dimapur", "Mokokchung", "Tuensang"],
+    "Odisha": ["Bhubaneswar", "Cuttack", "Rourkela", "Puri"],
+    "Punjab": ["Amritsar", "Ludhiana", "Jalandhar", "Patiala"],
+    "Rajasthan": ["Jaipur", "Jodhpur", "Udaipur", "Kota"],
+    "Sikkim": ["Gangtok", "Namchi", "Pelling", "Mangan"],
+    "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Salem"],
+    "Telangana": ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar"],
+    "Tripura": ["Agartala", "Udaipur", "Dharmanagar", "Kailashahar"],
+    "Uttar Pradesh": ["Lucknow", "Varanasi", "Kanpur", "Agra", "Prayagraj"],
+    "Uttarakhand": ["Dehradun", "Haridwar", "Roorkee", "Nainital"],
+    "West Bengal": ["Kolkata", "Darjeeling", "Siliguri", "Asansol"],
+    "Andaman and Nicobar Islands": ["Port Blair", "Havelock", "Diglipur"],
+    "Chandigarh": ["Chandigarh"],
+    "Dadra and Nagar Haveli and Daman and Diu": ["Daman", "Diu", "Silvassa"],
+    "Delhi": ["New Delhi", "Dwarka", "Rohini", "Saket"],
+    "Jammu and Kashmir": ["Srinagar", "Jammu", "Anantnag", "Baramulla"],
+    "Ladakh": ["Leh", "Kargil"],
+    "Lakshadweep": ["Kavaratti", "Agatti", "Minicoy"],
+    "Puducherry": ["Puducherry", "Auroville", "Karaikal", "Mahe"]
+}
 
 # --- Sidebar ---
 with st.sidebar:
@@ -53,7 +99,7 @@ with st.sidebar:
             "title": "🌾 KisanSetu", "sub": "Smart AI Agriculture",
             "tab_ai": "🤖 AI Advisor", "tab_mandi": "📊 Market Rates",
             "tab_iot": "📡 Field Sensors", "tab_tr": "🔄 Translator",
-            "tab_scan": "📷 Crop Scan",
+            "tab_scan": "📷 Leaf Disease Scan",
             "ask_crop": "Ask about your crop, soil, or fertilizer:",
             "btn_ai": "Ask AI Expert", "lbl_crop": "Select Crop:",
             "lbl_unit": "Select Unit:", "btn_sim": "Refresh Sensors",
@@ -64,7 +110,7 @@ with st.sidebar:
             "title": "🌾 किसान सेतु", "sub": "स्मार्ट एआई कृषि",
             "tab_ai": "🤖 एआई सलाहकार", "tab_mandi": "📊 बाजार भाव",
             "tab_iot": "📡 खेत सेंसर", "tab_tr": "🔄 अनुवादक",
-            "tab_scan": "📷 फसल स्कैन",
+            "tab_scan": "📷 फसल रोग स्कैन",
             "ask_crop": "अपनी फसल या मिट्टी के बारे में पूछें:",
             "btn_ai": "सलाह लें", "lbl_crop": "फसल चुनें:",
             "lbl_unit": "इकाई चुनें:", "btn_sim": "सेंसर रीफ्रेश करें",
@@ -75,7 +121,7 @@ with st.sidebar:
             "title": "🌾 ਕਿਸਾਨ ਸੇਤੂ", "sub": "ਸਮਾਰਟ ਏਆਈ ਖੇਤੀ",
             "tab_ai": "🤖 ਏਆਈ ਸਲਾਹਕਾਰ", "tab_mandi": "📊 ਬਾਜ਼ਾਰ ਦੇ ਭਾਅ",
             "tab_iot": "📡 ਖੇਤ ਸੈਂਸਰ", "tab_tr": "🔄 ਅਨੁਵਾਦਕ",
-            "tab_scan": "📷 ਫਸਲ ਸਕੈਨ",
+            "tab_scan": "📷 ਫਸਲ ਬਿਮਾਰੀ ਸਕੈਨ",
             "ask_crop": "ਆਪਣੀ ਫਸਲ ਜਾਂ ਮਿੱਟੀ ਬਾਰੇ ਪੁੱਛੋ:",
             "btn_ai": "ਸਲਾਹ ਲਓ", "lbl_crop": "ਫਸਲ ਚੁਣੋ:",
             "lbl_unit": "ਯੂਨਿਟ ਚੁਣੋ:", "btn_sim": "ਸੈਂਸਰ ਰਿਫ੍ਰੈਸ਼ ਕਰੋ",
@@ -86,7 +132,7 @@ with st.sidebar:
             "title": "🌾 కిసాన్ సేతు", "sub": "స్మార్ట్ AI వ్యవసాయం",
             "tab_ai": "🤖 AI సలహాదారు", "tab_mandi": "📊 మార్కెట్ ధరలు",
             "tab_iot": "📡 సెన్సార్లు", "tab_tr": "🔄 అనువాదకుడు",
-            "tab_scan": "📷 పంట స్కాన్",
+            "tab_scan": "📷 పంట తెగుళ్ల స్కాన్",
             "ask_crop": "మీ పంట లేదా నేల గురించి అడగండి:",
             "btn_ai": "సలహా తీసుకోండి", "lbl_crop": "పంటను ఎంచుకోండి:",
             "lbl_unit": "యూనిట్ ఎంచుకోండి:", "btn_sim": "రిఫ్రెష్ చేయండి",
@@ -97,25 +143,7 @@ with st.sidebar:
     ui = UI_DATA[lang]
     st.divider()
 
-    # GPS and Location
-    STATES = {
-        "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur"],
-        "Assam": ["Guwahati", "Dibrugarh", "Silchar"],
-        "Bihar": ["Patna", "Gaya", "Muzaffarpur"],
-        "Delhi": ["New Delhi", "Dwarka"],
-        "Gujarat": ["Ahmedabad", "Surat", "Vadodara"],
-        "Haryana": ["Gurugram", "Faridabad", "Panipat"],
-        "Karnataka": ["Bengaluru", "Mysuru", "Mangaluru"],
-        "Madhya Pradesh": ["Bhopal", "Indore", "Gwalior"],
-        "Maharashtra": ["Mumbai", "Pune", "Nagpur"],
-        "Punjab": ["Amritsar", "Ludhiana", "Jalandhar"],
-        "Rajasthan": ["Jaipur", "Jodhpur", "Udaipur"],
-        "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai"],
-        "Telangana": ["Hyderabad", "Warangal"],
-        "Uttar Pradesh": ["Lucknow", "Varanasi", "Kanpur", "Agra", "Prayagraj"],
-        "West Bengal": ["Kolkata", "Darjeeling", "Siliguri"]
-    }
-
+    # GPS Auto-Locate Button
     if st.button("🛰️ Auto-Locate (GPS)"):
         with st.spinner("Finding location..."):
             try:
@@ -150,37 +178,40 @@ with st.sidebar:
         st.session_state["loc_city"] = sel_city
 
     st.divider()
-    # A tiny toggle switch with just an icon. Flips the tutorial on/off instantly.
-    st.toggle("🎓", key="show_tutorial", help="Presenter Mode: Toggle Tutorial Screen")
+    # Presenter mode toggle linked to session state
+    st.toggle("🎓", key="presenter_mode", help="Presenter Mode: Toggle Tutorial Screen")
 
 # --- First-Time Welcome Tutorial ---
-if st.session_state["show_tutorial"]:
+# Shows if it's their first time OR if the presenter toggle is ON
+show_tutorial = (not st.session_state["has_started"]) or st.session_state.get("presenter_mode", False)
+
+if show_tutorial:
     st.markdown("<div class='main-header'>Welcome to KisanSetu 🌾</div>", unsafe_allow_html=True)
     st.markdown("<div class='sub-header'>Your Smart AI Agriculture Assistant</div>", unsafe_allow_html=True)
     
     st.markdown("""
     <div class='tutorial-box'>
         <h3 style='color: #4ade80; text-align: center;'>🚀 Quick Start Guide</h3>
-        <p><b>1. 🤖 AI Advisor & Camera:</b> Ask farming questions or upload a photo of a sick leaf to instantly detect plant diseases.<br><br>
-        <b>2. 📊 Market Rates:</b> Check the latest Mandi prices for your local crops.<br><br>
-        <b>3. 📡 Field Sensors:</b> Monitor simulated soil moisture and weather data.<br><br>
-        <b>4. 🛰️ Auto-Locate:</b> Open the sidebar menu and click the GPS button to get personalized advice for your exact city!</p>
+        <p><b>1. 🤖 AI Advisor & Camera:</b> Ask farming queries or snap a leaf photo to diagnose diseases.<br><br>
+        <b>2. 📊 Market Rates:</b> Real-time Mandi price calculations tailored to your quantity and crop.<br><br>
+        <b>3. 📡 Field Sensors:</b> Live simulated IoT metrics for soil moisture and temperature.<br><br>
+        <b>4. 🛰️ Auto-Locate:</b> Click the GPS button in the sidebar to sync to your current region!</p>
     </div>
     """, unsafe_allow_html=True)
     
-    # THE FIX: We use a callback function to change the toggle's state safely
-    def close_tutorial():
-        st.session_state["show_tutorial"] = False
-        
+    # Callback to securely clear the tutorial and the toggle at the same time
+    def enter_app():
+        st.session_state["has_started"] = True
+        st.session_state["presenter_mode"] = False
+        st.query_params["started"] = "yes" # Saves state in URL so camera won't reset it
+
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        # We attach the callback to the on_click trigger
-        st.button("✅ Start Using KisanSetu", use_container_width=True, on_click=close_tutorial)
+        st.button("✅ Start Using KisanSetu", use_container_width=True, on_click=enter_app)
             
-    # Pauses the code here so the main app hides behind the tutorial
-    st.stop() 
+    st.stop()
 
-# --- Main App Starts Here (Only runs when Toggle is OFF) ---
+# --- API Security & Groq Engines ---
 def get_api_key():
     p1 = "gsk_dqY6y3W"
     p2 = "jaq9M1sUxQQ"
@@ -236,19 +267,22 @@ def ask_groq_vision(prompt, base64_image):
         with urllib.request.urlopen(req, timeout=20) as response:
             res_data = json.loads(response.read().decode('utf-8'))
             return res_data['choices'][0]['message']['content']
-    except urllib.error.HTTPError as e:
-        return f"Vision Model Error: Currently unavailable. Please describe the disease to the AI Advisor."
+    except urllib.error.HTTPError:
+        return "Vision Model Error: Currently unavailable. Please describe the symptoms to the AI Advisor."
     except Exception as e:
         return f"Camera System Error: {str(e)}"
 
+# --- Main Interface ---
 st.markdown(f"<div class='main-header'>{ui['title']}</div>", unsafe_allow_html=True)
 st.markdown(f"<div class='sub-header'>{ui['sub']}</div>", unsafe_allow_html=True)
 
 tab1, tab2, tab3, tab4 = st.tabs([ui['tab_ai'], ui['tab_mandi'], ui['tab_iot'], ui['tab_tr']])
 
+# Tab 1: AI Advisor (Text + Camera & File Upload)
 with tab1:
+    st.markdown("### Agricultural Assistant")
     with st.form("ai_form"):
-        q = st.text_input(ui['ask_crop'], placeholder="e.g. Best fertilizer for wheat?")
+        q = st.text_input(ui['ask_crop'], placeholder="e.g. Best fertilizer for wheat?", key="text_query")
         if st.form_submit_button(ui['btn_ai']) and q:
             with st.spinner("⚡ Consulting Groq AI..."):
                 sys_prompt = f"You are KisanSetu AI, an agronomist expert. Answer concisely, practically, and in {lang}. Frame advice based on the farmer's location: {sel_city}, {sel_state}."
@@ -257,20 +291,23 @@ with tab1:
 
     st.divider()
 
-    st.markdown(f"#### {ui['tab_scan']}")
-    cam_image = st.camera_input("📷 Camera")
-    up_image = st.file_uploader("📁 Or upload an image", type=["jpg", "jpeg", "png"])
+    st.markdown(f"### {ui['tab_scan']}")
+    # Added keys to camera and uploader to stabilize them during mobile refreshes
+    cam_image = st.camera_input("📷 Take a live photo", key="camera_input")
+    up_image = st.file_uploader("📁 Or upload image (PNG / JPG / JPEG)", type=["png", "jpg", "jpeg"], key="file_upload")
+    
     final_image = cam_image if cam_image else up_image
     
     if final_image is not None:
         if st.button(ui['btn_scan']):
-            with st.spinner("🔍 AI is analyzing the crop..."):
+            with st.spinner("🔍 AI is diagnosing the crop leaf..."):
                 bytes_data = final_image.getvalue()
                 base64_img = base64.b64encode(bytes_data).decode('utf-8')
-                vision_prompt = f"You are a crop disease expert. Look at this plant leaf and tell me what disease it has and how to cure it briefly in {lang}. If it is not a plant, just say it is not a plant."
+                vision_prompt = f"You are a plant pathologist. Examine this plant leaf and state what disease it has and provide immediate remedy steps concisely in {lang}. If no disease or plant is found, clearly state so."
                 vision_response = ask_groq_vision(vision_prompt, base64_img)
                 st.success(vision_response)
 
+# Tab 2: Mandi Market Rates
 with tab2:
     CROPS = ["Wheat", "Paddy", "Potato", "Tomato", "Onion", "Sugarcane", "Cotton", "Maize"]
     UNITS = ["Quintal (100kg)", "Kilogram (1kg)", "Tonne (1000kg)"]
@@ -281,12 +318,16 @@ with tab2:
     u_idx = st.selectbox(ui["lbl_unit"], range(len(UNITS)), format_func=lambda x: UNITS[x])
     
     price = BASE_PRICES[c_idx]
-    if u_idx == 1: final_price = price / 100
-    elif u_idx == 2: final_price = price * 10
-    else: final_price = price
+    if u_idx == 1: 
+        final_price = price / 100
+    elif u_idx == 2: 
+        final_price = price * 10
+    else: 
+        final_price = price
         
     st.metric(CROPS[c_idx], f"₹{final_price:,.2f} / {UNITS[u_idx]}")
 
+# Tab 3: Simulated IoT Sensors
 with tab3:
     st.markdown(f"### {ui['tab_iot']}")
     if st.button(ui['btn_sim']):
@@ -295,12 +336,13 @@ with tab3:
         c2.metric("🌡️ Temperature", "31°C")
         c3.metric("💨 Humidity", "65%")
 
+# Tab 4: Translator
 with tab4:
     st.markdown(f"### {ui['tab_tr']}")
     txt_input = st.text_area("Paste text to translate:")
     if st.button("Translate") and txt_input:
         with st.spinner("Translating..."):
-            sys_prompt = f"Translate this text directly into {lang}. Return only the translated text. Do not add any extra commentary."
+            sys_prompt = f"Translate this text directly into {lang}. Return only the translated text without commentary."
             response = ask_groq_ai(sys_prompt, txt_input)
             st.success(response)
 
@@ -311,4 +353,5 @@ st.markdown(
     f"The Aryan International School, Varanasi"
     f"</div>", 
     unsafe_allow_html=True
-                            )
+    )
+    
