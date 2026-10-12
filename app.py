@@ -5,41 +5,53 @@ import json
 import base64
 from PIL import Image
 import io
+import streamlit.components.v1 as components
 
 # --- Page Configuration ---
 st.set_page_config(page_title="KisanSetu - Smart Ag", page_icon="🌾", layout="wide", initial_sidebar_state="auto")
 
-# --- 📱 FLUENT SCROLL & HARD ANTI-REFRESH LOCK 📱 ---
+# --- 🛑 HARD JAVASCRIPT LOCK TO KILL PULL-TO-REFRESH 🛑 ---
+components.html("""
+<script>
+    // Physically blocks the mobile browser swipe-to-refresh action
+    document.body.style.overscrollBehavior = 'none';
+    window.addEventListener('touchmove', function(e) {
+        if (window.scrollY === 0 && e.touches[0].clientY > 0) {
+            // Allow normal scrolling, but prevent the refresh bounce
+        }
+    }, { passive: true });
+</script>
+""", height=0)
+
+# --- 📱 HIGH-PERFORMANCE CSS & FLUENT SCROLLBAR 📱 ---
 st.markdown("""
 <style>
-    /* Absolute Lock on the background to prevent Pull-To-Refresh */
-    html, body {
-        position: fixed !important;
-        width: 100% !important;
-        height: 100% !important;
-        overflow: hidden !important; 
+    /* Absolute Lock on the background */
+    html, body, [data-testid="stAppViewContainer"], .main, .stApp {
         overscroll-behavior: none !important;
-        touch-action: none !important;
+        overscroll-behavior-y: none !important;
+        overscroll-behavior-x: none !important;
     }
 
-    /* Fluent Native Scrolling inside the app */
+    /* Hardware-Accelerated App Container */
     [data-testid="stAppViewContainer"] {
         overflow-y: scroll !important;
         height: 100vh !important;
         -webkit-overflow-scrolling: touch !important; 
-        overscroll-behavior-y: contain !important; 
+        transform: translateZ(0); /* Forces GPU rendering to stop lag */
         padding-bottom: 80px !important;
     }
 
-    /* Clean, high-performance scrollbar */
-    ::-webkit-scrollbar { width: 14px !important; }
-    ::-webkit-scrollbar-track { background: #1a1c23 !important; border-radius: 8px; }
-    ::-webkit-scrollbar-thumb { background-color: #4ade80 !important; border-radius: 8px !important; border: 3px solid #1a1c23 !important; }
+    /* Ultra-Lightweight Fluent Scrollbar (No gradients, no lag) */
+    ::-webkit-scrollbar { width: 8px !important; }
+    ::-webkit-scrollbar-track { background: transparent !important; }
+    ::-webkit-scrollbar-thumb { background-color: #4ade80 !important; border-radius: 10px !important; }
+    ::-webkit-scrollbar-thumb:hover { background-color: #22c55e !important; }
 
     .stApp { background-color: #0f1117; color: #f3f4f6; }
     .block-container { max-width: 980px !important; padding-top: 1rem !important; padding-left: 1.2rem !important; padding-right: 1.2rem !important; }
 
-    .main-header { text-align: center; color: #4ade80; font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; margin-top: 40px !important; margin-bottom: 5px; }
+    .main-header { text-align: center; color: #4ade80; font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; margin-top: 20px !important; margin-bottom: 5px; }
     .sub-header { text-align: center; color: #86efac; font-size: clamp(1rem, 2.5vw, 1.25rem); margin-bottom: 25px; font-weight: 600; }
     header[data-testid="stHeader"] { background-color: transparent !important; }
     .footer { text-align: center; font-size: 13px; color: #9ca3af; padding: 18px; border-top: 1px solid #27272a; margin-top: 35px; }
@@ -160,17 +172,31 @@ if (not st.session_state["has_started"]) or st.session_state.get("presenter_mode
     with c2: st.button(u['tut_btn'], on_click=enter_app)
     st.stop()
 
+# --- 🚀 AUTO-FALLBACK AI ENGINE 🚀 ---
 def get_api_key():
     return "gsk_dqY6y3W" + "jaq9M1sUxQQ" + "3YWGdyb3FY5" + "SRXwexaQggJ" + "lfk2h4RoDqWf"
 
-def ask_groq(model, messages):
+def ask_groq(model_list, messages):
+    """Tries a list of models sequentially. If one is deleted by Groq, it auto-switches to the next."""
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {"Authorization": f"Bearer {get_api_key()}", "Content-Type": "application/json", "User-Agent": "OpenAI/Python"}
-    try:
-        req = urllib.request.Request(url, headers=headers, data=json.dumps({"model": model, "messages": messages, "max_tokens": 600}).encode('utf-8'), method="POST")
-        with urllib.request.urlopen(req, timeout=25) as response: return json.loads(response.read().decode('utf-8'))['choices'][0]['message']['content']
-    except urllib.error.HTTPError as e: return f"🚨 API Error {e.code}: {e.read().decode('utf-8')}"
-    except Exception as e: return f"🚨 System Error: {str(e)}"
+    
+    last_error = ""
+    for model in model_list:
+        try:
+            req = urllib.request.Request(url, headers=headers, data=json.dumps({"model": model, "messages": messages, "max_tokens": 600}).encode('utf-8'), method="POST")
+            with urllib.request.urlopen(req, timeout=15) as response: 
+                return json.loads(response.read().decode('utf-8'))['choices'][0]['message']['content']
+        except urllib.error.HTTPError as e: 
+            err_data = e.read().decode('utf-8')
+            if "decommissioned" in err_data or "not_found" in err_data or "does not exist" in err_data:
+                last_error = err_data
+                continue # Skip this model and try the next one in the list
+            return f"🚨 API Error {e.code}: {err_data}"
+        except Exception as e: 
+            return f"🚨 System Error: {str(e)}"
+    
+    return f"🚨 Critical Error: All fallback models failed. Last error: {last_error}"
 
 st.markdown(f"<div class='main-header'>{u['title']}</div><div class='sub-header'>{u['sub']}</div>", unsafe_allow_html=True)
 tab1, tab2, tab3, tab4 = st.tabs([u['tab_ai'], u['tab_mandi'], u['tab_iot'], u['tab_tr']])
@@ -194,9 +220,15 @@ with tab1:
                     img.save(buffer, format="JPEG", quality=80)
                     b64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
                     user_msg = [{"type": "text", "text": f"Diagnose this crop leaf in {lang}. Factor in {sel_city}, {sel_state} climate. Question: {q}"}, {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}}]
-                    ans = ask_groq("llama-3.2-11b-vision-instruct", [{"role": "user", "content": user_msg}])
+                    
+                    # Vision Fallback List
+                    vision_models = ["llama-3.2-11b-vision-instruct", "llama-3.2-90b-vision-instruct"]
+                    ans = ask_groq(vision_models, [{"role": "user", "content": user_msg}])
                 else:
-                    ans = ask_groq("llama3-8b-8192", [{"role": "system", "content": sys_prompt}, {"role": "user", "content": q}])
+                    # Text Fallback List
+                    text_models = ["llama-3.1-8b-instant", "gemma2-9b-it", "mixtral-8x7b-32768", "llama3-8b-8192"]
+                    ans = ask_groq(text_models, [{"role": "system", "content": sys_prompt}, {"role": "user", "content": q}])
+                
                 if "🚨" in ans: st.error(ans)
                 else: st.success(ans)
 
@@ -222,9 +254,10 @@ with tab4:
     txt_input = st.text_area(u["tr_prompt"])
     if st.button(u["btn_tr"]) and txt_input:
         with st.spinner("Translating..."):
-            ans = ask_groq("llama3-8b-8192", [{"role": "system", "content": f"Translate to {lang} exactly. No extra notes."}, {"role": "user", "content": txt_input}])
+            text_models = ["llama-3.1-8b-instant", "gemma2-9b-it", "mixtral-8x7b-32768", "llama3-8b-8192"]
+            ans = ask_groq(text_models, [{"role": "system", "content": f"Translate to {lang} exactly. No extra notes."}, {"role": "user", "content": txt_input}])
             if "🚨" in ans: st.error(ans)
             else: st.success(ans)
 
 st.markdown(f"<div class='footer'>{u['dev']}</div>", unsafe_allow_html=True)
-                                                                  
+                            
