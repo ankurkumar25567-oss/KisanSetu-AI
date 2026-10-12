@@ -241,4 +241,4 @@ st.markdown(
     f"The Aryan International School, Varanasi"
     f"</div>", 
     unsafe_allow_html=True
-)
+                    )
