@@ -161,14 +161,15 @@ if (not st.session_state["has_started"]) or st.session_state.get("presenter_mode
     with c2: st.button(u['tut_btn'], on_click=enter_app)
     st.stop()
 
-# --- 🔍 DIRECT GEMINI API ENGINE (NO HIDING ERRORS) 🔍 ---
+# --- 🚀 ROBUST GEMINI MULTI-MODEL FALLBACK ENGINE 🚀 ---
 def ask_gemini(prompt_text, b64_image=None):
     try:
         key = st.secrets["GEMINI_API_KEY"]
     except Exception:
         return "🚨 ERROR: GEMINI_API_KEY missing from Streamlit Secrets."
 
-    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={key}"
+    # List of modern Gemini models to try sequentially
+    models_to_try = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"]
     headers = {"Content-Type": "application/json"}
     
     parts = [{"text": prompt_text}]
@@ -185,16 +186,22 @@ def ask_gemini(prompt_text, b64_image=None):
         "generationConfig": {"temperature": 0.4, "maxOutputTokens": 600}
     }
     
-    try:
-        req = urllib.request.Request(url, headers=headers, data=json.dumps(payload).encode('utf-8'), method="POST")
-        with urllib.request.urlopen(req, timeout=20) as resp:
-            data = json.loads(resp.read().decode('utf-8'))
-            return data['candidates'][0]['content']['parts'][0]['text']
-    except urllib.error.HTTPError as e:
-        err = e.read().decode('utf-8', errors='ignore')
-        return f"🚨 Google API Error {e.code}: {err}"
-    except Exception as e:
-        return f"🚨 Connection Error: {str(e)}"
+    last_err = ""
+    for model in models_to_try:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}"
+        try:
+            req = urllib.request.Request(url, headers=headers, data=json.dumps(payload).encode('utf-8'), method="POST")
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                data = json.loads(resp.read().decode('utf-8'))
+                return data['candidates'][0]['content']['parts'][0]['text']
+        except urllib.error.HTTPError as e:
+            last_err = e.read().decode('utf-8', errors='ignore')
+            continue
+        except Exception as e:
+            last_err = str(e)
+            continue
+            
+    return f"🚨 All Gemini models failed. Last Error: {last_err}"
 
 # --- Main Interface ---
 st.markdown(f"<div class='main-header'>{u['title']}</div><div class='sub-header'>{u['sub']}</div>", unsafe_allow_html=True)
