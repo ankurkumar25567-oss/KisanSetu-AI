@@ -175,7 +175,7 @@ def ask_openrouter(prompt_text):
         "X-Title": "KisanSetu"
     }
     payload = {
-        "model": "google/gemini-2.0-flash-lite-preview-02-05:free",
+        "model": "openrouter/free",
         "messages": [{"role": "user", "content": prompt_text}]
     }
     
@@ -232,4 +232,5 @@ with tab3:
             except Exception as e:
                 st.error(f"Translation Error: {str(e)}")
 
-st.markdown(f"<div class='footer'><b>{t['dev']}</div>", unsafe_allow_html=True)
+st.markdown(f"<div class='footer'><b>{t['dev']}</b></div>", unsafe_allow_html=True)
+    
