@@ -10,7 +10,7 @@ import streamlit.components.v1 as components
 # --- Page Configuration ---
 st.set_page_config(page_title="KisanSetu - Smart Ag", page_icon="🌾", layout="wide", initial_sidebar_state="auto")
 
-# --- 🛑 HARD JAVASCRIPT LOCK TO KILL PULL-TO-REFRESH 🛑 ---
+# --- 🛑 Anti-Refresh Lock ---
 components.html("""
 <script>
     document.body.style.overscrollBehavior = 'none';
@@ -20,7 +20,7 @@ components.html("""
 </script>
 """, height=0)
 
-# --- 📱 HIGH-PERFORMANCE CSS & FLUENT SCROLLBAR 📱 ---
+# --- 📱 Styling ---
 st.markdown("""
 <style>
     html, body, [data-testid="stAppViewContainer"], .main, .stApp {
@@ -38,7 +38,6 @@ st.markdown("""
     ::-webkit-scrollbar { width: 8px !important; }
     ::-webkit-scrollbar-track { background: transparent !important; }
     ::-webkit-scrollbar-thumb { background-color: #4ade80 !important; border-radius: 10px !important; }
-    ::-webkit-scrollbar-thumb:hover { background-color: #22c55e !important; }
 
     .stApp { background-color: #0f1117; color: #f3f4f6; }
     .block-container { max-width: 980px !important; padding-top: 1rem !important; padding-left: 1.2rem !important; padding-right: 1.2rem !important; }
@@ -58,7 +57,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- 🌐 20 LANGUAGES DICTIONARY & LOCALIZATION 🌐 ---
 LANGUAGES = [
     "English", "Hindi (हिंदी)", "Punjabi (ਪੰਜਾਬੀ)", "Telugu (తెలుగు)",
     "Bengali (বাংলা)", "Marathi (मराठी)", "Tamil (தமிழ்)", "Gujarati (ગુજરાતી)",
@@ -134,7 +132,7 @@ with st.sidebar:
     if st.button(u["gps_btn"]):
         with st.spinner("Finding location..."):
             try:
-                gps_req = urllib.request.Request("https://ipapi.co/json/", headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36'})
+                gps_req = urllib.request.Request("https://ipapi.co/json/", headers={'User-Agent': 'Mozilla/5.0'})
                 with urllib.request.urlopen(gps_req, timeout=5) as response:
                     loc_data = json.loads(response.read().decode('utf-8'))
                     if loc_data.get('region') in STATES:
@@ -163,41 +161,40 @@ if (not st.session_state["has_started"]) or st.session_state.get("presenter_mode
     with c2: st.button(u['tut_btn'], on_click=enter_app)
     st.stop()
 
-# --- 🚀 THE PURE FLAGSHIP AI ENGINE 🚀 ---
-def ask_groq(messages, is_vision=False):
+# --- 🚀 GEMINI API ENGINE (Handles AIza... Keys) 🚀 ---
+def ask_gemini(prompt_text, b64_image=None):
     try:
-        key = st.secrets["GROQ_API_KEY"]
+        key = st.secrets["GEMINI_API_KEY"]
     except Exception:
-        return "🚨 ERROR: API Key missing. Please add GROQ_API_KEY to your Streamlit Cloud Secrets."
+        return "🚨 ERROR: API Key missing. Please add GEMINI_API_KEY to your Streamlit Secrets."
 
-    headers = {
-        "Authorization": f"Bearer {key}",
-        "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={key}"
+    headers = {"Content-Type": "application/json"}
+    
+    parts = [{"text": prompt_text}]
+    if b64_image:
+        parts.append({
+            "inline_data": {
+                "mime_type": "image/jpeg",
+                "data": b64_image
+            }
+        })
+    
+    payload = {
+        "contents": [{"parts": parts}],
+        "generationConfig": {"temperature": 0.4, "maxOutputTokens": 600}
     }
     
-    # STRICTLY newest flagship models only to prevent 400 errors
-    text_models = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
-    vision_models = ["llama-3.2-11b-vision-preview"]
-
-    models_to_try = vision_models if is_vision else text_models
-    last_error = ""
-
-    for model in models_to_try:
-        try:
-            data = json.dumps({"model": model, "messages": messages, "max_tokens": 400}).encode('utf-8')
-            req = urllib.request.Request("https://api.groq.com/openai/v1/chat/completions", headers=headers, data=data, method="POST")
-            with urllib.request.urlopen(req, timeout=12) as response: 
-                return json.loads(response.read().decode('utf-8'))['choices'][0]['message']['content']
-        except urllib.error.HTTPError as e: 
-            err_msg = e.read().decode('utf-8', errors='ignore')
-            last_error = f"{model} -> Code {e.code}: {err_msg}"
-            continue 
-        except Exception as e: 
-            last_error = str(e)
-            continue
-            
-    return f"🚨 All AI models failed. Last Error: {last_error}"
+    try:
+        req = urllib.request.Request(url, headers=headers, data=json.dumps(payload).encode('utf-8'), method="POST")
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+            return data['candidates'][0]['content']['parts'][0]['text']
+    except urllib.error.HTTPError as e:
+        err = e.read().decode('utf-8', errors='ignore')
+        return f"🚨 Gemini Error {e.code}: {err}"
+    except Exception as e:
+        return f"🚨 System Error: {str(e)}"
 
 # --- Main Interface ---
 st.markdown(f"<div class='main-header'>{u['title']}</div><div class='sub-header'>{u['sub']}</div>", unsafe_allow_html=True)
@@ -212,24 +209,27 @@ with tab1:
     final_img = cam_image if cam_image else up_image
     
     if st.button(u['btn_ai']):
-        if not q and not final_img: st.warning("Please enter a question or upload/capture a photo.")
+        if not q and not final_img:
+            st.warning("Please enter a question or upload/capture a photo.")
         else:
-            with st.spinner("⚡ AI is working..."):
-                sys_prompt = f"You are KisanSetu AI, an expert agronomist. Provide practical advice directly in {lang}. Factor in the local climate of {sel_city}, {sel_state}."
+            with st.spinner("⚡ Gemini is analyzing..."):
+                sys_prompt = f"You are KisanSetu AI, an expert agronomist. Provide direct, practical farming advice in {lang}. Factor in the local climate of {sel_city}, {sel_state}."
                 if final_img:
                     img = Image.open(final_img).convert("RGB")
                     img.thumbnail((720, 720))
                     buffer = io.BytesIO()
                     img.save(buffer, format="JPEG", quality=80)
                     b64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
-                    user_msg = [{"type": "text", "text": f"Diagnose this crop leaf in {lang}. Factor in {sel_city}, {sel_state} climate. Question: {q}"}, {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}}]
                     
-                    ans = ask_groq([{"role": "user", "content": user_msg}], is_vision=True)
+                    full_prompt = f"{sys_prompt}\nExamine this crop leaf. Diagnose any disease, describe symptoms, and give practical remedies. Question: {q if q else 'Diagnose this crop.'}"
+                    ans = ask_gemini(full_prompt, b64_image=b64)
                 else:
-                    ans = ask_groq([{"role": "system", "content": sys_prompt}, {"role": "user", "content": q}], is_vision=False)
+                    ans = ask_gemini(f"{sys_prompt}\nUser question: {q}")
                 
-                if "🚨" in ans: st.error(ans)
-                else: st.success(ans)
+                if "🚨" in ans:
+                    st.error(ans)
+                else:
+                    st.success(ans)
 
 with tab2:
     CROPS, UNITS, BASE_PRICES = ["Wheat", "Paddy", "Potato", "Tomato", "Onion", "Sugarcane", "Cotton", "Maize"], ["Quintal (100kg)", "Kilogram (1kg)", "Tonne (1000kg)"], [2400, 2200, 1500, 3000, 2500, 350, 7000, 2100]
@@ -253,9 +253,10 @@ with tab4:
     txt_input = st.text_area(u["tr_prompt"])
     if st.button(u["btn_tr"]) and txt_input:
         with st.spinner("Translating..."):
-            ans = ask_groq([{"role": "system", "content": f"Translate to {lang} exactly. No extra notes."}, {"role": "user", "content": txt_input}], is_vision=False)
-            if "🚨" in ans: st.error(ans)
-            else: st.success(ans)
+            ans = ask_gemini(f"Translate the following text directly into {lang}. Return only the translation without commentary:\n{txt_input}")
+            if "🚨" in ans:
+                st.error(ans)
+            else:
+                st.success(ans)
 
 st.markdown(f"<div class='footer'>{u['dev']}</div>", unsafe_allow_html=True)
-    
