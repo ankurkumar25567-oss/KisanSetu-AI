@@ -20,30 +20,38 @@ LANGUAGES = ["English", "Hindi (हिंदी)", "Punjabi (ਪੰਜਾਬੀ)
 
 with st.sidebar:
     lang = st.selectbox("🌐 Language", LANGUAGES)
-    api_key_check = st.secrets.get("GEMINI_API_KEY", "Missing")
+    api_key_check = st.secrets.get("OPENROUTER_API_KEY", "Missing")
     st.write(f"Key loaded: {'✅' if api_key_check != 'Missing' else '❌'}")
 
-def ask_gemini(prompt_text):
-    key = st.secrets["GEMINI_API_KEY"]
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={key}"
-    headers = {"Content-Type": "application/json"}
-    payload = {"contents": [{"parts": [{"text": prompt_text}]}]}
+def ask_openrouter(prompt_text):
+    key = st.secrets["OPENROUTER_API_KEY"]
+    url = "https://openrouter.ai/api/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {key}",
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://streamlit.io",
+        "X-Title": "KisanSetu"
+    }
+    payload = {
+        "model": "openrouter/free",  # Automatically routes to active free models
+        "messages": [{"role": "user", "content": prompt_text}]
+    }
     
     req = urllib.request.Request(url, headers=headers, data=json.dumps(payload).encode('utf-8'), method="POST")
     with urllib.request.urlopen(req, timeout=20) as resp:
         data = json.loads(resp.read().decode('utf-8'))
-        return data['candidates'][0]['content']['parts'][0]['text']
+        return data["choices"][0]["message"]["content"]
 
-st.markdown("<div class='main-header'>🌾 KisanSetu</div><div class='sub-header'>Development Mode</div>", unsafe_allow_html=True)
+st.markdown("<div class='main-header'>🌾 KisanSetu</div><div class='sub-header'>Development Mode (OpenRouter)</div>", unsafe_allow_html=True)
 
 q = st.text_input("Ask your farming question:")
 if st.button("Ask AI"):
     if not q:
         st.warning("Please enter a question.")
     else:
-        with st.spinner("Calling Gemini AI..."):
+        with st.spinner("Calling OpenRouter..."):
             try:
-                ans = ask_gemini(f"Provide practical farming advice in {lang}: {q}")
+                ans = ask_openrouter(f"Provide practical farming advice in {lang}: {q}")
                 st.success(ans)
             except Exception as e:
                 st.error(f"API Error: {str(e)}")
