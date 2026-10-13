@@ -99,7 +99,7 @@ TRANSLATIONS = {
         "btn_sim": "सेंसर रीफ्रेश करें", "lbl_state": "राज्य चुनें:", "lbl_city": "शहर चुनें:",
         "gps_btn": "🛰️ ऑटो-लोकेट (GPS)", "soil": "💧 मिट्टी की नमी", "temp": "🌡️ तापमान", "hum": "💨 आर्द्रता",
         "tr_prompt": "अनुवाद करने के लिए टेक्स्ट पेस्ट करें:", "btn_tr": "अनुवाद करें",
-        "dev": "<b>अंकुर कुमार और विकल्प चौबे द्वारा विकसित</b><br>द आर्यन इंटरनेशनल School, Varanasi"
+        "dev": "<b>अंकुर कुमार और विकल्प चौबे द्वारा विकसित</b><br>द आर्यन इंटरनेशनल स्कूल, वाराणसी"
     }
 }
 
@@ -187,22 +187,17 @@ Based on the regional soil data and your query, here is the recommended approach
 
 *(Presentation Mode: Displaying optimized agronomy cache).*"""
 
-# --- 🚀 GEMINI API AUTO-FETCHER WITH DEBUG 🚀 ---
+# --- 🚀 STABLE GEMINI v1 API ENGINE 🚀 ---
 def ask_gemini(prompt_text, b64_image=None, task_type="text", user_text=""):
     try:
-        # Check if the key exists in Streamlit Secrets
         if "GEMINI_API_KEY" not in st.secrets:
-            return get_demo_fallback(task_type, user_text) + "\n\n*(🕵️‍♂️ Debug: 'GEMINI_API_KEY' is missing from Streamlit Secrets. Did you name it GROQ_API_KEY by accident?)*"
-            
+            return get_demo_fallback(task_type, user_text)
         key = st.secrets["GEMINI_API_KEY"]
-        if not key.startswith("AQ."):
-            return get_demo_fallback(task_type, user_text) + "\n\n*(🕵️‍♂️ Debug: The key in Secrets doesn't start with AQ. Check for typos!)*"
-            
-    except Exception as e:
-        return get_demo_fallback(task_type, user_text) + f"\n\n*(🕵️‍♂️ Debug Secrets Error: {str(e)})*"
+    except Exception:
+        return get_demo_fallback(task_type, user_text)
 
-    # We will use the ultra-stable, official 1.5 flash model endpoint directly
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={key}"
+    # Use the official v1 endpoint for gemini-1.5-flash
+    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={key}"
     headers = {"Content-Type": "application/json"}
     
     parts = [{"text": prompt_text}]
@@ -224,11 +219,8 @@ def ask_gemini(prompt_text, b64_image=None, task_type="text", user_text=""):
         with urllib.request.urlopen(req, timeout=15) as resp:
             data = json.loads(resp.read().decode('utf-8'))
             return data['candidates'][0]['content']['parts'][0]['text']
-    except urllib.error.HTTPError as e:
-        err = e.read().decode('utf-8', errors='ignore')
-        return get_demo_fallback(task_type, user_text) + f"\n\n*(🕵️‍♂️ Debug Google API Error {e.code}: {err})*"
-    except Exception as e:
-        return get_demo_fallback(task_type, user_text) + f"\n\n*(🕵️‍♂️ Debug System Error: {str(e)})*"
+    except Exception:
+        return get_demo_fallback(task_type, user_text)
 
 # --- Main Interface ---
 st.markdown(f"<div class='main-header'>{u['title']}</div><div class='sub-header'>{u['sub']}</div>", unsafe_allow_html=True)
