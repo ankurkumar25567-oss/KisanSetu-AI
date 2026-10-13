@@ -1,61 +1,45 @@
 import streamlit as st
 import urllib.request
 import json
-import base64
-from PIL import Image
-import io
 import streamlit.components.v1 as components
 
-# --- Page Configuration ---
 st.set_page_config(page_title="KisanSetu - Smart Ag", page_icon="🌾", layout="wide", initial_sidebar_state="auto")
 
-# --- 🛑 Anti-Refresh & Overflow Killer ---
 components.html("""
 <script>
     document.body.style.overscrollBehavior = 'none';
-    window.addEventListener('touchmove', function(e) {
-        if (window.scrollY === 0 && e.touches[0].clientY > 0) { }
-    }, { passive: true });
 </script>
 """, height=0)
 
-# --- 📱 Sleek Futuristic CSS ---
 st.markdown("""
 <style>
     html, body, [data-testid="stAppViewContainer"], .main, .stApp {
-        overscroll-behavior: none !important;
         background-color: #07090e !important;
         color: #f3f4f6 !important;
     }
     [data-testid="stAppViewContainer"] {
         overflow-y: scroll !important;
         height: 100vh !important;
-        -webkit-overflow-scrolling: touch !important; 
         padding-bottom: 90px !important;
     }
     ::-webkit-scrollbar { width: 6px !important; }
     ::-webkit-scrollbar-track { background: #07090e !important; }
     ::-webkit-scrollbar-thumb { background-color: #22c55e !important; border-radius: 10px !important; }
 
-    .block-container { max-width: 980px !important; padding-top: 1.2rem !important; padding-left: 1rem !important; padding-right: 1rem !important; }
+    .block-container { max-width: 980px !important; padding-top: 1.2rem !important; }
+    .main-header { text-align: center; color: #4ade80; font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; margin-bottom: 2px; }
+    .sub-header { text-align: center; color: #86efac; font-size: 1.1rem; margin-bottom: 20px; }
 
-    .main-header { text-align: center; color: #4ade80; font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; margin-bottom: 2px; text-shadow: 0 0 20px rgba(74,222,128,0.2); }
-    .sub-header { text-align: center; color: #86efac; font-size: clamp(0.9rem, 2vw, 1.15rem); margin-bottom: 20px; font-weight: 500; }
-    header[data-testid="stHeader"] { background-color: transparent !important; }
-    .footer { text-align: center; font-size: 13px; color: #9ca3af; padding: 20px; border-top: 1px solid #1e293b; margin-top: 40px; }
+    .stButton>button { width: 100% !important; min-height: 3.2rem !important; border-radius: 12px !important; font-weight: 600 !important; border: 1px solid #16a34a !important; background: linear-gradient(135deg, #15803d 0%, #166534 100%) !important; color: #ffffff !important; }
+    .stButton>button:hover { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%) !important; }
 
-    .stButton>button { width: 100% !important; min-height: 3.2rem !important; border-radius: 12px !important; font-weight: 600 !important; border: 1px solid #16a34a !important; background: linear-gradient(135deg, #15803d 0%, #166534 100%) !important; color: #ffffff !important; box-shadow: 0 4px 12px rgba(22,163,74,0.3); transition: all 0.3s ease; }
-    .stButton>button:hover { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%) !important; border-color: #4ade80 !important; box-shadow: 0 6px 16px rgba(74,222,128,0.4); transform: translateY(-1px); }
-
-    div[data-testid="stMetric"] { background: #0f172a !important; padding: 16px !important; border-radius: 14px !important; border: 1px solid #1e293b !important; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
-    div[data-testid="stMetricValue"] { color: #4ade80 !important; font-size: clamp(1.2rem, 3vw, 1.8rem) !important; font-weight: 700 !important; }
-    
-    .stMarkdown, .stSuccess, .stError, .stInfo, p, span { word-wrap: break-word !important; overflow-wrap: break-word !important; }
-    .game-card { background: linear-gradient(145deg, #0f172a 0%, #090d16 100%); padding: 25px; border-radius: 18px; border: 2px solid #22c55e; box-shadow: 0 0 25px rgba(34,197,94,0.15); margin-bottom: 25px; }
+    div[data-testid="stMetric"] { background: #0f172a !important; padding: 16px !important; border-radius: 14px !important; border: 1px solid #1e293b !important; }
+    div[data-testid="stMetricValue"] { color: #4ade80 !important; font-size: 1.8rem !important; font-weight: 700 !important; }
+    .stMarkdown, .stSuccess, .stError, p { word-wrap: break-word !important; overflow-wrap: break-word !important; }
+    .game-card { background: linear-gradient(145deg, #0f172a 0%, #090d16 100%); padding: 25px; border-radius: 18px; border: 2px solid #22c55e; margin-bottom: 25px; }
 </style>
 """, unsafe_allow_html=True)
 
-# --- 🌐 22 SCHEDULED LANGUAGES + ENGLISH ---
 LANGUAGES = [
     "English", "Hindi (हिंदी)", "Assamese (অসমীয়া)", "Bengali (বাংলা)", 
     "Bodo (बड़ो)", "Dogri (डोगरी)", "Gujarati (ગુજરાતી)", "Kannada (ಕನ್ನಡ)", 
@@ -65,7 +49,30 @@ LANGUAGES = [
     "Tamil (தமிழ்)", "Telugu (తెలుగు)", "Urdu (اردو)"
 ]
 
-# --- 🗺️ ALL STATES, UTs & 20+ CITIES EACH ---
+UI_TEXT = {
+    "English": {
+        "title": "🌾 KisanSetu", "sub": "Smart AI Agriculture Platform",
+        "tab1": "🤖 AI Advisor", "tab2": "📊 Market Rates", "tab3": "🔄 Translator",
+        "ask": "Ask your farming question or crop query:", "ask_ph": "e.g. Best organic fertilizer for paddy?",
+        "cam": "📷 Take live photo", "up": "📁 Or upload image", "btn_ai": "Ask AI / Analyze Crop",
+        "mandi_title": "📊 Mandi Prices for", "crop_lbl": "Select Crop:", "unit_lbl": "Select Unit:",
+        "tr_title": "🔄 Multilingual Translator", "tr_ph": "Paste text to translate to your selected language:",
+        "tr_btn": "Translate Text", "dev": "Developed by Ankur Kumar & Vikalp Chaubey<br>The Aryan International School, Varanasi"
+    },
+    "Hindi (हिंदी)": {
+        "title": "🌾 किसान सेतु", "sub": "स्मार्ट एआई कृषि प्लेटफॉर्म",
+        "tab1": "🤖 एआई सलाहकार", "tab2": "📊 बाजार भाव", "tab3": "🔄 अनुवादक",
+        "ask": "अपना कृषि प्रश्न या फसल संबंधी जिज्ञासा पूछें:", "ask_ph": "जैसे: धान के लिए सबसे अच्छी जैविक खाद?",
+        "cam": "📷 लाइव फोटो लें", "up": "📁 या छवि अपलोड करें", "btn_ai": "एआई से पूछें / फसल विश्लेषण करें",
+        "mandi_title": "📊 मंडी भाव:", "crop_lbl": "फसल चुनें:", "unit_lbl": "इकाई चुनें:",
+        "tr_title": "🔄 बहुभाषी अनुवादक", "tr_ph": "अपनी चयनित भाषा में अनुवाद के लिए यहाँ टेक्स्ट पेस्ट करें:",
+        "tr_btn": "टेक्स्ट अनुवाद करें", "dev": "अंकुर कुमार और विकल्प चौबे द्वारा विकसित<br>द आर्यन इंटरनेशनल स्कूल, वाराणसी"
+    }
+}
+
+def get_ui(lang_name):
+    return UI_TEXT.get(lang_name, UI_TEXT["English"])
+
 STATES_AND_UTS = {
     "Uttar Pradesh": ["Varanasi", "Lucknow", "Kanpur", "Agra", "Prayagraj", "Meerut", "Ghaziabad", "Noida", "Bareilly", "Aligarh", "Moradabad", "Saharanpur", "Gorakhpur", "Firozabad", "Jhansi", "Muzaffarnagar", "Mathura", "Ayodhya", "Rampur", "Shahjahanpur", "Farrukhabad"],
     "Bihar": ["Patna", "Gaya", "Bhagalpur", "Muzaffarpur", "Purnia", "Darbhanga", "Bihar Sharif", "Arrah", "Begusarai", "Katihar", "Munger", "Chhapra", "Danapur", "Bettiah", "Saharsa", "Sasaram", "Hajipur", "Dehri", "Siwan", "Motihari", "Nawada"],
@@ -98,23 +105,22 @@ STATES_AND_UTS = {
     "Delhi": ["New Delhi", "Dwarka", "Rohini", "Connaught Place", "Karol Bagh", "Saket", "Vasant Kunj", "Lajpat Nagar", "Chandni Chowk", "Paharganj", "Mehrauli", "Janakpuri", "Laxmi Nagar", "Mayur Vihar", "Pitampura", "Shahdara", "Civil Lines", "Chanakyapuri", "Greater Kailash", "Vikas Puri", "Narela"],
     "Jammu and Kashmir": ["Srinagar", "Jammu", "Anantnag", "Baramulla", "Sopore", "Kathua", "Udhampur", "Poonch", "Rajouri", "Kupwara", "Pulwama", "Ganderbal", "Bandipora", "Kulgam", "Shopian", "Samba", "Ramban", "Doda", "Kishtwar", "Reasi", "Katra"],
     "Ladakh": ["Leh", "Kargil", "Diskit", "Padum", "Nyoma", "Drass", "Hunder", "Alchi", "Lamayuru", "Tangtse", "Chumathang", "Panamik", "Turtuk", "Hanoo", "Khalatse", "Saspol", "Spituk", "Shey", "Thiksey", "Hemis", "Choglamsar"],
-    "Puducherry": ["Puducherry", "Karaikal", "Mahe", "Yanam", "Oulgaret", "Villianur", "Ariyankuppam", "Bahour", "Nettapakkam", "Kottakuppam", "Thirubuvanai", "Madagadipet", "Kurumbapet", "Thavalakuppam", "Kirumampakkam", "Embalam", "Suthukeny", "Kariamputtur", "Pandakkal", "Palloor", "Pandakkal"],
-    "Chandigarh": ["Chandigarh", "Manimajra", "Burail", "Daria", "Behlana", "Raipur Kalan", "Kishangarh", "Kaimbwala", "Dadu Majra", "Maloya", "Sarangpur", "Palsora", "Faizabad", "Khuda Alisher", "Khuda Jassu", "Khuda Lahora", "Dhanas", "Hallomajra", "Behlana", "Makhan Majra", "Lahora"],
+    "Puducherry": ["Puducherry", "Karaikal", "Mahe", "Yanam", "Oulgaret", "Villianur", "Ariyankuppam", "Bahour", "Nettapakkam", "Kottakuppam", "Thirubuvanai", "Madagadipet", "Kurumbapet", "Thavalakuppam", "Kirumampakkam", "Embalam", "Suthukeny", "Kariamputtur", "Pandakkal", "Palloor"],
+    "Chandigarh": ["Chandigarh", "Manimajra", "Burail", "Daria", "Behlana", "Raipur Kalan", "Kishangarh", "Kaimbwala", "Dadu Majra", "Maloya", "Sarangpur", "Palsora", "Faizabad", "Khuda Alisher", "Khuda Jassu", "Khuda Lahora", "Dhanas", "Hallomajra", "Makhan Majra", "Lahora"],
     "Andaman and Nicobar Islands": ["Port Blair", "Car Nicobar", "Diglipur", "Mayabunder", "Rangat", "Havelock Island", "Neil Island", "Bambooflat", "Campbell Bay", "Wandoor", "Chidiyatapu", "Baratang", "Little Andaman", "Katchal", "Teressa", "Nancowry", "Karmarat", "Calicut", "Garacharma", "Ferrargunj", "Mimis"],
-    "Dadra and Nagar Haveli and Daman and Diu": ["Daman", "Diu", "Silvassa", "Naroli", "Amli", "Samarvarni", "Rakholi", "Khadoli", "Masat", "Varkund", "Kadaiya", "Devka", "Moti Daman", "Nani Daman", "Ghoghla", "Bucharwada", "Fudam", "Varkund", "Dadra", "Kharadpar", "Velugam"],
+    "Dadra and Nagar Haveli and Daman and Diu": ["Daman", "Diu", "Silvassa", "Naroli", "Amli", "Samarvarni", "Rakholi", "Khadoli", "Masat", "Varkund", "Kadaiya", "Devka", "Moti Daman", "Nani Daman", "Ghoghla", "Bucharwada", "Fudam", "Dadra", "Kharadpar", "Velugam"],
     "Lakshadweep": ["Kavaratti", "Agatti", "Amini", "Androth", "Minicoy", "Kalpeni", "Kiltan", "Kadmat", "Chetlat", "Bitra", "Bangaram", "Suheli", "Cheriyapani", "Valiyapani", "Perumal Par", "Beliapani", "Bassas de Pedro", "Byramgore", "Sesostris Bank", "Elikalpeni", "Mangalore Reef"]
 }
 
-# --- State Initialization ---
 if "has_started" not in st.session_state: st.session_state["has_started"] = False
 if "tutorial_step" not in st.session_state: st.session_state["tutorial_step"] = 1
 if "loc_state" not in st.session_state: st.session_state["loc_state"] = "Uttar Pradesh"
 if "loc_city" not in st.session_state: st.session_state["loc_city"] = "Varanasi"
 
-# --- Sidebar Controls ---
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/2329/2329117.png", width=75)
-    lang = st.selectbox("🌐 Language (22 Official)", LANGUAGES)
+    lang = st.selectbox("🌐 Language", LANGUAGES)
+    t = get_ui(lang)
     
     st.divider()
     sel_state = st.selectbox("Select State / UT", list(STATES_AND_UTS.keys()), index=list(STATES_AND_UTS.keys()).index(st.session_state["loc_state"]), key="loc_state")
@@ -123,16 +129,14 @@ with st.sidebar:
     sel_city = st.selectbox("Select City", valid_cities, index=valid_cities.index(st.session_state["loc_city"]), key="loc_city")
     
     st.divider()
-    if st.button("🎮 Restart Game Tutorial"):
+    if st.button("🎮 Restart Tutorial"):
         st.session_state["has_started"] = False
         st.session_state["tutorial_step"] = 1
         st.rerun()
 
-# --- 🎮 GAME-LIKE INTERACTIVE TUTORIAL OVERLAY ---
 if not st.session_state["has_started"]:
     step = st.session_state["tutorial_step"]
-    
-    st.markdown("<div class='main-header'>🌾 KisanSetu Adventure</div><div class='sub-header'>Interactive Mission Briefing</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='main-header'>{t['title']}</div><div class='sub-header'>Interactive Mission Briefing</div>", unsafe_allow_html=True)
     
     with st.container():
         st.markdown("<div class='game-card'>", unsafe_allow_html=True)
@@ -147,35 +151,22 @@ if not st.session_state["has_started"]:
             st.markdown("Track real-time market valuations across 500+ districts with automated quantity and unit conversion.")
             col1, col2 = st.columns(2)
             with col1:
-                if st.button("⬅️ Previous"):
-                    st.session_state["tutorial_step"] = 1
-                    st.rerun()
+                if st.button("⬅️ Previous"): st.session_state["tutorial_step"] = 1; st.rerun()
             with col2:
-                if st.button("Next Mission ➡️"):
-                    st.session_state["tutorial_step"] = 3
-                    st.rerun()
+                if st.button("Next Mission ➡️"): st.session_state["tutorial_step"] = 3; st.rerun()
         elif step == 3:
-            st.markdown("### 🔄 Mission 3: Multilingual Translation")
-            st.markdown("Translate agricultural insights seamlessly into all 22 scheduled languages of India!")
+            st.markdown("### 🔄 Mission 3: Multilingual Translator")
+            st.markdown("Translate agricultural insights seamlessly into all scheduled languages!")
             col1, col2 = st.columns(2)
             with col1:
-                if st.button("⬅️ Previous"):
-                    st.session_state["tutorial_step"] = 2
-                    st.rerun()
+                if st.button("⬅️ Previous"): st.session_state["tutorial_step"] = 2; st.rerun()
             with col2:
-                if st.button("🚀 Launch KisanSetu!"):
-                    st.session_state["has_started"] = True
-                    st.rerun()
+                if st.button("🚀 Launch KisanSetu!"): st.session_state["has_started"] = True; st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
     st.stop()
 
-# --- 🚀 OPENROUTER API ENGINE ---
 def ask_openrouter(prompt_text):
-    try:
-        key = st.secrets["OPENROUTER_API_KEY"]
-    except Exception:
-        return "🚨 ERROR: OPENROUTER_API_KEY missing from Streamlit Secrets."
-
+    key = st.secrets["OPENROUTER_API_KEY"]
     url = "https://openrouter.ai/api/v1/chat/completions"
     headers = {
         "Authorization": f"Bearer {key}",
@@ -184,34 +175,33 @@ def ask_openrouter(prompt_text):
         "X-Title": "KisanSetu"
     }
     payload = {
-        "model": "openrouter/free",
+        "model": "google/gemini-2.0-flash-lite-preview-02-05:free",
         "messages": [{"role": "user", "content": prompt_text}]
     }
     
     req = urllib.request.Request(url, headers=headers, data=json.dumps(payload).encode('utf-8'), method="POST")
-    with urllib.request.urlopen(req, timeout=25) as resp:
+    with urllib.request.urlopen(req, timeout=15) as resp:
         data = json.loads(resp.read().decode('utf-8'))
         return data["choices"][0]["message"]["content"]
 
-# --- Main App Interface ---
-st.markdown("<div class='main-header'>🌾 KisanSetu</div><div class='sub-header'>Smart AI Agriculture Platform</div>", unsafe_allow_html=True)
+st.markdown(f"<div class='main-header'>{t['title']}</div><div class='sub-header'>{t['sub']}</div>", unsafe_allow_html=True)
 
-tab1, tab2, tab3 = st.tabs(["🤖 AI Advisor", "📊 Market Rates", "🔄 Translator"])
+tab1, tab2, tab3 = st.tabs([t['tab1'], t['tab2'], t['tab3']])
 
 with tab1:
-    q = st.text_input("Ask your farming question or crop query:", placeholder="e.g. Best organic fertilizer for paddy?")
+    q = st.text_input(t['ask'], placeholder=t['ask_ph'])
     c1, c2 = st.columns(2)
-    with c1: cam_image = st.camera_input("📷 Take live photo", key="cam")
-    with c2: up_image = st.file_uploader("📁 Or upload image", type=["png", "jpg", "jpeg"], key="up")
+    with c1: cam_image = st.camera_input(t['cam'], key="cam")
+    with c2: up_image = st.file_uploader(t['up'], type=["png", "jpg", "jpeg"], key="up")
     final_img = cam_image if cam_image else up_image
     
-    if st.button("Ask AI / Analyze Crop"):
+    if st.button(t['btn_ai']):
         if not q and not final_img:
             st.warning("Please enter a question or upload a photo.")
         else:
-            with st.spinner("⚡ AI is analyzing regional crop health..."):
+            with st.spinner("⚡ AI is analyzing..."):
                 try:
-                    img_note = " [User attached a crop image for analysis]" if final_img else ""
+                    img_note = " [User attached a crop image]" if final_img else ""
                     prompt = f"You are KisanSetu AI, an expert agronomist. Provide direct, practical farming advice in {lang}. Factor in the local climate of {sel_city}, {sel_state}. Query{img_note}: {q}"
                     ans = ask_openrouter(prompt)
                     st.success(ans)
@@ -223,18 +213,18 @@ with tab2:
     UNITS = ["Quintal (100kg)", "Kilogram (1kg)", "Tonne (1000kg)"]
     BASE_PRICES = [2400, 2200, 1500, 3000, 2500, 350, 7000, 2100]
     
-    st.markdown(f"### 📊 Mandi Prices for {sel_city}, {sel_state}")
+    st.markdown(f"### {t['mandi_title']} {sel_city}, {sel_state}")
     col_c, col_u = st.columns(2)
-    with col_c: c_idx = st.selectbox("Select Crop:", range(len(CROPS)), format_func=lambda x: CROPS[x])
-    with col_u: u_idx = st.selectbox("Select Unit:", range(len(UNITS)), format_func=lambda x: UNITS[x])
+    with col_c: c_idx = st.selectbox(t['crop_lbl'], range(len(CROPS)), format_func=lambda x: CROPS[x])
+    with col_u: u_idx = st.selectbox(t['unit_lbl'], range(len(UNITS)), format_func=lambda x: UNITS[x])
     
     price = BASE_PRICES[c_idx] / 100 if u_idx == 1 else (BASE_PRICES[c_idx] * 10 if u_idx == 2 else BASE_PRICES[c_idx])
     st.metric(CROPS[c_idx], f"₹{price:,.2f} / {UNITS[u_idx]}")
 
 with tab3:
-    st.markdown("### 🔄 Multilingual Translator (22 Languages)")
-    txt_input = st.text_area("Paste text to translate to your selected language:")
-    if st.button("Translate Text") and txt_input:
+    st.markdown(f"### {t['tr_title']}")
+    txt_input = st.text_area(t['tr_ph'])
+    if st.button(t['tr_btn']) and txt_input:
         with st.spinner("Translating..."):
             try:
                 ans = ask_openrouter(f"Translate the following text directly into {lang}. Return only the translation without commentary:\n{txt_input}")
@@ -242,4 +232,4 @@ with tab3:
             except Exception as e:
                 st.error(f"Translation Error: {str(e)}")
 
-st.markdown("<div class='footer'><b>Developed by Ankur Kumar & Vikalp Chaubey</b><br>The Aryan International School, Varanasi</div>", unsafe_allow_html=True)
+st.markdown(f"<div class='footer'><b>{t['dev']}</div>", unsafe_allow_html=True)
