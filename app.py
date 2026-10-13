@@ -242,4 +242,4 @@ with tab3:
             except Exception as e:
                 st.error(f"Translation Error: {str(e)}")
 
-st.markdown("<div class='footer'><b>Developed by Ankur Kumar & Vikalp Chaubey</b><br>The Aryan International School, Varanasi</div>", unsafe_allow_html=True
+st.markdown("<div class='footer'><b>Developed by Ankur Kumar & Vikalp Chaubey</b><br>The Aryan International School, Varanasi</div>", unsafe_allow_html=True)
