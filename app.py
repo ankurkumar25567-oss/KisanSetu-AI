@@ -20,25 +20,19 @@ LANGUAGES = ["English", "Hindi (हिंदी)", "Punjabi (ਪੰਜਾਬੀ)
 
 with st.sidebar:
     lang = st.selectbox("🌐 Language", LANGUAGES)
-    api_key_check = st.secrets.get("BYTEZ_API_KEY", "Missing")
+    api_key_check = st.secrets.get("GEMINI_API_KEY", "Missing")
     st.write(f"Key loaded: {'✅' if api_key_check != 'Missing' else '❌'}")
 
-def ask_bytez(prompt_text):
-    key = st.secrets["BYTEZ_API_KEY"]
-    url = "https://api.bytez.com/v1/chat/completions"
-    headers = {
-        "Authorization": f"Bearer {key}",
-        "Content-Type": "application/json"
-    }
-    payload = {
-        "model": "meta-llama/Llama-3.1-8B-Instruct",
-        "messages": [{"role": "user", "content": prompt_text}]
-    }
+def ask_gemini(prompt_text):
+    key = st.secrets["GEMINI_API_KEY"]
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={key}"
+    headers = {"Content-Type": "application/json"}
+    payload = {"contents": [{"parts": [{"text": prompt_text}]}]}
     
     req = urllib.request.Request(url, headers=headers, data=json.dumps(payload).encode('utf-8'), method="POST")
     with urllib.request.urlopen(req, timeout=20) as resp:
         data = json.loads(resp.read().decode('utf-8'))
-        return data["choices"][0]["message"]["content"]
+        return data['candidates'][0]['content']['parts'][0]['text']
 
 st.markdown("<div class='main-header'>🌾 KisanSetu</div><div class='sub-header'>Development Mode</div>", unsafe_allow_html=True)
 
@@ -47,9 +41,9 @@ if st.button("Ask AI"):
     if not q:
         st.warning("Please enter a question.")
     else:
-        with st.spinner("Calling Bytez API..."):
+        with st.spinner("Calling Gemini AI..."):
             try:
-                ans = ask_bytez(f"Provide practical farming advice in {lang}: {q}")
+                ans = ask_gemini(f"Provide practical farming advice in {lang}: {q}")
                 st.success(ans)
             except Exception as e:
                 st.error(f"API Error: {str(e)}")
