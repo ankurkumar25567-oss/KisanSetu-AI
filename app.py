@@ -1,17 +1,11 @@
 import streamlit as st
 import urllib.request
 import json
-from PIL import Image
-import io
 import streamlit.components.v1 as components
 
 st.set_page_config(page_title="KisanSetu - Smart Ag", page_icon="🌾", layout="wide")
 
-components.html("""
-<script>
-    document.body.style.overscrollBehavior = 'none';
-</script>
-""", height=0)
+components.html("""<script>document.body.style.overscrollBehavior = 'none';</script>""", height=0)
 
 st.markdown("""
 <style>
@@ -31,18 +25,20 @@ with st.sidebar:
 
 def ask_bytez(prompt_text):
     key = st.secrets["BYTEZ_API_KEY"]
-    url = "https://api.bytez.com/model/v2/meta-llama/Llama-3.1-8B-Instruct"
-    headers = {"Authorization": key, "Content-Type": "application/json"}
-    payload = {"messages": [{"role": "user", "content": prompt_text}]}
+    url = "https://api.bytez.com/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {key}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "model": "meta-llama/Llama-3.1-8B-Instruct",
+        "messages": [{"role": "user", "content": prompt_text}]
+    }
     
     req = urllib.request.Request(url, headers=headers, data=json.dumps(payload).encode('utf-8'), method="POST")
     with urllib.request.urlopen(req, timeout=20) as resp:
         data = json.loads(resp.read().decode('utf-8'))
-        if "output" in data:
-            return data["output"]
-        elif "choices" in data:
-            return data["choices"][0]["message"]["content"]
-        return str(data)
+        return data["choices"][0]["message"]["content"]
 
 st.markdown("<div class='main-header'>🌾 KisanSetu</div><div class='sub-header'>Development Mode</div>", unsafe_allow_html=True)
 
