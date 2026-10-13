@@ -237,4 +237,9 @@ with tab3:
     if st.button("Translate Text") and txt_input:
         with st.spinner("Translating..."):
             try:
-                ans = ask_openrouter(f"Transl
+                ans = ask_openrouter(f"Translate the following text directly into {lang}. Return only the translation without commentary:\n{txt_input}")
+                st.success(ans)
+            except Exception as e:
+                st.error(f"Translation Error: {str(e)}")
+
+st.markdown("<div class='footer'><b>Developed by Ankur Kumar & Vikalp Chaubey</b><br>The Aryan International School, Varanasi</div>", unsafe_allow_html=True
