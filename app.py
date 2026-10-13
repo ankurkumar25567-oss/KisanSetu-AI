@@ -163,13 +163,12 @@ if (not st.session_state["has_started"]) or st.session_state.get("presenter_mode
     with c2: st.button(u['tut_btn'], on_click=enter_app)
     st.stop()
 
-# --- 🚀 SECURE STREAMLIT SECRETS AI ENGINE 🚀 ---
+# --- 🚀 THE PURE FLAGSHIP AI ENGINE 🚀 ---
 def ask_groq(messages, is_vision=False):
-    # Safely pull the key from Streamlit Cloud Secrets (No code leaks!)
     try:
         key = st.secrets["GROQ_API_KEY"]
     except Exception:
-        return "🚨 ERROR: API Key missing. Please add your key to the Streamlit Cloud Secrets dashboard."
+        return "🚨 ERROR: API Key missing. Please add GROQ_API_KEY to your Streamlit Cloud Secrets."
 
     headers = {
         "Authorization": f"Bearer {key}",
@@ -177,8 +176,9 @@ def ask_groq(messages, is_vision=False):
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     }
     
-    text_models = ["gemma2-9b-it", "llama-3.2-3b-preview", "llama-3.1-8b-instant", "llama3-8b-8192"]
-    vision_models = ["llama-3.2-11b-vision-preview", "llama-3.2-90b-vision-preview"]
+    # STRICTLY newest flagship models only to prevent 400 errors
+    text_models = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
+    vision_models = ["llama-3.2-11b-vision-preview"]
 
     models_to_try = vision_models if is_vision else text_models
     last_error = ""
@@ -197,7 +197,7 @@ def ask_groq(messages, is_vision=False):
             last_error = str(e)
             continue
             
-    return f"🚨 All AI models failed. Your API key might be locked. Please generate a new one at console.groq.com. Last Error: {last_error}"
+    return f"🚨 All AI models failed. Last Error: {last_error}"
 
 # --- Main Interface ---
 st.markdown(f"<div class='main-header'>{u['title']}</div><div class='sub-header'>{u['sub']}</div>", unsafe_allow_html=True)
@@ -258,3 +258,4 @@ with tab4:
             else: st.success(ans)
 
 st.markdown(f"<div class='footer'>{u['dev']}</div>", unsafe_allow_html=True)
+    
