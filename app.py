@@ -163,7 +163,6 @@ if (not st.session_state["has_started"]) or st.session_state.get("presenter_mode
 
 # --- 🚀 EMERGENCY PRESENTATION OFFLINE CACHE 🚀 ---
 def get_demo_fallback(task_type, user_text=""):
-    """If Google's API fails, this displays a realistic answer so the judges never know the server crashed."""
     if task_type == "vision":
         return """🌿 **Crop Diagnosis Complete**
         
@@ -171,9 +170,8 @@ def get_demo_fallback(task_type, user_text=""):
 **Local Climate Factor:** Factoring in current regional humidity and soil conditions.
 
 **Recommended Treatment Plan:**
-1. **Organic Remedy:** Spray a diluted Neem oil solution (5ml per liter of water) targeting the underside of the leaves. Ensure application during early morning or late evening.
-2. **Chemical Remedy:** If the spread continues after 3 days, apply a mild copper-based fungicide.
-3. **Field Management:** Reduce surface watering to prevent excess moisture buildup around the roots.
+1. **Organic Remedy:** Spray a diluted Neem oil solution targeting the underside of the leaves. 
+2. **Field Management:** Reduce surface watering to prevent excess moisture buildup.
 
 *(Presentation Mode: Displaying optimized agronomy cache).*"""
     elif task_type == "translate":
@@ -183,36 +181,28 @@ def get_demo_fallback(task_type, user_text=""):
         
 Based on the regional soil data and your query, here is the recommended approach:
 
-1. **Soil Preparation:** Ensure proper drainage. Local soil types benefit heavily from organic compost mixing prior to sowing.
-2. **Fertilizer Schedule:** Use a balanced NPK ratio. Apply 40% of nitrogen at the base, and split the rest between the vegetative and flowering stages.
-3. **Pest Management:** Monitor weekly for local pests. Use bio-pesticides as a first line of defense to preserve soil health.
+1. **Soil Preparation:** Ensure proper drainage. Local soil types benefit heavily from organic compost.
+2. **Fertilizer Schedule:** Use a balanced NPK ratio. 
+3. **Pest Management:** Monitor weekly for local pests. Use bio-pesticides.
 
 *(Presentation Mode: Displaying optimized agronomy cache).*"""
 
-# --- 🚀 DYNAMIC GEMINI API AUTO-FETCHER 🚀 ---
+# --- 🚀 GEMINI API AUTO-FETCHER WITH DEBUG 🚀 ---
 def ask_gemini(prompt_text, b64_image=None, task_type="text", user_text=""):
     try:
+        # Check if the key exists in Streamlit Secrets
+        if "GEMINI_API_KEY" not in st.secrets:
+            return get_demo_fallback(task_type, user_text) + "\n\n*(🕵️‍♂️ Debug: 'GEMINI_API_KEY' is missing from Streamlit Secrets. Did you name it GROQ_API_KEY by accident?)*"
+            
         key = st.secrets["GEMINI_API_KEY"]
-    except Exception:
-        return get_demo_fallback(task_type, user_text)
+        if not key.startswith("AQ."):
+            return get_demo_fallback(task_type, user_text) + "\n\n*(🕵️‍♂️ Debug: The key in Secrets doesn't start with AQ. Check for typos!)*"
+            
+    except Exception as e:
+        return get_demo_fallback(task_type, user_text) + f"\n\n*(🕵️‍♂️ Debug Secrets Error: {str(e)})*"
 
-    # 1. Ask Google what models are active for this key RIGHT NOW
-    target_model = "gemini-1.5-flash-latest" # Failsafe default
-    try:
-        req_models = urllib.request.Request(f"https://generativelanguage.googleapis.com/v1beta/models?key={key}")
-        with urllib.request.urlopen(req_models, timeout=5) as response:
-            models_data = json.loads(response.read().decode('utf-8'))['models']
-            for m in models_data:
-                name = m.get('name', '')
-                methods = m.get('supportedGenerationMethods', [])
-                if 'generateContent' in methods and 'gemini' in name.lower() and 'flash' in name.lower():
-                    target_model = name.split('/')[-1]
-                    break
-    except Exception:
-        pass # If fetching fails, we just use the default above
-
-    # 2. Fire the query to the confirmed active model
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{target_model}:generateContent?key={key}"
+    # We will use the ultra-stable, official 1.5 flash model endpoint directly
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={key}"
     headers = {"Content-Type": "application/json"}
     
     parts = [{"text": prompt_text}]
@@ -234,9 +224,11 @@ def ask_gemini(prompt_text, b64_image=None, task_type="text", user_text=""):
         with urllib.request.urlopen(req, timeout=15) as resp:
             data = json.loads(resp.read().decode('utf-8'))
             return data['candidates'][0]['content']['parts'][0]['text']
-    except Exception:
-        # If ANYTHING goes wrong, trigger Emergency Presentation Mode!
-        return get_demo_fallback(task_type, user_text)
+    except urllib.error.HTTPError as e:
+        err = e.read().decode('utf-8', errors='ignore')
+        return get_demo_fallback(task_type, user_text) + f"\n\n*(🕵️‍♂️ Debug Google API Error {e.code}: {err})*"
+    except Exception as e:
+        return get_demo_fallback(task_type, user_text) + f"\n\n*(🕵️‍♂️ Debug System Error: {str(e)})*"
 
 # --- Main Interface ---
 st.markdown(f"<div class='main-header'>{u['title']}</div><div class='sub-header'>{u['sub']}</div>", unsafe_allow_html=True)
@@ -296,4 +288,3 @@ with tab4:
             st.success(ans)
 
 st.markdown(f"<div class='footer'>{u['dev']}</div>", unsafe_allow_html=True)
-    
