@@ -161,42 +161,13 @@ if (not st.session_state["has_started"]) or st.session_state.get("presenter_mode
     with c2: st.button(u['tut_btn'], on_click=enter_app)
     st.stop()
 
-# --- 🚀 EMERGENCY PRESENTATION OFFLINE CACHE 🚀 ---
-def get_demo_fallback(task_type, user_text=""):
-    if task_type == "vision":
-        return """🌿 **Crop Diagnosis Complete**
-        
-**Condition Detected:** Early-stage Fungal Blight / Nutrient Deficiency.
-**Local Climate Factor:** Factoring in current regional humidity and soil conditions.
-
-**Recommended Treatment Plan:**
-1. **Organic Remedy:** Spray a diluted Neem oil solution targeting the underside of the leaves. 
-2. **Field Management:** Reduce surface watering to prevent excess moisture buildup.
-
-*(Presentation Mode: Displaying optimized agronomy cache).*"""
-    elif task_type == "translate":
-        return f"*(Translated to {lang} via Presentation Mode)*:\n\n{user_text}"
-    else:
-        return """🌾 **Agronomy Advisor**
-        
-Based on the regional soil data and your query, here is the recommended approach:
-
-1. **Soil Preparation:** Ensure proper drainage. Local soil types benefit heavily from organic compost.
-2. **Fertilizer Schedule:** Use a balanced NPK ratio. 
-3. **Pest Management:** Monitor weekly for local pests. Use bio-pesticides.
-
-*(Presentation Mode: Displaying optimized agronomy cache).*"""
-
-# --- 🚀 STABLE GEMINI v1 API ENGINE 🚀 ---
-def ask_gemini(prompt_text, b64_image=None, task_type="text", user_text=""):
+# --- 🔍 DIRECT GEMINI API ENGINE (NO HIDING ERRORS) 🔍 ---
+def ask_gemini(prompt_text, b64_image=None):
     try:
-        if "GEMINI_API_KEY" not in st.secrets:
-            return get_demo_fallback(task_type, user_text)
         key = st.secrets["GEMINI_API_KEY"]
     except Exception:
-        return get_demo_fallback(task_type, user_text)
+        return "🚨 ERROR: GEMINI_API_KEY missing from Streamlit Secrets."
 
-    # Use the official v1 endpoint for gemini-1.5-flash
     url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={key}"
     headers = {"Content-Type": "application/json"}
     
@@ -216,11 +187,14 @@ def ask_gemini(prompt_text, b64_image=None, task_type="text", user_text=""):
     
     try:
         req = urllib.request.Request(url, headers=headers, data=json.dumps(payload).encode('utf-8'), method="POST")
-        with urllib.request.urlopen(req, timeout=15) as resp:
+        with urllib.request.urlopen(req, timeout=20) as resp:
             data = json.loads(resp.read().decode('utf-8'))
             return data['candidates'][0]['content']['parts'][0]['text']
-    except Exception:
-        return get_demo_fallback(task_type, user_text)
+    except urllib.error.HTTPError as e:
+        err = e.read().decode('utf-8', errors='ignore')
+        return f"🚨 Google API Error {e.code}: {err}"
+    except Exception as e:
+        return f"🚨 Connection Error: {str(e)}"
 
 # --- Main Interface ---
 st.markdown(f"<div class='main-header'>{u['title']}</div><div class='sub-header'>{u['sub']}</div>", unsafe_allow_html=True)
@@ -248,11 +222,14 @@ with tab1:
                     b64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
                     
                     full_prompt = f"{sys_prompt}\nExamine this crop leaf. Diagnose any disease, describe symptoms, and give practical remedies. Question: {q if q else 'Diagnose this crop.'}"
-                    ans = ask_gemini(full_prompt, b64_image=b64, task_type="vision", user_text=q)
+                    ans = ask_gemini(full_prompt, b64_image=b64)
                 else:
-                    ans = ask_gemini(f"{sys_prompt}\nUser question: {q}", task_type="text", user_text=q)
+                    ans = ask_gemini(f"{sys_prompt}\nUser question: {q}")
                 
-                st.success(ans)
+                if "🚨" in ans:
+                    st.error(ans)
+                else:
+                    st.success(ans)
 
 with tab2:
     CROPS, UNITS, BASE_PRICES = ["Wheat", "Paddy", "Potato", "Tomato", "Onion", "Sugarcane", "Cotton", "Maize"], ["Quintal (100kg)", "Kilogram (1kg)", "Tonne (1000kg)"], [2400, 2200, 1500, 3000, 2500, 350, 7000, 2100]
@@ -276,7 +253,10 @@ with tab4:
     txt_input = st.text_area(u["tr_prompt"])
     if st.button(u["btn_tr"]) and txt_input:
         with st.spinner("Translating..."):
-            ans = ask_gemini(f"Translate the following text directly into {lang}. Return only the translation without commentary:\n{txt_input}", task_type="translate", user_text=txt_input)
-            st.success(ans)
+            ans = ask_gemini(f"Translate the following text directly into {lang}. Return only the translation without commentary:\n{txt_input}")
+            if "🚨" in ans:
+                st.error(ans)
+            else:
+                st.success(ans)
 
 st.markdown(f"<div class='footer'>{u['dev']}</div>", unsafe_allow_html=True)
