@@ -203,7 +203,6 @@ with tab1:
 
     st.divider()
 
-    # Gemini-style Combined Input Box (Text + Camera + File Uploader)
     q = st.text_input(t['ask'], value=st.session_state["query_input"], placeholder=t['ask_ph'])
     
     col_in1, col_in2 = st.columns(2)
@@ -232,4 +231,5 @@ with tab2:
     
     st.markdown(f"### {t['mandi_title']} {sel_city}, {sel_state}")
     col_c, col_u = st.columns(2)
-    with col_c: c_idx = st.selectbox(t['crop_lbl'], range(len(CROPS)), format_func=la
+    with col_c: c_idx = st.selectbox(t['crop_lbl'], range(len(CROPS)), format_func=lambda x: CROPS[x])
+    with col_u: u_idx = st.selectbox(t['unit_lbl'], 
