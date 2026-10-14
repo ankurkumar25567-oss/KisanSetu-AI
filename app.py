@@ -207,7 +207,7 @@ with tab1:
     if qp3.button("3. What happened to my tomatoes?"):
         st.session_state["query_input"] = "What happened to my tomatoes? (Tomato Fruit Rot / Late Blight detected)"
 
-    st.divider()
+    st.divider():
 
     q = st.text_input(t['ask'], value=st.session_state["query_input"], placeholder=t['ask_ph'])
     
