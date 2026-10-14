@@ -216,20 +216,10 @@ with tab1:
     with col_in2: up_image = st.file_uploader(t['up'], type=["png", "jpg", "jpeg"], key="up_advisor")
     final_img = cam_image if cam_image else up_image
     
-    if st.divider():
-
-    q = st.text_input(t['ask'], value=st.session_state["query_input"], placeholder=t['ask_ph'])
-    
-    col_in1, col_in2 = st.columns(2)
-    with col_in1: cam_image = st.camera_input(t['cam'], key="cam_advisor")
-    with col_in2: up_image = st.file_uploader(t['up'], type=["png", "jpg", "jpeg"], key="up_advisor")
-    final_img = cam_image if cam_image else up_image
-    
     if st.button(t['btn_ai']):
         if not q and not final_img:
             st.warning("Please enter a question or upload a photo.")
         else:
-            # Check if it's one of our pre-made prompts for instant response
             if q in PRE_MADE_ANSWERS:
                 st.success(PRE_MADE_ANSWERS[q])
             else:
