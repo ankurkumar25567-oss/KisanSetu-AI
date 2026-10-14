@@ -232,4 +232,32 @@ with tab2:
     st.markdown(f"### {t['mandi_title']} {sel_city}, {sel_state}")
     col_c, col_u = st.columns(2)
     with col_c: c_idx = st.selectbox(t['crop_lbl'], range(len(CROPS)), format_func=lambda x: CROPS[x])
-    with col_u: u_idx = st.selectbox(t['unit_lbl'], 
+    with col_u: u_idx = st.selectbox(t['unit_lbl'],range(len(UNITS)), format_func=lambda x: UNITS[x])
+    
+    price = BASE_PRICES[c_idx] / 100 if u_idx == 1 else (BASE_PRICES[c_idx] * 10 if u_idx == 2 else BASE_PRICES[c_idx])
+    st.metric(CROPS[c_idx], f"₹{price:,.2f} / {UNITS[u_idx]}")
+
+with tab3:
+    st.markdown(f"### {t['tr_title']}")
+    tr_text = st.text_area(t['tr_ph'], value=st.session_state["tr_input"])
+    
+    tr_col1, tr_col2 = st.columns(2)
+    with tr_col1: tr_cam = st.camera_input(t['cam'], key="cam_translator")
+    with tr_col2: tr_file = st.file_uploader(t['up'], type=["png", "jpg", "jpeg", "txt"], key="file_translator")
+    final_tr_media = tr_cam if tr_cam else tr_file
+
+    if st.button(t['tr_btn']):
+        if not tr_text and not final_tr_media:
+            st.warning("Please enter text or upload an image/document to translate.")
+        else:
+            with st.spinner("Translating..."):
+                time.sleep(1.5)
+                try:
+                    media_note = " [User provided an image/document to translate]" if final_tr_media else ""
+                    prompt = f"Translate the following text or media content directly into {lang}. Return only the translation without commentary:\nText: {tr_text}{media_note}"
+                    ans = ask_openrouter(prompt)
+                    st.success(ans)
+                except Exception as e:
+                    st.error(f"Translation Error: {str(e)}")
+
+st.markdown(f"<div class='footer'><b>{t['dev']}</b></div>", unsafe_allow_html=True)
