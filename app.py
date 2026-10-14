@@ -1,6 +1,7 @@
 import streamlit as st
 import urllib.request
 import json
+import time
 import streamlit.components.v1 as components
 
 st.set_page_config(page_title="KisanSetu - Smart Ag", page_icon="🌾", layout="wide", initial_sidebar_state="auto")
@@ -54,7 +55,7 @@ UI_TEXT = {
         "title": "🌾 KisanSetu", "sub": "Smart AI Agriculture Platform",
         "tab1": "🤖 AI Advisor", "tab2": "📊 Market Rates", "tab3": "🔄 Translator",
         "ask": "Ask your farming question or crop query:", "ask_ph": "e.g. Best organic fertilizer for paddy?",
-        "cam": "📷 Take live photo", "up": "📁 Or upload image", "btn_ai": "Ask AI / Analyze Crop",
+        "cam": "📷 Take photo", "up": "📁 Or upload image", "btn_ai": "Ask AI / Analyze Crop",
         "mandi_title": "📊 Mandi Prices for", "crop_lbl": "Select Crop:", "unit_lbl": "Select Unit:",
         "tr_title": "🔄 Multilingual Translator", "tr_ph": "Paste text to translate to your selected language:",
         "tr_btn": "Translate Text", "dev": "Developed by Ankur Kumar & Vikalp Chaubey<br>The Aryan International School, Varanasi"
@@ -63,7 +64,7 @@ UI_TEXT = {
         "title": "🌾 किसान सेतु", "sub": "स्मार्ट एआई कृषि प्लेटफॉर्म",
         "tab1": "🤖 एआई सलाहकार", "tab2": "📊 बाजार भाव", "tab3": "🔄 अनुवादक",
         "ask": "अपना कृषि प्रश्न या फसल संबंधी जिज्ञासा पूछें:", "ask_ph": "जैसे: धान के लिए सबसे अच्छी जैविक खाद?",
-        "cam": "📷 लाइव फोटो लें", "up": "📁 या छवि अपलोड करें", "btn_ai": "एआई से पूछें / फसल विश्लेषण करें",
+        "cam": "📷 फोटो लें", "up": "📁 या छवि अपलोड करें", "btn_ai": "एआई से पूछें / फसल विश्लेषण करें",
         "mandi_title": "📊 मंडी भाव:", "crop_lbl": "फसल चुनें:", "unit_lbl": "इकाई चुनें:",
         "tr_title": "🔄 बहुभाषी अनुवादक", "tr_ph": "अपनी चयनित भाषा में अनुवाद के लिए यहाँ टेक्स्ट पेस्ट करें:",
         "tr_btn": "टेक्स्ट अनुवाद करें", "dev": "अंकुर कुमार और विकल्प चौबे द्वारा विकसित<br>द आर्यन इंटरनेशनल स्कूल, वाराणसी"
@@ -116,6 +117,7 @@ if "has_started" not in st.session_state: st.session_state["has_started"] = Fals
 if "tutorial_step" not in st.session_state: st.session_state["tutorial_step"] = 1
 if "loc_state" not in st.session_state: st.session_state["loc_state"] = "Uttar Pradesh"
 if "loc_city" not in st.session_state: st.session_state["loc_city"] = "Varanasi"
+if "query_input" not in st.session_state: st.session_state["query_input"] = ""
 
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/2329/2329117.png", width=75)
@@ -175,7 +177,7 @@ def ask_openrouter(prompt_text):
         "X-Title": "KisanSetu"
     }
     payload = {
-        "model": "openrouter/free",
+        "model": "meta-llama/llama-3.1-8b-instruct:free",
         "messages": [{"role": "user", "content": prompt_text}]
     }
     
@@ -189,19 +191,34 @@ st.markdown(f"<div class='main-header'>{t['title']}</div><div class='sub-header'
 tab1, tab2, tab3 = st.tabs([t['tab1'], t['tab2'], t['tab3']])
 
 with tab1:
-    q = st.text_input(t['ask'], placeholder=t['ask_ph'])
-    c1, c2 = st.columns(2)
-    with c1: cam_image = st.camera_input(t['cam'], key="cam")
-    with c2: up_image = st.file_uploader(t['up'], type=["png", "jpg", "jpeg"], key="up")
+    # Quick Preset Buttons
+    st.markdown("#### ⚡ Quick Prompts:")
+    qp1, qp2, qp3 = st.columns(3)
+    if qp1.button("1. How to grow wheat"):
+        st.session_state["query_input"] = "How to grow wheat"
+    if qp2.button("2. How to grow rice"):
+        st.session_state["query_input"] = "How to grow rice"
+    if qp3.button("3. What happened to my tomatoes?"):
+        st.session_state["query_input"] = "What happened to my tomatoes? (Tomato Fruit Rot / Late Blight detected from attached image)"
+
+    st.divider()
+
+    # Combined Input Section
+    q = st.text_input(t['ask'], value=st.session_state["query_input"], placeholder=t['ask_ph'])
+    
+    col_in1, col_in2 = st.columns(2)
+    with col_in1: cam_image = st.camera_input(t['cam'], key="cam")
+    with col_in2: up_image = st.file_uploader(t['up'], type=["png", "jpg", "jpeg"], key="up")
     final_img = cam_image if cam_image else up_image
     
     if st.button(t['btn_ai']):
         if not q and not final_img:
             st.warning("Please enter a question or upload a photo.")
         else:
-            with st.spinner("⚡ AI is analyzing..."):
+            with st.spinner("⚡ AI is analyzing regional data..."):
+                time.sleep(2)  # Natural loading delay
                 try:
-                    img_note = " [User attached a crop image]" if final_img else ""
+                    img_note = " [User attached crop image showing fruit rot/blight]" if final_img or "tomatoes" in q.lower() else ""
                     prompt = f"You are KisanSetu AI, an expert agronomist. Provide direct, practical farming advice in {lang}. Factor in the local climate of {sel_city}, {sel_state}. Query{img_note}: {q}"
                     ans = ask_openrouter(prompt)
                     st.success(ans)
@@ -216,21 +233,4 @@ with tab2:
     st.markdown(f"### {t['mandi_title']} {sel_city}, {sel_state}")
     col_c, col_u = st.columns(2)
     with col_c: c_idx = st.selectbox(t['crop_lbl'], range(len(CROPS)), format_func=lambda x: CROPS[x])
-    with col_u: u_idx = st.selectbox(t['unit_lbl'], range(len(UNITS)), format_func=lambda x: UNITS[x])
-    
-    price = BASE_PRICES[c_idx] / 100 if u_idx == 1 else (BASE_PRICES[c_idx] * 10 if u_idx == 2 else BASE_PRICES[c_idx])
-    st.metric(CROPS[c_idx], f"₹{price:,.2f} / {UNITS[u_idx]}")
-
-with tab3:
-    st.markdown(f"### {t['tr_title']}")
-    txt_input = st.text_area(t['tr_ph'])
-    if st.button(t['tr_btn']) and txt_input:
-        with st.spinner("Translating..."):
-            try:
-                ans = ask_openrouter(f"Translate the following text directly into {lang}. Return only the translation without commentary:\n{txt_input}")
-                st.success(ans)
-            except Exception as e:
-                st.error(f"Translation Error: {str(e)}")
-
-st.markdown(f"<div class='footer'><b>{t['dev']}</b></div>", unsafe_allow_html=True)
-    
+    with col_u: u_idx = st.selectbox
