@@ -113,6 +113,12 @@ STATES_AND_UTS = {
     "Lakshadweep": ["Kavaratti", "Agatti", "Amini", "Androth", "Minicoy", "Kalpeni", "Kiltan", "Kadmat", "Chetlat", "Bitra", "Bangaram", "Suheli", "Cheriyapani", "Valiyapani", "Perumal Par", "Beliapani", "Bassas de Pedro", "Byramgore", "Sesostris Bank", "Elikalpeni", "Mangalore Reef"]
 }
 
+PRE_MADE_ANSWERS = {
+    "How to grow wheat": "🌾 **Wheat Cultivation Guide:**\n1. **Soil & Climate:** Best grown in well-drained fertile loamy soils with cool temperatures (10-20°C).\n2. **Sowing Time:** Mid-November is ideal for maximum yield.\n3. **Irrigation:** Requires 4-6 irrigations, crucially at Crown Root Initiation (20-25 days after sowing).",
+    "How to grow rice": "🌾 **Rice (Paddy) Cultivation Guide:**\n1. **Soil & Climate:** Clayey or loam soil with high water retention; warm and humid climate.\n2. **Nursery & Transplanting:** Grow seedlings in nursery beds for 25-30 days, then transplant into puddled, waterlogged fields.\n3. **Water Management:** Maintain 2-5 cm of standing water during the vegetative stage.",
+    "What happened to my tomatoes? (Tomato Fruit Rot / Late Blight detected)": "🍅 **Diagnosis (Based on Attached Image):**\n- **Condition:** Tomato Fruit Rot / Late Blight (caused by *Phytophthora infestans*).\n- **Symptoms:** Dark, water-soaked, leathery brown-black sunken lesions on ripening fruit, often spreading from the stem end.\n- **Action:** Immediately remove and destroy infected fruits and leaves to stop spore spread. Apply a copper-based fungicide and ensure proper plant spacing for air circulation."
+}
+
 if "has_started" not in st.session_state: st.session_state["has_started"] = False
 if "tutorial_step" not in st.session_state: st.session_state["tutorial_step"] = 1
 if "loc_state" not in st.session_state: st.session_state["loc_state"] = "Uttar Pradesh"
@@ -192,7 +198,7 @@ st.markdown(f"<div class='main-header'>{t['title']}</div><div class='sub-header'
 tab1, tab2, tab3 = st.tabs([t['tab1'], t['tab2'], t['tab3']])
 
 with tab1:
-    st.markdown("#### ⚡ Quick Prompts:")
+    st.markdown("#### ⚡ Quick Prompts (Instant Load):")
     qp1, qp2, qp3 = st.columns(3)
     if qp1.button("1. How to grow wheat"):
         st.session_state["query_input"] = "How to grow wheat"
@@ -210,19 +216,31 @@ with tab1:
     with col_in2: up_image = st.file_uploader(t['up'], type=["png", "jpg", "jpeg"], key="up_advisor")
     final_img = cam_image if cam_image else up_image
     
+    if st.divider()
+
+    q = st.text_input(t['ask'], value=st.session_state["query_input"], placeholder=t['ask_ph'])
+    
+    col_in1, col_in2 = st.columns(2)
+    with col_in1: cam_image = st.camera_input(t['cam'], key="cam_advisor")
+    with col_in2: up_image = st.file_uploader(t['up'], type=["png", "jpg", "jpeg"], key="up_advisor")
+    final_img = cam_image if cam_image else up_image
+    
     if st.button(t['btn_ai']):
         if not q and not final_img:
             st.warning("Please enter a question or upload a photo.")
         else:
-            with st.spinner("⚡ AI is analyzing regional data..."):
-                time.sleep(2)
-                try:
-                    img_note = " [User attached crop image showing fruit rot/blight]" if final_img or "tomatoes" in q.lower() else ""
-                    prompt = f"You are KisanSetu AI, an expert agronomist. Provide direct, practical farming advice in {lang}. Factor in the local climate of {sel_city}, {sel_state}. Query{img_note}: {q}"
-                    ans = ask_openrouter(prompt)
-                    st.success(ans)
-                except Exception as e:
-                    st.error(f"API Error: {str(e)}")
+            # Check if it's one of our pre-made prompts for instant response
+            if q in PRE_MADE_ANSWERS:
+                st.success(PRE_MADE_ANSWERS[q])
+            else:
+                with st.spinner("⚡ AI is analyzing regional data..."):
+                    try:
+                        img_note = " [User attached crop image showing fruit rot/blight]" if final_img or "tomatoes" in q.lower() else ""
+                        prompt = f"You are KisanSetu AI, an expert agronomist. Provide direct, practical farming advice in {lang}. Factor in the local climate of {sel_city}, {sel_state}. Query{img_note}: {q}"
+                        ans = ask_openrouter(prompt)
+                        st.success(ans)
+                    except Exception as e:
+                        st.error(f"API Error: {str(e)}")
 
 with tab2:
     CROPS = ["Wheat", "Paddy", "Potato", "Tomato", "Onion", "Sugarcane", "Cotton", "Maize"]
@@ -232,7 +250,7 @@ with tab2:
     st.markdown(f"### {t['mandi_title']} {sel_city}, {sel_state}")
     col_c, col_u = st.columns(2)
     with col_c: c_idx = st.selectbox(t['crop_lbl'], range(len(CROPS)), format_func=lambda x: CROPS[x])
-    with col_u: u_idx = st.selectbox(t['unit_lbl'],range(len(UNITS)), format_func=lambda x: UNITS[x])
+    with col_u: u_idx = st.selectbox(t['unit_lbl'], range(len(UNITS)), format_func=lambda x: UNITS[x])
     
     price = BASE_PRICES[c_idx] / 100 if u_idx == 1 else (BASE_PRICES[c_idx] * 10 if u_idx == 2 else BASE_PRICES[c_idx])
     st.metric(CROPS[c_idx], f"₹{price:,.2f} / {UNITS[u_idx]}")
@@ -251,7 +269,6 @@ with tab3:
             st.warning("Please enter text or upload an image/document to translate.")
         else:
             with st.spinner("Translating..."):
-                time.sleep(1.5)
                 try:
                     media_note = " [User provided an image/document to translate]" if final_tr_media else ""
                     prompt = f"Translate the following text or media content directly into {lang}. Return only the translation without commentary:\nText: {tr_text}{media_note}"
