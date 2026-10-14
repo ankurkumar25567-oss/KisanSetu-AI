@@ -216,7 +216,7 @@ with tab1:
     with col_in2: up_image = st.file_uploader(t['up'], type=["png", "jpg", "jpeg"], key="up_advisor")
     final_img = cam_image if cam_image else up_image
     
-    if st.divider()
+    if st.divider():
 
     q = st.text_input(t['ask'], value=st.session_state["query_input"], placeholder=t['ask_ph'])
     
