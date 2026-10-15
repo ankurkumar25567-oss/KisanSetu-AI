@@ -202,4 +202,19 @@ with tab2:
     st.markdown(f"### {t['mandi_title']} {sel_city}, {sel_state}")
     st.metric("Wheat", "₹2,400 / Quintal")
     st.metric("Paddy", "₹2,200 / Quintal")
-    st.
+    st.metric("Potato", "₹1,500 / Quintal")
+    st.metric("Tomato", "₹3,000 / Quintal")
+
+with tab3:
+    st.markdown("### 📜 Active Government Schemes & Subsidies")
+    for name, desc in GOVT_SCHEMES:
+        st.markdown(f"<div class='feature-card'><b>{name}</b><br>{desc}</div>", unsafe_allow_html=True)
+
+with tab4:
+    t_text = st.text_area(t['tr_ph'])
+    tr_file = st.file_uploader("Upload document/image to translate", type=["png", "jpg", "txt"], key="tr_file_up")
+    if st.button(t['tr_btn']) and (t_text or tr_file):
+        with st.spinner("Translating..."):
+            st.success(ask_openrouter(f"Translate the provided text into {lang}: {t_text}"))
+
+st.markdown(f"<div class='footer' style='text-align:center; color:#9ca3af; margin-top:50px; font-size:13px;'><b>{t['dev']}</b></div>", unsafe_allow_html=True)
