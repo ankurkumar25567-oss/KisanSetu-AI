@@ -9,7 +9,6 @@ components.html("""<script>document.body.style.overscrollBehavior = 'none';</scr
 
 st.markdown("""
 <style>
-    /* Dynamic Island & Notch Top Clearance */
     :root {
         --safe-top: env(safe-area-inset-top, 35px);
     }
@@ -29,10 +28,8 @@ st.markdown("""
         padding-left: 1rem !important;
         padding-right: 1rem !important;
     }
-    
     .main-header { text-align: center; color: #4ade80; font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 800; }
     .sub-header { text-align: center; color: #86efac; font-size: 1.1rem; margin-bottom: 25px; }
-    
     .stTextInput>div>div>input {
         background-color: #121824 !important;
         color: #ffffff !important;
@@ -184,4 +181,4 @@ PRE_MADE_ANSWERS = {
     "मेरे टमाटर को क्या हुआ?": "🍅 **निदान:** लेट ब्लाइट / फ्रूट रोट। संक्रमित फल को हटाएं और कॉपर फंगसाइड लगाएं।",
     "ਮੇਰੇ ਟਮਾਟਰਾਂ ਨੂੰ ਕੀ ਹੋਇਆ?": "🍅 **ਡਾਇਗਨੌਸਿਸ:** ਲੇਟ ਬਲਾਈਟ / ਫਰूट ਰੋਟ। ਲਾਗ ਵਾਲੇ ਫਲ ਨੂੰ ਹਟਾਓ।",
     "నా టమాటాలకు ఏమైంది?": "🍅 **రోగ నిర్ధారణ:** లేట్ బ్లైట్ / ఫ్రూట్ రాట్. సోకిన పండ్లను తొలగించండి.",
- 
+    "আমার টমেটোর কী হয়েছে?": "🍅 **রোগ নির্ণয়:** লেট ব্লা
