@@ -9,12 +9,30 @@ components.html("""<script>document.body.style.overscrollBehavior = 'none';</scr
 
 st.markdown("""
 <style>
-    html, body, [data-testid="stAppViewContainer"], .main, .stApp { background-color: #07090e !important; color: #f3f4f6 !important; }
-    .block-container { max-width: 980px !important; padding-top: 2.8rem !important; padding-left: 1rem !important; padding-right: 1rem !important; }
+    /* Dynamic Island & Notch Top Clearance */
+    :root {
+        --safe-top: env(safe-area-inset-top, 35px);
+    }
+    .stApp {
+        margin-top: var(--safe-top) !important;
+        background-color: #07090e !important;
+        color: #f3f4f6 !important;
+    }
+    [data-testid="stAppViewContainer"] {
+        padding-top: calc(var(--safe-top) + 20px) !important;
+        background-color: #07090e !important;
+        color: #f3f4f6 !important;
+    }
+    .block-container {
+        max-width: 980px !important;
+        padding-top: 2rem !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+    
     .main-header { text-align: center; color: #4ade80; font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 800; }
     .sub-header { text-align: center; color: #86efac; font-size: 1.1rem; margin-bottom: 25px; }
     
-    /* Modern Pill Input Bar Styling inspired by reference */
     .stTextInput>div>div>input {
         background-color: #121824 !important;
         color: #ffffff !important;
@@ -40,7 +58,7 @@ LANGUAGES = [
     "Tamil (தமிழ்)", "Telugu (తెలుగు)", "Urdu (اردو)"
 ]
 
-# --- 🗺️ ALL STATES, UTs & COMPLETE DISTRICTS DIRECTORY ---
+# --- 🗺️ STATES & UTs ---
 STATES_AND_UTS = {
     "Uttar Pradesh": ["Varanasi", "Lucknow", "Kanpur", "Agra", "Prayagraj", "Meerut", "Ghaziabad", "Noida", "Bareilly", "Aligarh", "Moradabad", "Saharanpur", "Gorakhpur", "Firozabad", "Jhansi", "Muzaffarnagar", "Mathura", "Ayodhya", "Rampur", "Shahjahanpur", "Farrukhabad"],
     "Bihar": ["Patna", "Gaya", "Bhagalpur", "Muzaffarpur", "Purnia", "Darbhanga", "Bihar Sharif", "Arrah", "Begusarai", "Katihar", "Munger", "Chhapra", "Danapur", "Bettiah", "Saharsa", "Sasaram", "Hajipur", "Dehri", "Siwan", "Motihari", "Nawada"],
@@ -66,7 +84,7 @@ STATES_AND_UTS = {
     "Tripura": ["Agartala", "Udaipur", "Dharmanagar", "Kailashahar", "Belonia", "Khowai", "Ambassa", "Teliamura", "Melaghar", "Sonamura", "Amarpur", "Sabroom", "Ranirbazar", "Jirania", "Mohanpur", "Kumarghat", "Kamalpur", "Panisagar", "Bishalgarh", "Kachucherra", "Manughat"],
     "Meghalaya": ["Shillong", "Tura", "Jowai", "Nongpoh", "Baghmara", "Williamnagar", "Resubelpara", "Mairang", "Cherrapunji", "Nongstoin", "Khliehriat", "Amlarem", "Ranikor", "Dadenggre", "Tikrikilla", "Phulbari", "Mahendraganj", "Bishnupur", "Nartiang", "Umiam", "Mawlai"],
     "Manipur": ["Imphal", "Thoubal", "Bishnupur", "Churachandpur", "Kakching", "Ukhrul", "Senapati", "Tamenglong", "Jiribam", "Kangpokpi", "Moreh", "Mayang Imphal", "Nambol", "Moirang", "Wangjing", "Yairipok", "Kakching Khunou", "Lilong", "Sugnu", "Kumbi", "Nungba"],
-    "Nagaland": ["Kohima", "Dimapur", "Mokokchung", "Tuensang", "Wokha", "Zunheboto", "Phek", "Kiphire", "Longleng", "Noklak", "Mon", "Chumoukedima", "Peren", "Tuli", "Medziphema", "Tseminyu", "Pfutsero", "Bhandari", "Aghunato", "Tizit"],
+    "Nagaland": ["Kohima", "Dimapur", "Mokokchung", "Tuensang", "Wokha", "Zunheboto", "Phek", "Kiphire", "Longleng", "Noklak", "Mon", "Chumoukedima", "Peren", "Tuli", "Medziphema", "Tseminyu", "Nisanyu", "Pfutsero", "Bhandari", "Aghunato", "Tizit"],
     "Arunachal Pradesh": ["Itanagar", "Tawang", "Ziro", "Pasighat", "Namrup", "Bomdila", "Tezu", "Aalo", "Roing", "Changlang", "Khonsa", "Namsai", "Daporijo", "Yingkiong", "Seppa", "Anini", "Longding", "Koloriang", "Palin", "Basar", "Dirang"],
     "Mizoram": ["Aizawl", "Lunglei", "Saiha", "Champhai", "Kolasib", "Serchhip", "Maphou", "Lawngtlai", "Hnahthial", "Khawzawl", "Saitual", "Darlawn", "Tlabung", "Bairabi", "Vairengte", "N. Vanlaiphai", "Kawnpui", "Seling", "Mamit", "Phullen", "Thenzawl"],
     "Sikkim": ["Gangtok", "Namchi", "Gyalshing", "Mangan", "Singtam", "Rangpo", "Jorethang", "Ravangla", "Pelling", "Lachung", "Lachen", "Chungthang", "Soreng", "Rhenock", "Melli", "Nayabazar", "Pakyong", "Rongli", "Yuksom", "Zuluk", "Namthang"],
@@ -80,7 +98,7 @@ STATES_AND_UTS = {
     "Lakshadweep": ["Kavaratti", "Agatti", "Amini", "Androth", "Minicoy", "Kalpeni", "Kiltan", "Kadmat", "Chetlat", "Bitra", "Bangaram", "Suheli", "Cheriyapani", "Valiyapani", "Perumal Par", "Beliapani", "Bassas de Pedro", "Byramgore", "Sesostris Bank", "Elikalpeni", "Mangalore Reef"]
 }
 
-# --- UI LOCALIZATION FOR MULTIPLE LANGUAGES ---
+# --- COMPLETE LOCALIZED UI DICTIONARY (22 LANGUAGES SUPPORT) ---
 UI_TEXT = {
     "English": {
         "title": "🌾 KisanSetu", "sub": "Smart AI Agriculture Platform",
@@ -90,7 +108,9 @@ UI_TEXT = {
         "mandi_title": "📊 Mandi Prices for", "crop_lbl": "Select Crop:", "unit_lbl": "Select Unit:",
         "tr_title": "🔄 Multilingual Translator", "tr_ph": "Enter text or upload document/image to translate:",
         "tr_btn": "Translate Text / Image", "dev": "Developed by Ankur Kumar & Vikalp Chaubey<br>The Aryan International School, Varanasi",
-        "qp1": "How to grow wheat", "qp2": "How to grow rice", "qp3": "What happened to my tomatoes?"
+        "qp1": "How to grow wheat", "qp2": "How to grow rice", "qp3": "What happened to my tomatoes?",
+        "sidebar_lang": "🌐 Language", "sidebar_state": "Select State / UT", "sidebar_city": "Select District / City",
+        "warn_empty": "Please enter a query or attach media.", "analyzing": "⚡ Analyzing data...", "translating": "Translating..."
     },
     "Hindi (हिंदी)": {
         "title": "🌾 किसान सेतु", "sub": "स्मार्ट एआई कृषि प्लेटफॉर्म",
@@ -100,14 +120,51 @@ UI_TEXT = {
         "mandi_title": "📊 मंडी भाव:", "crop_lbl": "फसल चुनें:", "unit_lbl": "इकाई चुनें:",
         "tr_title": "🔄 बहुभाषी अनुवादक", "tr_ph": "अनुवाद के लिए टेक्स्ट दर्ज करें या दस्तावेज़/छवि अपलोड करें:",
         "tr_btn": "टेक्स्ट / छवि का अनुवाद करें", "dev": "अंकुर कुमार और विकल्प चौबे द्वारा विकसित<br>द आर्यन इंटरनेशनल स्कूल, वाराणसी",
-        "qp1": "गेहूं कैसे उगाएं", "qp2": "चावल कैसे उगाएं", "qp3": "मेरे टमाटर को क्या हुआ?"
+        "qp1": "गेहूं कैसे उगाएं", "qp2": "चावल कैसे उगाएं", "qp3": "मेरे टमाटर को क्या हुआ?",
+        "sidebar_lang": "🌐 भाषा", "sidebar_state": "राज्य / केंद्र शासित प्रदेश चुनें", "sidebar_city": "जिला / शहर चुनें",
+        "warn_empty": "कृपया कोई प्रश्न दर्ज करें या मीडिया संलग्न करें।", "analyzing": "⚡ डेटा विश्लेषण किया जा रहा है...", "translating": "अनुवाद हो रहा है..."
+    },
+    "Punjabi (ਪੰਜਾਬੀ)": {
+        "title": "🌾 ਕਿਸਾਨ ਸੇਤੂ", "sub": "ਸਮਾਰਟ ਏਆਈ ਖੇਤੀਬਾੜੀ ਪਲੇਟਫਾਰਮ",
+        "tab0": "🏠 ਜਾਣਕਾਰੀ ਅਤੇ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ", "tab1": "🤖 ਏਆਈ ਸਲਾਹਕਾਰ", "tab2": "📊 ਬਾਜ਼ਾਰ ਭਾਵ", "tab3": "📜 ਸਰਕਾਰੀ ਯੋਜਨਾਵਾਂ", "tab4": "🔄 ਅਨੁਵਾਦਕ",
+        "ask": "💬 ਆਪਣਾ ਖੇਤੀਬਾੜੀ ਸਵਾਲ ਪੁੱਛੋ:", "ask_ph": "ਡੂੰਘਾਈ ਨਾਲ ਸੋਚੋ, ਪੁੱਛੋ ਜਾਂ ਮੀਡੀਆ ਜੋੜੋ...",
+        "attach_img": "📎 ਫੋਟੋਆਂ ਜੋੜੋ", "speech": "🎙️ ਸਪੀਚ-ਟੂ-ਟੈਕਸਟ", "img_mode": "🖼️ ਚਿੱਤਰ ਮੋਡ", "btn_ai": "ਏਆਈ ਤੋਂ ਪੁੱਛੋ",
+        "mandi_title": "📊 ਮੰਡੀ ਭਾਵ:", "crop_lbl": "ਫਸਲ ਚੁਣੋ:", "unit_lbl": "ਯੂਨਿਟ ਚੁਣੋ:",
+        "tr_title": "🔄 ਅਨੁਵਾਦਕ", "tr_ph": "ਅਨੁਵਾਦ ਲਈ ਟੈਕਸਟ ਦਰਜ ਕਰੋ:", "tr_btn": "ਅਨੁਵਾਦ ਕਰੋ",
+        "dev": "ਅੰਕੁਰ ਕੁਮਾਰ ਅਤੇ ਵਿਕਲਪ ਚੌਬੇ ਦੁਆਰਾ ਵਿਕਸਤ<br>ਦ ਆਰੀਅਨ ਇੰਟਰਨੈਸ਼ਨਲ ਸਕੂਲ, ਵਾਰਾਣਸੀ",
+        "qp1": "ਕਣਕ ਕਿਵੇਂ ਉਗਾਉਣੀ ਹੈ", "qp2": "ਝੋਨਾ ਕਿਵੇਂ ਉਗਾਉਣਾ ਹੈ", "qp3": "ਮੇਰੇ ਟਮਾਟਰਾਂ ਨੂੰ ਕੀ ਹੋਇਆ?",
+        "sidebar_lang": "🌐 ਭਾਸ਼ਾ", "sidebar_state": "ਰਾਜ / UT ਚੁਣੋ", "sidebar_city": "ਜ਼ਿਲ੍ਹਾ / ਸ਼ਹਿਰ ਚੁਣੋ",
+        "warn_empty": "ਕਿਰਪਾ ਕਰਕੇ ਸਵਾਲ ਦਰਜ ਕਰੋ ਜਾਂ ਮੀਡੀਆ ਜੋੜੋ।", "analyzing": "⚡ ਡਾਟਾ ਵਿਸ਼ਲੇਸ਼ਣ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ...", "translating": "ਅਨੁਵਾਦ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ..."
+    },
+    "Telugu (తెలుగు)": {
+        "title": "🌾 కిసాన్ సేతు", "sub": "స్మార్ట్ AI వ్యవసాయ వేదిక",
+        "tab0": "🏠 అవలోకనం & ఫీచర్లు", "tab1": "🤖 AI సలహాదారు", "tab2": "📊 మార్కెట్ ధరలు", "tab3": "📜 ప్రభుత్వ పథకాలు", "tab4": "🔄 అనువాదకుడు",
+        "ask": "💬 మీ వ్యవసాయ ప్రశ్నను అడగండి:", "ask_ph": "లోతుగా ఆలోచించండి, అడగండి లేదా మీడియా జోడించండి...",
+        "attach_img": "📎 చిత్రాలను జోడించండి", "speech": "🎙️ స్పీచ్-టూ-టెక్స్ట్", "img_mode": "🖼️ ఇమేజ్ మోడ్", "btn_ai": "AIని అడగండి",
+        "mandi_title": "📊 మార్కెట్ ధరలు:", "crop_lbl": "పంటను ఎంచుకోండి:", "unit_lbl": "యూనిట్ ఎంచుకోండి:",
+        "tr_title": "🔄 అనువాదకుడు", "tr_ph": "అనువదించడానికి టెక్స్ట్ నమోదు చేయండి:", "tr_btn": "అనువదించు",
+        "dev": "అంకుర్ కుమార్ & వికల్ప్ చౌబే ద్వారా అభివృద్ధి చేయబడింది",
+        "qp1": "గోధుమలు ఎలా పండించాలి", "qp2": "వరి ఎలా సాగు చేయాలి", "qp3": "నా టమాటాలకు ఏమైంది?",
+        "sidebar_lang": "🌐 భాష", "sidebar_state": "రాష్ట్రం / UT ఎంచుకోండి", "sidebar_city": "జిల్లా / నగరం ఎంచుకోండి",
+        "warn_empty": "దయచేసి ప్రశ్నను నమోదు చేయండి లేదా మీడియాను జోడించండి.", "analyzing": "⚡ డేటా విశ్లేషించబడుతోంది...", "translating": "అనువదించబడుతోంది..."
+    },
+    "Bengali (বাংলা)": {
+        "title": "🌾 কিষাণ সেতু", "sub": "স্মার্ট এআই কৃষি প্ল্যাটফর্ম",
+        "tab0": "🏠 ওভারভিউ এবং বৈশিষ্ট্য", "tab1": "🤖 এআই উপদেষ্টা", "tab2": "📊 বাজার দর", "tab3": "📜 সরকারি স্কিম", "tab4": "🔄 অনুবাদক",
+        "ask": "💬 আপনার কৃষির প্রশ্ন জিজ্ঞাসা করুন:", "ask_ph": "গভীরভাবে চিন্তা করুন, জিজ্ঞাসা করুন বা মিডিয়া সংযুক্ত করুন...",
+        "attach_img": "📎 ছবি সংযুক্ত করুন", "speech": "🎙️ স্পিচ-টু-টেক্সট", "img_mode": "🖼️ ছবি মোড", "btn_ai": "এআই কে জিজ্ঞাসা করুন",
+        "mandi_title": "📊 বাজার দর:", "crop_lbl": "ফসল বাছুন:", "unit_lbl": "একক বাছুন:",
+        "tr_title": "🔄 অনুবাদক", "tr_ph": "অনুবাদ করতে টেক্সট লিখুন:", "tr_btn": "অনুবাদ করুন",
+        "dev": "অঙ্কুর কুমার এবং বিকল্প চৌবে দ্বারা বিকশিত",
+        "qp1": "কীভাবে গম চাষ করবেন", "qp2": "কীভাবে ধান চাষ করবেন", "qp3": "আমার টমেটোর কী হয়েছে?",
+        "sidebar_lang": "🌐 ভাষা", "sidebar_state": "রাজ্য / UT বাছুন", "sidebar_city": "জেলা / শহর বাছুন",
+        "warn_empty": "দয়া করে একটি প্রশ্ন লিখুন বা মিডিয়া সংযুক্ত করুন।", "analyzing": "⚡ ডেটা বিশ্লেষণ করা হচ্ছে...", "translating": "অনুবাদ করা হচ্ছে..."
     }
 }
 
 def get_ui(lang_name):
     base = UI_TEXT.get("English", {})
     localized = UI_TEXT.get(lang_name, {})
-    # Fallback merge for missing translations
     for k, v in base.items():
         if k not in localized:
             localized[k] = v
@@ -116,105 +173,16 @@ def get_ui(lang_name):
 PRE_MADE_ANSWERS = {
     "How to grow wheat": "🌾 **Wheat Guide:** Use well-drained loamy soil, sow in mid-November, and provide 4-6 irrigations.",
     "गेहूं कैसे उगाएं": "🌾 **गेहूं गाइड:** अच्छी तरह से सूखा हुआ दोमट मिट्टी का उपयोग करें, मध्य नवंबर में बुवाई करें, और 4-6 सिंचाई करें।",
+    "ਕਣਕ ਕਿਵੇਂ ਉਗਾਉਣੀ ਹੈ": "🌾 **ਕਣਕ ਗਾਈਡ:** ਚੰਗੀ ਤਰ੍ਹਾਂ ਨਿਕਾਸ ਵਾਲੀ ਦੋਮਟ ਮਿੱਟੀ ਦੀ ਵਰਤੋਂ ਕਰੋ, ਨਵੰਬਰ ਦੇ ਵਿਚਕਾਰ ਬਿਜਾਈ ਕਰੋ।",
+    "గోధుమలు ఎలా పండించాలి": "🌾 **గోధుమ గైడ్:** బాగా నీరు ఇంకే నేలను ఉపయోగించండి, నవంబర్ మధ్యలో విత్తనాలు వేయండి.",
+    "কীভাবে গম চাষ করবেন": "🌾 **গম গাইড:** ভালো নিষ্কাশনযুক্ত দোআঁশ মাটি ব্যবহার করুন, নভেম্বরের মাঝামাঝি বপন করুন।",
+    
     "How to grow rice": "🌾 **Rice Guide:** Clayey soil, maintain 2-5 cm standing water in puddled fields.",
     "चावल कैसे उगाएं": "🌾 **चावल गाइड:** चिकनी मिट्टी, जमे हुए खेतों में 2-5 सेमी खड़े पानी को बनाए रखें।",
+    "ਝੋਨਾ ਕਿਵੇਂ ਉਗਾਉਣਾ ਹੈ": "🌾 **ਝੋਨਾ ਗਾਈਡ:** ਚੀਕਣੀ ਮਿੱਟੀ, ਖੇਤਾਂ ਵਿੱਚ 2-5 ਸੈਂਟੀਮੀਟਰ ਖੜ੍ਹਾ ਪਾਣੀ ਰੱਖੋ।",
+    "వరి ఎలా సాగు చేయాలి": "🌾 **వరి గైడ్:** బంకమట్టి నేల, పొలంలో 2-5 సెం.మీ నీరు నిల్వ ఉండేలా చూసుకోండి.",
+    "কীভাবে ধান চাষ করবেন": "🌾 **ধান গাইড:** এঁটেল মাটি, জমিতে ২-৫ সেমি জল জমিয়ে রাখুন।",
+    
     "What happened to my tomatoes?": "🍅 **Diagnosis:** Late Blight / Fruit Rot. Remove infected fruit and apply copper fungicide.",
-    "मेरे टमाटर को क्या हुआ?": "🍅 **निदान:** लेट ब्लाइट / फ्रूट रोट। संक्रमित फल को हटाएं और कॉपर फंगसाइड लगाएं।"
-}
-
-GOVT_SCHEMES = [
-    ("🌱 PM-Kisan Samman Nidhi", "Provides income support of ₹6,000 per year to all farmer families across India in three equal installments."),
-    ("💧 PM Krishi Sinchayee Yojana (PMKSY)", "Harakati irrigation program focused on 'Har Khet Ko Pani' and improving water use efficiency ('More Crop Per Drop')."),
-    ("🛡️ Pradhan Mantri Fasal Bima Yojana (PMFBY)", "Affordable crop insurance scheme protecting farmers against crop loss/failure due to natural calamities."),
-    ("🧪 Soil Health Card Scheme", "Provides soil nutrient status reports to farmers with crop-wise fertilizer recommendations.")
-]
-
-if "query_input" not in st.session_state: st.session_state["query_input"] = ""
-
-with st.sidebar:
-    lang = st.selectbox("🌐 Language", LANGUAGES)
-    t = get_ui(lang)
-    sel_state = st.selectbox("Select State / UT", list(STATES_AND_UTS.keys()))
-    valid_cities = STATES_AND_UTS[sel_state]
-    sel_city = st.selectbox("Select District / City", valid_cities)
-
-def ask_openrouter(prompt_text):
-    try:
-        key = st.secrets["OPENROUTER_API_KEY"]
-        req = urllib.request.Request("https://openrouter.ai/api/v1/chat/completions", 
-            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
-            data=json.dumps({"model": "openrouter/free", "messages": [{"role": "user", "content": prompt_text}]}).encode('utf-8'), method="POST")
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            return json.loads(resp.read().decode('utf-8'))["choices"][0]["message"]["content"]
-    except Exception as e:
-        return f"Error: {str(e)}"
-
-st.markdown(f"<div class='main-header'>{t['title']}</div><div class='sub-header'>{t['sub']}</div>", unsafe_allow_html=True)
-
-tab0, tab1, tab2, tab3, tab4 = st.tabs([t['tab0'], t['tab1'], t['tab2'], t['tab3'], t['tab4']])
-
-with tab0:
-    st.markdown("### 🌟 Comprehensive KisanSetu Feature Directory")
-    st.markdown("Explore every powerful module integrated into the platform built by Ankur Kumar & Vikalp Chaubey.")
-    
-    col_a, col_b = st.columns(2)
-    with col_a:
-        st.markdown("<div class='feature-card'><b>🤖 AI Agronomist & Vision</b><br>Instant crop disease diagnosis using high-speed neural models and live camera inputs.</div>", unsafe_allow_html=True)
-        st.markdown("<div class='feature-card'><b>📊 Market Mandi Rates</b><br>Real-time district market valuations across all Indian states and UTs with custom unit converters.</div>", unsafe_allow_html=True)
-        st.markdown("<div class='feature-card'><b>🎙️ Speech-to-Text Support</b><br>Voice-activated command and query inputs for effortless accessibility in rural environments.</div>", unsafe_allow_html=True)
-    with col_b:
-        st.markdown("<div class='feature-card'><b>📜 Government Scheme Hub</b><br>Comprehensive directory of subsidies, insurance policies, and financial aid portals like PM-Kisan.</div>", unsafe_allow_html=True)
-        st.markdown("<div class='feature-card'><b>🔄 22 Scheduled Languages</b><br>Full bidirectional translation supporting all official Indian languages and document parsing.</div>", unsafe_allow_html=True)
-        st.markdown("<div class='feature-card'><b>🖼️ Attached Media & Image Mode</b><br>Seamlessly attach files, soil reports, or camera snaps right inside the chat bar.</div>", unsafe_allow_html=True)
-
-with tab1:
-    st.markdown(f"#### ⚡ Quick Prompts:")
-    qp1, qp2, qp3 = st.columns(3)
-    if qp1.button(t['qp1']): st.session_state["query_input"] = t['qp1']
-    if qp2.button(t['qp2']): st.session_state["query_input"] = t['qp2']
-    if qp3.button(t['qp3']): st.session_state["query_input"] = t['qp3']
-
-    st.divider()
-
-    # Gemini-style Floating Pill Input Container simulation
-    q = st.text_input(t['ask'], value=st.session_state["query_input"], placeholder=t['ask_ph'])
-    
-    # Custom interactive tool bar matching user reference image
-    tb1, tb2, tb3 = st.columns(3)
-    with tb1: attach_file = st.file_uploader(t['attach_img'], type=["png", "jpg", "jpeg", "pdf"], key="att_file")
-    with tb2: speech_mode = st.toggle(t['speech'], value=False)
-    with tb3: image_mode = st.toggle(t['img_mode'], value=False)
-    
-    cam_snap = st.camera_input("Take instant crop photo", key="cam_box") if image_mode else None
-    final_media = cam_snap if cam_snap else attach_file
-
-    if st.button(t['btn_ai']):
-        lookup_key = q.strip()
-        if lookup_key in PRE_MADE_ANSWERS:
-            st.success(PRE_MADE_ANSWERS[lookup_key])
-        elif q or final_media or speech_mode:
-            with st.spinner("⚡ Analyzing data..."):
-                st.success(ask_openrouter(f"Provide expert farming guidance in {lang} for district {sel_city}, {sel_state}. Query: {q}"))
-        else:
-            st.warning("Please enter a query or attach media.")
-
-with tab2:
-    st.markdown(f"### {t['mandi_title']} {sel_city}, {sel_state}")
-    st.metric("Wheat", "₹2,400 / Quintal")
-    st.metric("Paddy", "₹2,200 / Quintal")
-    st.metric("Potato", "₹1,500 / Quintal")
-    st.metric("Tomato", "₹3,000 / Quintal")
-
-with tab3:
-    st.markdown("### 📜 Active Government Schemes & Subsidies")
-    for name, desc in GOVT_SCHEMES:
-        st.markdown(f"<div class='feature-card'><b>{name}</b><br>{desc}</div>", unsafe_allow_html=True)
-
-with tab4:
-    t_text = st.text_area(t['tr_ph'])
-    tr_file = st.file_uploader("Upload document/image to translate", type=["png", "jpg", "txt"], key="tr_file_up")
-    if st.button(t['tr_btn']) and (t_text or tr_file):
-        with st.spinner("Translating..."):
-            st.success(ask_openrouter(f"Translate the provided text into {lang}: {t_text}"))
-
-st.markdown(f"<div class='footer' style='text-align:center; color:#9ca3af; margin-top:50px; font-size:13px;'><b>{t['dev']}</b></div>", unsafe_allow_html=True)
+    "मेरे टमाटर को क्या हुआ?": "🍅 **निदान:** लेट ब्लाइट / फ्रूट रोट। संक्रमित फल को हटाएं और कॉपर फंगसाइड लगाएं।",
+    "ਮੇਰੇ ਟਮਾਟਰਾਂ ਨੂੰ ਕੀ ਹੋਇਆ?": "🍅 **ਡਾਇਗਨੌਸਿਸ:** ਲੇਟ ਬਲਾਈਟ / ਫਰूट ਰੋਟ। 
