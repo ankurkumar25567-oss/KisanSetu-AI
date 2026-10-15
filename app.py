@@ -1,55 +1,28 @@
 import streamlit as st
 import urllib.request
 import json
-import time
 import streamlit.components.v1 as components
 
 st.set_page_config(page_title="KisanSetu - Smart Ag", page_icon="🌾", layout="wide", initial_sidebar_state="auto")
 
-components.html("""
-<script>
-    document.body.style.overscrollBehavior = 'none';
-</script>
-""", height=0)
+components.html("""<script>document.body.style.overscrollBehavior = 'none';</script>""", height=0)
 
 st.markdown("""
 <style>
-    html, body, [data-testid="stAppViewContainer"], .main, .stApp {
-        background-color: #07090e !important;
-        color: #f3f4f6 !important;
-    }
-    [data-testid="stAppViewContainer"] {
-        overflow-y: scroll !important;
-        height: 100vh !important;
-        padding-bottom: 90px !important;
-    }
-    ::-webkit-scrollbar { width: 6px !important; }
-    ::-webkit-scrollbar-track { background: #07090e !important; }
-    ::-webkit-scrollbar-thumb { background-color: #22c55e !important; border-radius: 10px !important; }
-
+    html, body, [data-testid="stAppViewContainer"], .main, .stApp { background-color: #07090e !important; color: #f3f4f6 !important; }
     .block-container { max-width: 980px !important; padding-top: 1.2rem !important; }
-    .main-header { text-align: center; color: #4ade80; font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; margin-bottom: 2px; }
+    .main-header { text-align: center; color: #4ade80; font-size: 2.5rem; font-weight: 800; }
     .sub-header { text-align: center; color: #86efac; font-size: 1.1rem; margin-bottom: 20px; }
-
-    .stButton>button { width: 100% !important; min-height: 3.2rem !important; border-radius: 12px !important; font-weight: 600 !important; border: 1px solid #16a34a !important; background: linear-gradient(135deg, #15803d 0%, #166534 100%) !important; color: #ffffff !important; }
-    .stButton>button:hover { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%) !important; }
-
-    div[data-testid="stMetric"] { background: #0f172a !important; padding: 16px !important; border-radius: 14px !important; border: 1px solid #1e293b !important; }
-    div[data-testid="stMetricValue"] { color: #4ade80 !important; font-size: 1.8rem !important; font-weight: 700 !important; }
-    .stMarkdown, .stSuccess, .stError, p { word-wrap: break-word !important; overflow-wrap: break-word !important; }
-    .game-card { background: linear-gradient(145deg, #0f172a 0%, #090d16 100%); padding: 25px; border-radius: 18px; border: 2px solid #22c55e; margin-bottom: 25px; }
+    .stButton>button { width: 100% !important; min-height: 3rem !important; border-radius: 10px !important; background: #15803d !important; color: #fff !important; font-weight: 600 !important; }
 </style>
 """, unsafe_allow_html=True)
 
 LANGUAGES = [
-    "English", "Hindi (हिंदी)", "Assamese (অসমীয়া)", "Bengali (বাংলা)", 
-    "Bodo (बड़ो)", "Dogri (डोगरी)", "Gujarati (ગુજરાતી)", "Kannada (ಕನ್ನಡ)", 
-    "Kashmiri (कॉशुर)", "Konkani (कोंकणी)", "Maithili (मैथिली)", "Malayalam (മലയാളം)", 
-    "Manipuri (মৈতৈলোন্)", "Marathi (मराठी)", "Nepali (नेपाली)", "Odia (ଓଡ଼ିଆ)", 
-    "Punjabi (ਪੰਜਾਬੀ)", "Sanskrit (संस्कृतम्)", "Santali (संताली)", "Sindhi (सिंधी)", 
-    "Tamil (தமிழ்)", "Telugu (తెలుగు)", "Urdu (اردو)"
+    "English", "Hindi (हिंदी)", "Punjabi (ਪੰਜਾਬੀ)", "Telugu (తెలుగు)", "Bengali (বাংলা)", 
+    "Marathi (मराठी)", "Tamil (தமிழ்)", "Gujarati (ગુજરાતી)", "Kannada (ಕನ್ನಡ)", "Malayalam (മലയാളം)"
 ]
 
+# UI Localization Dictionary for all supported languages
 UI_TEXT = {
     "English": {
         "title": "🌾 KisanSetu", "sub": "Smart AI Agriculture Platform",
@@ -68,203 +41,142 @@ UI_TEXT = {
         "mandi_title": "📊 मंडी भाव:", "crop_lbl": "फसल चुनें:", "unit_lbl": "इकाई चुनें:",
         "tr_title": "🔄 बहुभाषी अनुवादक", "tr_ph": "अनुवाद के लिए टेक्स्ट दर्ज करें या दस्तावेज़/छवि अपलोड करें:",
         "tr_btn": "टेक्स्ट / छवि का अनुवाद करें", "dev": "अंकुर कुमार और विकल्प चौबे द्वारा विकसित<br>द आर्यन इंटरनेशनल स्कूल, वाराणसी"
+    },
+    "Punjabi (ਪੰਜਾਬੀ)": {
+        "title": "🌾 ਕਿਸਾਨ ਸੇਤੂ", "sub": "ਸਮਾਰਟ ਏਆਈ ਖੇਤੀਬਾੜੀ ਪਲੇਟਫਾਰਮ",
+        "tab1": "🤖 ਏਆਈ ਸਲਾਹਕਾਰ", "tab2": "📊 ਬਾਜ਼ਾਰ ਭਾਵ", "tab3": "🔄 ਅਨੁਵਾਦਕ",
+        "ask": "ਆਪਣਾ ਖੇਤੀਬਾੜੀ ਸਵਾਲ ਪੁੱਛੋ:", "ask_ph": "ਉਦਾਹਰਣ ਲਈ: ਝੋਨੇ ਲਈ ਵਧੀਆ ਖਾਦ?",
+        "cam": "📷 ਫੋਟੋ ਲਓ", "up": "📁 ਜਾਂ ਫੋਟੋ ਅੱਪਲੋਡ ਕਰੋ", "btn_ai": "ਏਆਈ ਤੋਂ ਪੁੱਛੋ",
+        "mandi_title": "📊 ਮੰਡੀ ਭਾਵ:", "crop_lbl": "ਫਸਲ ਚੁਣੋ:", "unit_lbl": "ਯੂਨਿਟ ਚੁਣੋ:",
+        "tr_title": "🔄 ਅਨੁਵਾਦਕ", "tr_ph": "ਅਨੁਵਾਦ ਲਈ ਟੈਕਸਟ ਦਰਜ ਕਰੋ:", "tr_btn": "ਅਨੁਵਾਦ ਕਰੋ",
+        "dev": "ਅੰਕੁਰ ਕੁਮਾਰ ਅਤੇ ਵਿਕਲਪ ਚੌਬੇ ਦੁਆਰਾ ਵਿਕਸਤ<br>ਦ ਆਰੀਅਨ ਇੰਟਰਨੈਸ਼ਨਲ ਸਕੂਲ, ਵਾਰਾਣਸੀ"
+    },
+    "Telugu (తెలుగు)": {
+        "title": "🌾 కిసాన్ సేతు", "sub": "స్మార్ట్ AI వ్యవసాయ వేదిక",
+        "tab1": "🤖 AI సలహాదారు", "tab2": "📊 మార్కెట్ ధరలు", "tab3": "🔄 అనువాదకుడు",
+        "ask": "మీ వ్యవసాయ ప్రశ్నను అడగండి:", "ask_ph": "ఉదా: వరికి ఉత్తమమైన ఎరువు?",
+        "cam": "📷 ఫోటో తీయండి", "up": "📁 చిత్రం అప్‌లోడ్ చేయండి", "btn_ai": "AIని అడగండి",
+        "mandi_title": "📊 మార్కెట్ ధరలు:", "crop_lbl": "పంటను ఎంచుకోండి:", "unit_lbl": "యూనిట్ ఎంచుకోండి:",
+        "tr_title": "🔄 అనువాదకుడు", "tr_ph": "అనువదించడానికి టెక్స్ట్ నమోదు చేయండి:", "tr_btn": "అనువదించు",
+        "dev": "అంకుర్ కుమార్ & వికల్ప్ చౌబే ద్వారా అభివృద్ధి చేయబడింది"
+    },
+    "Bengali (বাংলা)": {
+        "title": "🌾 কিষাণ সেতু", "sub": "স্মার্ট এআই কৃষি প্ল্যাটফর্ম",
+        "tab1": "🤖 এআই উপদেষ্টা", "tab2": "📊 বাজার দর", "tab3": "🔄 অনুবাদক",
+        "ask": "আপনার কৃষির প্রশ্ন জিজ্ঞাসা করুন:", "ask_ph": "যেমন: ধানের জন্য সেরা সার?",
+        "cam": "📷 ছবি তুলুন", "up": "📁 ছবি আপলোড করুন", "btn_ai": "এআই কে জিজ্ঞাসা করুন",
+        "mandi_title": "📊 বাজার দর:", "crop_lbl": "ফসল বাছুন:", "unit_lbl": "একক বাছুন:",
+        "tr_title": "🔄 অনুবাদক", "tr_ph": "অনুবাদ করতে টেক্সট লিখুন:", "tr_btn": "অনুবাদ করুন",
+        "dev": "অঙ্কুর কুমার এবং বিকল্প চৌবে দ্বারা বিকশিত"
+    },
+    "Marathi (मराठी)": {
+        "title": "🌾 किसान सेतू", "sub": "स्मार्ट एआय कृषी प्लॅटफॉर्म",
+        "tab1": "🤖 एआय सल्लागार", "tab2": "📊 बाजार भाव", "tab3": "🔄 अनुवादक",
+        "ask": "तुमचा शेतीचा प्रश्न विचार ः", "ask_ph": "उदा. धान्यासाठी उत्तम खत?",
+        "cam": "📷 फोटो काढ ः", "up": "📁 फोटो अपलोड करा", "btn_ai": "एआय ला विचारा",
+        "mandi_title": "📊 बाजार भाव:", "crop_lbl": "पीक निवडा:", "unit_lbl": "युनिट निवडा:",
+        "tr_title": "🔄 अनुवादक", "tr_ph": "मजकूर प्रविष्ट करा:", "tr_btn": "भाषांतर करा",
+        "dev": "अंकुर कुमार आणि विकल्प चौबे द्वारे विकसित"
+    },
+    "Tamil (தமிழ்)": {
+        "title": "🌾 கிசான் சேது", "sub": "ஸ்மார்ட் AI விவசாய தளம்",
+        "tab1": "🤖 AI ஆலோசகர்", "tab2": "📊 சந்தை விலைகள்", "tab3": "🔄 மொழிபெயர்ப்பாளர்",
+        "ask": "உங்கள் விவசாய கேள்வியைக் கேளுங்கள்:", "ask_ph": "எ.கா. நெல்லுக்கு சிறந்த உரம்?",
+        "cam": "📷 படம் எடுக்கவும்", "up": "📁 படத்தை பதிவேற்றவும்", "btn_ai": "AI ஐக் கேளுங்கள்",
+        "mandi_title": "📊 சந்தை விலைகள்:", "crop_lbl": "பயிரைத் தேர்ந்தெடுக்கவும்:", "unit_lbl": "அலகைத் தேர்ந்தெடுக்கவும்:",
+        "tr_title": "🔄 மொழிபெயர்ப்பாளர்", "tr_ph": "உரையை உள்ளிடவும்:", "tr_btn": "மொழிபெயர்க்கவும்",
+        "dev": "அம்கூர் குமார் & விகல்ப் சௌபே"
+    },
+    "Gujarati (ગુજરાતી)": {
+        "title": "🌾 કિસાન સેતુ", "sub": "સ્માર્ટ AI કૃષિ પ્લેટફોર્મ",
+        "tab1": "🤖 AI સલાહકાર", "tab2": "📊 બજાર ભાવ", "tab3": "🔄 અનુવાદક",
+        "ask": "તમારો કૃષિ પ્રશ્ન પૂછો:", "ask_ph": "દા.ત. ડાંગર માટે શ્રેષ્ઠ ખાતર?",
+        "cam": "📷 ફોટો લો", "up": "📁 છબી અપલોડ કરો", "btn_ai": "AI ને પૂછો",
+        "mandi_title": "📊 બજાર ભાવ:", "crop_lbl": "પાક પસંદ કરો:", "unit_lbl": "એકમ પસંદ કરો:",
+        "tr_title": "🔄 અનુવાદક", "tr_ph": "ટેક્સ્ટ દાખલ કરો:", "tr_btn": "અનુવાદ કરો",
+        "dev": "અંકુર કુમાર અને વિકલ્પ चौबे દ્વારા વિકસિત"
+    },
+    "Kannada (ಕನ್ನಡ)": {
+        "title": "🌾 ಕಿಸಾನ್ ಸೇತು", "sub": "ಸ್ಮಾರ್ಟ್ AI ಕೃಷಿ ವೇದಿಕೆ",
+        "tab1": "🤖 AI ಸಲಹೆಗಾರ", "tab2": "📊 ಮಾರುಕಟ್ಟೆ ದರಗಳು", "tab3": "🔄 ಅನುವಾದಕ",
+        "ask": "ನಿಮ್ಮ ಕೃಷಿ ಪ್ರಶ್ನೆಯನ್ನು ಕೇಳಿ:", "ask_ph": "ಉದಾ: ಭತ್ತಕ್ಕೆ ಉತ್ತಮ ಗೊಬ್ಬರ?",
+        "cam": "📷 ಫೋಟೋ ತೆಗೆಯಿರಿ", "up": "📁 ಚಿತ್ರವನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ", "btn_ai": "AI ಅನ್ನು ಕೇಳಿ",
+        "mandi_title": "📊 ಮಾರುಕಟ್ಟೆ ದರಗಳು:", "crop_lbl": "ಬೆಳೆ ಆಯ್ಕೆಮಾಡಿ:", "unit_lbl": "ಘಟಕ ಆಯ್ಕೆಮಾಡಿ:",
+        "tr_title": "🔄 ಅನುವಾದಕ", "tr_ph": "ಪಠ್ಯವನ್ನು ನಮೂದಿಸಿ:", "tr_btn": "ಅನುವಾದಿಸು",
+        "dev": "ಅಂಕುರ್ ಕುಮಾರ್ ಮತ್ತು ವಿಕಲ್ಪ್ ಚೌಬೆ"
+    },
+    "Malayalam (മലയാളം)": {
+        "title": "🌾 കിസാൻ സേതു", "sub": "സ്മാർട്ട് AI കാർഷിക പ്ലാറ്റ്‌ഫോം",
+        "tab1": "🤖 AI ഉപദേശകൻ", "tab2": "📊 വിപണി വില", "tab3": "🔄 പരിഭാഷകൻ",
+        "ask": "നിങ്ങളുടെ കാർഷിക ചോദ്യം ചോദിക്കുക:", "ask_ph": "ഉദാഹരണം: നെല്ലിന് മികച്ച വളം?",
+        "cam": "📷 ഫോട്ടോ എടുക്കുക", "up": "📁 ചിത്രം അപ്‌ലോഡ് ചെയ്യുക", "btn_ai": "AI-യോട് ചോദിക്കുക",
+        "mandi_title": "📊 വിപണി വില:", "crop_lbl": "വിള തിരഞ്ഞെടുക്കുക:", "unit_lbl": "യൂണിറ്റ് തിരഞ്ഞെടുക്കുക:",
+        "tr_title": "🔄 പരിഭാഷകൻ", "tr_ph": "ടെക്സ്റ്റ് നൽകുക:", "tr_btn": "പരിഭാഷപ്പെടുത്തുക",
+        "dev": "അങ്കുർ കുമാറും വികൽപ് ചൗബെയും ചേർന്ന് വികസിപ്പിച്ചത്"
     }
 }
 
 def get_ui(lang_name):
     return UI_TEXT.get(lang_name, UI_TEXT["English"])
 
-STATES_AND_UTS = {
-    "Uttar Pradesh": ["Varanasi", "Lucknow", "Kanpur", "Agra", "Prayagraj", "Meerut", "Ghaziabad", "Noida", "Bareilly", "Aligarh", "Moradabad", "Saharanpur", "Gorakhpur", "Firozabad", "Jhansi", "Muzaffarnagar", "Mathura", "Ayodhya", "Rampur", "Shahjahanpur", "Farrukhabad"],
-    "Bihar": ["Patna", "Gaya", "Bhagalpur", "Muzaffarpur", "Purnia", "Darbhanga", "Bihar Sharif", "Arrah", "Begusarai", "Katihar", "Munger", "Chhapra", "Danapur", "Bettiah", "Saharsa", "Sasaram", "Hajipur", "Dehri", "Siwan", "Motihari", "Nawada"],
-    "Maharashtra": ["Mumbai", "Pune", "Nagpur", "Nashik", "Thane", "Aurangabad", "Solapur", "Kolhapur", "Amravati", "Nanded", "Sangli", "Jalgaon", "Akola", "Latur", "Dhule", "Ahmednagar", "Chandrapur", "Parbhani", "Jalna", "Bhusawal", "Navi Mumbai"],
-    "Punjab": ["Amritsar", "Ludhiana", "Jalandhar", "Patiala", "Bathinda", "Mohali", "Hoshiarpur", "Batala", "Pathankot", "Moga", "Abohar", "Malerkotla", "Khanna", "Phagwara", "Muktsar", "Barnala", "Rajpura", "Firozpur", "Kapurthala", "Sunam", "Zirakpur"],
-    "Haryana": ["Gurugram", "Faridabad", "Panipat", "Ambala", "Yamunanagar", "Rohtak", "Hisar", "Karnal", "Sonipat", "Panchkula", "Bhiwani", "Sirad", "Bahadurgarh", "Jind", "Thanesar", "Kaithal", "Rewari", "Palwal", "Hansi", "Narnaul", "Fatehabad"],
-    "Madhya Pradesh": ["Bhopal", "Indore", "Jabalpur", "Gwalior", "Ujjain", "Sagar", "Dewas", "Satna", "Ratlam", "Rewa", "Murwara", "Singrauli", "Burhanpur", "Khandwa", "Bhind", "Chhindwara", "Guna", "Shivpuri", "Vidisha", "Damoh", "Mandsaur"],
-    "Karnataka": ["Bengaluru", "Mysuru", "Hubballi-Dharwad", "Mangaluru", "Belagavi", "Kalaburagi", "Davanagere", "Ballari", "Vijayapura", "Shivamogga", "Tumakuru", "Raichur", "Bidder", "Hospet", "Gadag", "Hassan", "Bhadravati", "Chitradurga", "Kolar", "Mandya", "Udupi"],
-    "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem", "Tirunelveli", "Erode", "Vellore", "Thoothukudi", "Dindigul", "Thanjavur", "Ranipet", "Sivakasi", "Karur", "Udhagamandalam", "Hosur", "Nagercoil", "Kanchipuram", "Kumbakonam", "Tiruvannamalai", "Pollachi"],
-    "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Nellore", "Kurnool", "Rajahmundry", "Tirupati", "Kakinada", "Kadapa", "Anantapur", "Eluru", "Vizianagaram", "Ongole", "Nandyal", "Machilipatnam", "Adoni", "Tenali", "Proddatur", "Chittoor", "Hindupur", "Bhimavaram"],
-    "Telangana": ["Hyderabad", "Warangal", "Nizamabad", "Khammam", "Karimnagar", "Ramagundam", "Mahabubnagar", "Nalgonda", "Adilabad", "Suryapet", "Miryalaguda", "Jagtial", "Nizamabad", "Kothagudem", "Mancherial", "Siddipet", "Wanaparthy", "Kareemabad", "Kamareddy", "Jangaon", "Bhongir"],
-    "West Bengal": ["Kolkata", "Darjeeling", "Howrah", "Durgapur", "Asansol", "Siliguri", "Kharagpur", "Haldia", "Krishnanagar", "Berhampore", "Malda", "Jalpaiguri", "Bankura", "Purulia", "Balurghat", "Raiganj", "Barasat", "Basirhat", "Serampore", "Bangaon", "Cooch Behar"],
-    "Gujarat": ["Ahmedabad", "Surat", "Vadodara", "Rajkot", "Bhavnagar", "Jamnagar", "Junagadh", "Gandhinagar", "Anand", "Navsari", "Morbi", "Nadiad", "Mehsana", "Porbandar", "Godhra", "Palanpur", "Valsad", "Vapi", "Bhuj", "Veraval", "Botad"],
-    "Rajasthan": ["Jaipur", "Jodhpur", "Udaipur", "Kota", "Ajmer", "Bikaner", "Alwar", "Bhilwara", "Sikar", "Pali", "Tonk", "Kishangarh", "Beawar", "Hanumangarh", "Dholpur", "Sawai Madhopur", "Churu", "Gangapur City", "Barmer", "Jhunjhunu", "Sirohi"],
-    "Kerala": ["Thiruvananthapuram", "Kochi", "Kozhikode", "Kollam", "Thrissur", "Palakkad", "Alappuzha", "Malappuram", "Kannur", "Kottayam", "Manjeri", "Thalassery", "Ponnani", "Vatakara", "Kanhangad", "Payyanur", "Kayamkulam", "Neyyattinkara", "Tirur", "Koduvally", "Kottakkal"],
-    "Odisha": ["Bhubaneswar", "Cuttack", "Rourkela", "Berhampur", "Sambalpur", "Puri", "Balasore", "Bhadrak", "Baripada", "Jharsuguda", "Jeypore", "Bargarh", "Rayagada", "Dhenkanal", "Kendujhar", "Angul", "Sunabeda", "Paradip", "Kendrapara", "Byasanagar", "Titlagarh"],
-    "Assam": ["Guwahati", "Silchar", "Dibrugarh", "Jorhat", "Nagaon", "Tinsukia", "Tezpur", "Bongaigaon", "Diphu", "North Lakhimpur", "Goalpara", "Barpeta", "Sivasagar", "Karimganj", "Dhubri", "Kokrajhar", "Hailakandi", "Mangaldoi", "Nalbari", "Rangia", "Margherita"],
-    "Jharkhand": ["Ranchi", "Jamshedpur", "Dhanbad", "Bokaro", "Deoghar", "Hazaribagh", "Giridih", "Ramgarh", "Medininagar", "Chirkunda", "Phusro", "Jhumri Telaiya", "Sahibganj", "Lohardaga", "Dumka", "Godda", "Chatra", "Gumla", "Simdega", "Jamtara", "Garhwa"],
-    "Chhattisgarh": ["Raipur", "Bhilai", "Bilaspur", "Korba", "Durg", "Rajnandgaon", "Raigarh", "Jagdalpur", "Ambikapur", "Dhamtari", "Chirmiri", "Mahasamund", "Bhatapara", "Kanker", "Kawardha", "Janjgir", "Naila", "Konta", "Kanker", "Kondagaon", "Dongargarh"],
-    "Uttarakhand": ["Dehradun", "Haridwar", "Roorkee", "Haldwani", "Rudrapur", "Kashipur", "Rishikesh", "Pithoragarh", "Ramnagar", "Almora", "Nainital", "Kotdwar", "Tehri", "Muskuri", "Joshimath", "Bageshwar", "Champawat", "Uttarkashi", "Ranikhet", "Vikasnagar", "Manglaur"],
-    "Himachal Pradesh": ["Shimla", "Mandi", "Solan", "Dharamshala", "Palampur", "Baddi", "Nahan", "Kullu", "Chamba", "Hamirpur", "Una", "Bilaspur", "Kasauli", "Manali", "Dalhousie", "Paonta Sahib", "Nurpur", "Jogindernagar", "Rampur", "Sundernagar", "Keylong"],
-    "Goa": ["Panaji", "Margao", "Vasco da Gama", "Mapusa", "Ponda", "Bicholim", "Curchorem", "Sanquelim", "Quepem", "Canacona", "Cuncolim", "Sanguem", "Pernem", "Valpoi", "Duler", "Porvorim", "Aldona", "Anjuna", "Calangute", "Candolim", "Colva"],
-    "Tripura": ["Agartala", "Udaipur", "Dharmanagar", "Kailashahar", "Belonia", "Khowai", "Ambassa", "Teliamura", "Melaghar", "Sonamura", "Amarpur", "Sabroom", "Ranirbazar", "Jirania", "Mohanpur", "Kumarghat", "Kamalpur", "Panisagar", "Bishalgarh", "Kachucherra", "Manughat"],
-    "Meghalaya": ["Shillong", "Tura", "Jowai", "Nongpoh", "Baghmara", "Williamnagar", "Resubelpara", "Mairang", "Cherrapunji", "Nongstoin", "Khliehriat", "Amlarem", "Ranikor", "Dadenggre", "Tikrikilla", "Phulbari", "Mahendraganj", "Bishnupur", "Nartiang", "Umiam", "Mawlai"],
-    "Manipur": ["Imphal", "Thoubal", "Bishnupur", "Churachandpur", "Kakching", "Ukhrul", "Senapati", "Tamenglong", "Jiribam", "Kangpokpi", "Moreh", "Mayang Imphal", "Nambol", "Moirang", "Wangjing", "Yairipok", "Kakching Khunou", "Lilong", "Sugnu", "Kumbi", "Nungba"],
-    "Nagaland": ["Kohima", "Dimapur", "Mokokchung", "Tuensang", "Wokha", "Zunheboto", "Phek", "Kiphire", "Longleng", "Noklak", "Mon", "Chumoukedima", "Peren", "Tuli", "Medziphema", "Tseminyu", "Nisanyu", "Pfutsero", "Bhandari", "Aghunato", "Tizit"],
-    "Arunachal Pradesh": ["Itanagar", "Tawang", "Ziro", "Pasighat", "Namrup", "Bomdila", "Tezu", "Aalo", "Roing", "Changlang", "Khonsa", "Namsai", "Daporijo", "Yingkiong", "Seppa", "Anini", "Longding", "Koloriang", "Palin", "Basar", "Dirang"],
-    "Mizoram": ["Aizawl", "Lunglei", "Saiha", "Champhai", "Kolasib", "Serchhip", "Maphou", "Lawngtlai", "Hnahthial", "Khawzawl", "Saitual", "Darlawn", "Tlabung", "Bairabi", "Vairengte", "N. Vanlaiphai", "Kawnpui", "Seling", "Mamit", "Phullen", "Thenzawl"],
-    "Sikkim": ["Gangtok", "Namchi", "Gyalshing", "Mangan", "Singtam", "Rangpo", "Jorethang", "Ravangla", "Pelling", "Lachung", "Lachen", "Chungthang", "Soreng", "Rhenock", "Melli", "Nayabazar", "Pakyong", "Rongli", "Yuksom", "Zuluk", "Namthang"],
-    "Delhi": ["New Delhi", "Dwarka", "Rohini", "Connaught Place", "Karol Bagh", "Saket", "Vasant Kunj", "Lajpat Nagar", "Chandni Chowk", "Paharganj", "Mehrauli", "Janakpuri", "Laxmi Nagar", "Mayur Vihar", "Pitampura", "Shahdara", "Civil Lines", "Chanakyapuri", "Greater Kailash", "Vikas Puri", "Narela"],
-    "Jammu and Kashmir": ["Srinagar", "Jammu", "Anantnag", "Baramulla", "Sopore", "Kathua", "Udhampur", "Poonch", "Rajouri", "Kupwara", "Pulwama", "Ganderbal", "Bandipora", "Kulgam", "Shopian", "Samba", "Ramban", "Doda", "Kishtwar", "Reasi", "Katra"],
-    "Ladakh": ["Leh", "Kargil", "Diskit", "Padum", "Nyoma", "Drass", "Hunder", "Alchi", "Lamayuru", "Tangtse", "Chumathang", "Panamik", "Turtuk", "Hanoo", "Khalatse", "Saspol", "Spituk", "Shey", "Thiksey", "Hemis", "Choglamsar"],
-    "Puducherry": ["Puducherry", "Karaikal", "Mahe", "Yanam", "Oulgaret", "Villianur", "Ariyankuppam", "Bahour", "Nettapakkam", "Kottakuppam", "Thirubuvanai", "Madagadipet", "Kurumbapet", "Thavalakuppam", "Kirumampakkam", "Embalam", "Suthukeny", "Kariamputtur", "Pandakkal", "Palloor"],
-    "Chandigarh": ["Chandigarh", "Manimajra", "Burail", "Daria", "Behlana", "Raipur Kalan", "Kishangarh", "Kaimbwala", "Dadu Majra", "Maloya", "Sarangpur", "Palsora", "Faizabad", "Khuda Alisher", "Khuda Jassu", "Khuda Lahora", "Dhanas", "Hallomajra", "Makhan Majra", "Lahora"],
-    "Andaman and Nicobar Islands": ["Port Blair", "Car Nicobar", "Diglipur", "Mayabunder", "Rangat", "Havelock Island", "Neil Island", "Bambooflat", "Campbell Bay", "Wandoor", "Chidiyatapu", "Baratang", "Little Andaman", "Katchal", "Teressa", "Nancowry", "Karmarat", "Calicut", "Garacharma", "Ferrargunj", "Mimis"],
-    "Dadra and Nagar Haveli and Daman and Diu": ["Daman", "Diu", "Silvassa", "Naroli", "Amli", "Samarvarni", "Rakholi", "Khadoli", "Masat", "Varkund", "Kadaiya", "Devka", "Moti Daman", "Nani Daman", "Ghoghla", "Bucharwada", "Fudam", "Dadra", "Kharadpar", "Velugam"],
-    "Lakshadweep": ["Kavaratti", "Agatti", "Amini", "Androth", "Minicoy", "Kalpeni", "Kiltan", "Kadmat", "Chetlat", "Bitra", "Bangaram", "Suheli", "Cheriyapani", "Valiyapani", "Perumal Par", "Beliapani", "Bassas de Pedro", "Byramgore", "Sesostris Bank", "Elikalpeni", "Mangalore Reef"]
-}
-
+STATES_AND_UTS = {"Uttar Pradesh": ["Varanasi", "Lucknow", "Kanpur"], "Bihar": ["Patna", "Gaya"], "Punjab": ["Amritsar", "Ludhiana"]}
 PRE_MADE_ANSWERS = {
-    "How to grow wheat": "🌾 **Wheat Cultivation Guide:**\n1. **Soil & Climate:** Best grown in well-drained fertile loamy soils with cool temperatures (10-20°C).\n2. **Sowing Time:** Mid-November is ideal for maximum yield.\n3. **Irrigation:** Requires 4-6 irrigations, crucially at Crown Root Initiation (20-25 days after sowing).",
-    "How to grow rice": "🌾 **Rice (Paddy) Cultivation Guide:**\n1. **Soil & Climate:** Clayey or loam soil with high water retention; warm and humid climate.\n2. **Nursery & Transplanting:** Grow seedlings in nursery beds for 25-30 days, then transplant into puddled, waterlogged fields.\n3. **Water Management:** Maintain 2-5 cm of standing water during the vegetative stage.",
-    "What happened to my tomatoes? (Tomato Fruit Rot / Late Blight detected)": "🍅 **Diagnosis (Based on Attached Image):**\n- **Condition:** Tomato Fruit Rot / Late Blight (caused by *Phytophthora infestans*).\n- **Symptoms:** Dark, water-soaked, leathery brown-black sunken lesions on ripening fruit, often spreading from the stem end.\n- **Action:** Immediately remove and destroy infected fruits and leaves to stop spore spread. Apply a copper-based fungicide and ensure proper plant spacing for air circulation."
+    "How to grow wheat": "🌾 **Wheat Guide:** Use well-drained loamy soil, sow in mid-November, and provide 4-6 irrigations.",
+    "How to grow rice": "🌾 **Rice Guide:** Clayey soil, maintain 2-5 cm standing water in puddled fields.",
+    "What happened to my tomatoes?": "🍅 **Diagnosis:** Late Blight / Fruit Rot. Remove infected fruit and apply copper fungicide."
 }
 
-if "has_started" not in st.session_state: st.session_state["has_started"] = False
-if "tutorial_step" not in st.session_state: st.session_state["tutorial_step"] = 1
-if "loc_state" not in st.session_state: st.session_state["loc_state"] = "Uttar Pradesh"
-if "loc_city" not in st.session_state: st.session_state["loc_city"] = "Varanasi"
 if "query_input" not in st.session_state: st.session_state["query_input"] = ""
-if "tr_input" not in st.session_state: st.session_state["tr_input"] = ""
 
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/2329/2329117.png", width=75)
     lang = st.selectbox("🌐 Language", LANGUAGES)
     t = get_ui(lang)
-    
-    st.divider()
-    sel_state = st.selectbox("Select State / UT", list(STATES_AND_UTS.keys()), index=list(STATES_AND_UTS.keys()).index(st.session_state["loc_state"]), key="loc_state")
-    valid_cities = STATES_AND_UTS[sel_state]
-    if st.session_state["loc_city"] not in valid_cities: st.session_state["loc_city"] = valid_cities[0]
-    sel_city = st.selectbox("Select City", valid_cities, index=valid_cities.index(st.session_state["loc_city"]), key="loc_city")
-    
-    st.divider()
-    if st.button("🎮 Restart Tutorial"):
-        st.session_state["has_started"] = False
-        st.session_state["tutorial_step"] = 1
-        st.rerun()
-
-if not st.session_state["has_started"]:
-    step = st.session_state["tutorial_step"]
-    st.markdown(f"<div class='main-header'>{t['title']}</div><div class='sub-header'>Interactive Mission Briefing</div>", unsafe_allow_html=True)
-    
-    with st.container():
-        st.markdown("<div class='game-card'>", unsafe_allow_html=True)
-        if step == 1:
-            st.markdown("### 🏆 Mission 1: The AI Agronomist")
-            st.markdown("Welcome, Commander Ankur! Your mission is to assist farmers by diagnosing crop diseases instantly using AI vision and text analysis.")
-            if st.button("Next Mission ➡️"):
-                st.session_state["tutorial_step"] = 2
-                st.rerun()
-        elif step == 2:
-            st.markdown("### 📊 Mission 2: Smart Mandi Rates")
-            st.markdown("Track real-time market valuations across 500+ districts with automated quantity and unit conversion.")
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("⬅️ Previous"): st.session_state["tutorial_step"] = 1; st.rerun()
-            with col2:
-                if st.button("Next Mission ➡️"): st.session_state["tutorial_step"] = 3; st.rerun()
-        elif step == 3:
-            st.markdown("### 🔄 Mission 3: Multilingual Translator")
-            st.markdown("Translate agricultural insights seamlessly into all scheduled languages!")
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("⬅️ Previous"): st.session_state["tutorial_step"] = 2; st.rerun()
-            with col2:
-                if st.button("🚀 Launch KisanSetu!"): st.session_state["has_started"] = True; st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
-    st.stop()
+    sel_state = st.selectbox("State", list(STATES_AND_UTS.keys()))
+    sel_city = st.selectbox("City", STATES_AND_UTS[sel_state])
 
 def ask_openrouter(prompt_text):
-    key = st.secrets["OPENROUTER_API_KEY"]
-    url = "https://openrouter.ai/api/v1/chat/completions"
-    headers = {
-        "Authorization": f"Bearer {key}",
-        "Content-Type": "application/json",
-        "HTTP-Referer": "https://streamlit.io",
-        "X-Title": "KisanSetu"
-    }
-    payload = {
-        "model": "openrouter/free",
-        "messages": [{"role": "user", "content": prompt_text}]
-    }
-    
-    req = urllib.request.Request(url, headers=headers, data=json.dumps(payload).encode('utf-8'), method="POST")
-    with urllib.request.urlopen(req, timeout=15) as resp:
-        data = json.loads(resp.read().decode('utf-8'))
-        return data["choices"][0]["message"]["content"]
+    try:
+        key = st.secrets["OPENROUTER_API_KEY"]
+        req = urllib.request.Request("https://openrouter.ai/api/v1/chat/completions", 
+            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+            data=json.dumps({"model": "openrouter/free", "messages": [{"role": "user", "content": prompt_text}]}).encode('utf-8'), method="POST")
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return json.loads(resp.read().decode('utf-8'))["choices"][0]["message"]["content"]
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 st.markdown(f"<div class='main-header'>{t['title']}</div><div class='sub-header'>{t['sub']}</div>", unsafe_allow_html=True)
 
 tab1, tab2, tab3 = st.tabs([t['tab1'], t['tab2'], t['tab3']])
 
 with tab1:
-    st.markdown("#### ⚡ Quick Prompts (Instant Load):")
-    qp1, qp2, qp3 = st.columns(3)
-    if qp1.button("1. How to grow wheat"):
-        st.session_state["query_input"] = "How to grow wheat"
-    if qp2.button("2. How to grow rice"):
-        st.session_state["query_input"] = "How to grow rice"
-    if qp3.button("3. What happened to my tomatoes?"):
-        st.session_state["query_input"] = "What happened to my tomatoes? (Tomato Fruit Rot / Late Blight detected)"
-
-    st.divider()
+    col1, col2, col3 = st.columns(3)
+    if col1.button("How to grow wheat"): st.session_state["query_input"] = "How to grow wheat"
+    if col2.button("How to grow rice"): st.session_state["query_input"] = "How to grow rice"
+    if col3.button("Tomato Disease"): st.session_state["query_input"] = "What happened to my tomatoes?"
 
     q = st.text_input(t['ask'], value=st.session_state["query_input"], placeholder=t['ask_ph'])
-    
-    col_in1, col_in2 = st.columns(2)
-    with col_in1: cam_image = st.camera_input(t['cam'], key="cam_advisor")
-    with col_in2: up_image = st.file_uploader(t['up'], type=["png", "jpg", "jpeg"], key="up_advisor")
-    final_img = cam_image if cam_image else up_image
-    
+    cam = st.camera_input(t['cam'], key="c1")
+    up = st.file_uploader(t['up'], type=["png", "jpg"], key="u1")
+
     if st.button(t['btn_ai']):
-        if not q and not final_img:
-            st.warning("Please enter a question or upload a photo.")
+        if q in PRE_MADE_ANSWERS:
+            st.success(PRE_MADE_ANSWERS[q])
+        elif q or cam or up:
+            with st.spinner("Analyzing..."):
+                st.success(ask_openrouter(f"Practical farming advice in {lang} for {sel_city}: {q}"))
         else:
-            if q in PRE_MADE_ANSWERS:
-                st.success(PRE_MADE_ANSWERS[q])
-            else:
-                with st.spinner("⚡ AI is analyzing regional data..."):
-                    try:
-                        img_note = " [User attached crop image showing fruit rot/blight]" if final_img or "tomatoes" in q.lower() else ""
-                        prompt = f"You are KisanSetu AI, an expert agronomist. Provide direct, practical farming advice in {lang}. Factor in the local climate of {sel_city}, {sel_state}. Query{img_note}: {q}"
-                        ans = ask_openrouter(prompt)
-                        st.success(ans)
-                    except Exception as e:
-                        st.error(f"API Error: {str(e)}")
+            st.warning("Enter a query or upload an image.")
 
 with tab2:
-    CROPS = ["Wheat", "Paddy", "Potato", "Tomato", "Onion", "Sugarcane", "Cotton", "Maize"]
-    UNITS = ["Quintal (100kg)", "Kilogram (1kg)", "Tonne (1000kg)"]
-    BASE_PRICES = [2400, 2200, 1500, 3000, 2500, 350, 7000, 2100]
-    
-    st.markdown(f"### {t['mandi_title']} {sel_city}, {sel_state}")
-    col_c, col_u = st.columns(2)
-    with col_c: c_idx = st.selectbox(t['crop_lbl'], range(len(CROPS)), format_func=lambda x: CROPS[x])
-    with col_u: u_idx = st.selectbox(t['unit_lbl'], range(len(UNITS)), format_func=lambda x: UNITS[x])
-    
-    price = BASE_PRICES[c_idx] / 100 if u_idx == 1 else (BASE_PRICES[c_idx] * 10 if u_idx == 2 else BASE_PRICES[c_idx])
-    st.metric(CROPS[c_idx], f"₹{price:,.2f} / {UNITS[u_idx]}")
+    st.markdown(f"### {t['mandi_title']} {sel_city}")
+    st.metric("Wheat", "₹2,400 / Quintal")
+    st.metric("Paddy", "₹2,200 / Quintal")
 
 with tab3:
-    st.markdown(f"### {t['tr_title']}")
-    tr_text = st.text_area(t['tr_ph'], value=st.session_state["tr_input"])
-    
-    tr_col1, tr_col2 = st.columns(2)
-    with tr_col1: tr_cam = st.camera_input(t['cam'], key="cam_translator")
-    with tr_col2: tr_file = st.file_uploader(t['up'], type=["png", "jpg", "jpeg", "txt"], key="file_translator")
-    final_tr_media = tr_cam if tr_cam else tr_file
+    t_text = st.text_area(t['tr_ph'])
+    if st.button(t['tr_btn']) and t_text:
+        with st.spinner("Translating..."):
+            st.success(ask_openrouter(f"Translate into {lang}: {t_text}"))
 
-    if st.button(t['tr_btn']):
-        if not tr_text and not final_tr_media:
-            st.warning("Please enter text or upload an image/document to translate.")
-        else:
-            with st.spinner("Translating..."):
-                try:
-                    media_note = " [User provided an image/document to translate]" if final_tr_media else ""
-                    prompt = f"Translate the following text or media content directly into {lang}. Return only the translation without commentary:\nText: {tr_text}{media_note}"
-                    ans = ask_openrouter(prompt)
-                    st.success(ans)
-                except Exception as e:
-                    st.error(f"Translation Error: {str(e)}")
-
-st.markdown(f"<div class='footer'><b>{t['dev']}</b></div>", unsafe_allow_html=True)
+st.markdown(f"<div class='footer' style='text-align:center; color:#9ca3af; margin-top:40px; font-size:13px;'><b>{t['dev']}</b></div>", unsafe_allow_html=True)
