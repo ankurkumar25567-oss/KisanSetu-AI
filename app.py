@@ -48,7 +48,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- 🌐 22 SCHEDULED LANGUAGES ---
 LANGUAGES = [
     "English", "Hindi (हिंदी)", "Assamese (অসমীয়া)", "Bengali (বাংলা)", 
     "Bodo (बड़ो)", "Dogri (डोगरी)", "Gujarati (ગુજરાતી)", "Kannada (ಕನ್ನಡ)", 
@@ -58,7 +57,6 @@ LANGUAGES = [
     "Tamil (தமிழ்)", "Telugu (తెలుగు)", "Urdu (اردو)"
 ]
 
-# --- 🗺️ STATES & UTs ---
 STATES_AND_UTS = {
     "Uttar Pradesh": ["Varanasi", "Lucknow", "Kanpur", "Agra", "Prayagraj", "Meerut", "Ghaziabad", "Noida", "Bareilly", "Aligarh", "Moradabad", "Saharanpur", "Gorakhpur", "Firozabad", "Jhansi", "Muzaffarnagar", "Mathura", "Ayodhya", "Rampur", "Shahjahanpur", "Farrukhabad"],
     "Bihar": ["Patna", "Gaya", "Bhagalpur", "Muzaffarpur", "Purnia", "Darbhanga", "Bihar Sharif", "Arrah", "Begusarai", "Katihar", "Munger", "Chhapra", "Danapur", "Bettiah", "Saharsa", "Sasaram", "Hajipur", "Dehri", "Siwan", "Motihari", "Nawada"],
@@ -78,7 +76,7 @@ STATES_AND_UTS = {
     "Assam": ["Guwahati", "Silchar", "Dibrugarh", "Jorhat", "Nagaon", "Tinsukia", "Tezpur", "Bongaigaon", "Diphu", "North Lakhimpur", "Goalpara", "Barpeta", "Sivasagar", "Karimganj", "Dhubri", "Kokrajhar", "Hailakandi", "Mangaldoi", "Nalbari", "Rangia", "Margherita"],
     "Jharkhand": ["Ranchi", "Jamshedpur", "Dhanbad", "Bokaro", "Deoghar", "Hazaribagh", "Giridih", "Ramgarh", "Medininagar", "Chirkunda", "Phusro", "Jhumri Telaiya", "Sahibganj", "Lohardaga", "Dumka", "Godda", "Chatra", "Gumla", "Simdega", "Jamtara", "Garhwa"],
     "Chhattisgarh": ["Raipur", "Bhilai", "Bilaspur", "Korba", "Durg", "Rajnandgaon", "Raigarh", "Jagdalpur", "Ambikapur", "Dhamtari", "Chirmiri", "Mahasamund", "Bhatapara", "Kanker", "Kawardha", "Janjgir", "Naila", "Konta", "Kondagaon", "Dongargarh"],
-    "Uttarakhand": ["Dehradun", "Haridwar", "Roorkee", "Haldwani", "Rudrapur", "Kashipur", "Rishikesh", "Pithoragarh", "Ramnagar", "Almora", "Nainital", "Kotdwar", "Tehri", "Joshimath", "Bageshwar", "Champawat", "Uttarkashi", "Ranikhet", "Vikasnagar", "Manglaur"],
+    "Uttarakhand": ["Dehradun", "Haridwar", "Roorkee", "Haldwani", "Rudrapur", "Kashipur", "Rishikesh", "Pithoragarh", "Ramnagar", "Almora", "Nainital", "Kotdwar", "Tehri", "Muskuri", "Joshimath", "Bageshwar", "Champawat", "Uttarkashi", "Ranikhet", "Vikasnagar", "Manglaur"],
     "Himachal Pradesh": ["Shimla", "Mandi", "Solan", "Dharamshala", "Palampur", "Baddi", "Nahan", "Kullu", "Chamba", "Hamirpur", "Una", "Bilaspur", "Kasauli", "Manali", "Dalhousie", "Paonta Sahib", "Nurpur", "Jogindernagar", "Rampur", "Sundernagar", "Keylong"],
     "Goa": ["Panaji", "Margao", "Vasco da Gama", "Mapusa", "Ponda", "Bicholim", "Curchorem", "Sanquelim", "Quepem", "Canacona", "Cuncolim", "Sanguem", "Pernem", "Valpoi", "Duler", "Porvorim", "Aldona", "Anjuna", "Calangute", "Candolim", "Colva"],
     "Tripura": ["Agartala", "Udaipur", "Dharmanagar", "Kailashahar", "Belonia", "Khowai", "Ambassa", "Teliamura", "Melaghar", "Sonamura", "Amarpur", "Sabroom", "Ranirbazar", "Jirania", "Mohanpur", "Kumarghat", "Kamalpur", "Panisagar", "Bishalgarh", "Kachucherra", "Manughat"],
@@ -98,7 +96,6 @@ STATES_AND_UTS = {
     "Lakshadweep": ["Kavaratti", "Agatti", "Amini", "Androth", "Minicoy", "Kalpeni", "Kiltan", "Kadmat", "Chetlat", "Bitra", "Bangaram", "Suheli", "Cheriyapani", "Valiyapani", "Perumal Par", "Beliapani", "Bassas de Pedro", "Byramgore", "Sesostris Bank", "Elikalpeni", "Mangalore Reef"]
 }
 
-# --- COMPLETE LOCALIZED UI DICTIONARY (22 LANGUAGES SUPPORT) ---
 UI_TEXT = {
     "English": {
         "title": "🌾 KisanSetu", "sub": "Smart AI Agriculture Platform",
@@ -175,14 +172,15 @@ PRE_MADE_ANSWERS = {
     "गेहूं कैसे उगाएं": "🌾 **गेहूं गाइड:** अच्छी तरह से सूखा हुआ दोमट मिट्टी का उपयोग करें, मध्य नवंबर में बुवाई करें, और 4-6 सिंचाई करें।",
     "ਕਣਕ ਕਿਵੇਂ ਉਗਾਉਣੀ ਹੈ": "🌾 **ਕਣਕ ਗਾਈਡ:** ਚੰਗੀ ਤਰ੍ਹਾਂ ਨਿਕਾਸ ਵਾਲੀ ਦੋਮਟ ਮਿੱਟੀ ਦੀ ਵਰਤੋਂ ਕਰੋ, ਨਵੰਬਰ ਦੇ ਵਿਚਕਾਰ ਬਿਜਾਈ ਕਰੋ।",
     "గోధుమలు ఎలా పండించాలి": "🌾 **గోధుమ గైడ్:** బాగా నీరు ఇంకే నేలను ఉపయోగించండి, నవంబర్ మధ్యలో విత్తనాలు వేయండి.",
-    "কীভাবে গম চাষ করবেন": "🌾 **গম গাইড:** ভালো নিষ্কাশনযুক্ত দোআঁশ মাটি ব্যবহার করুন, নভেম্বরের মাঝামাঝি বপন করুন।",
+    "কীভাবে গম চাষ করবেন": "🌾 **গম গাইড:** ভালো নিষ্কাশনযুক্ত দোআঁশ মাটি ব্যবহার করুন, নভেম্বরের মাঝামাঝি বপন করুন.",
     
     "How to grow rice": "🌾 **Rice Guide:** Clayey soil, maintain 2-5 cm standing water in puddled fields.",
     "चावल कैसे उगाएं": "🌾 **चावल गाइड:** चिकनी मिट्टी, जमे हुए खेतों में 2-5 सेमी खड़े पानी को बनाए रखें।",
     "ਝੋਨਾ ਕਿਵੇਂ ਉਗਾਉਣਾ ਹੈ": "🌾 **ਝੋਨਾ ਗਾਈਡ:** ਚੀਕਣੀ ਮਿੱਟੀ, ਖੇਤਾਂ ਵਿੱਚ 2-5 ਸੈਂਟੀਮੀਟਰ ਖੜ੍ਹਾ ਪਾਣੀ ਰੱਖੋ।",
     "వరి ఎలా సాగు చేయాలి": "🌾 **వరి గైడ్:** బంకమట్టి నేల, పొలంలో 2-5 సెం.మీ నీరు నిల్వ ఉండేలా చూసుకోండి.",
-    "কীভাবে ধান চাষ করবেন": "🌾 **ধান গাইড:** এঁটেল মাটি, জমিতে ২-৫ সেমি জল জমিয়ে রাখুন।",
+    "কীভাবে ধান চাষ করবেন": "🌾 **ধান গাইড:** এঁটেল মাটি, জমিতে ২-৫ সেমি জল জমিয়ে রাখুন.",
     
     "What happened to my tomatoes?": "🍅 **Diagnosis:** Late Blight / Fruit Rot. Remove infected fruit and apply copper fungicide.",
     "मेरे टमाटर को क्या हुआ?": "🍅 **निदान:** लेट ब्लाइट / फ्रूट रोट। संक्रमित फल को हटाएं और कॉपर फंगसाइड लगाएं।",
-    "ਮੇਰੇ ਟਮਾਟਰਾਂ ਨੂੰ ਕੀ ਹੋਇਆ?": "🍅 **ਡਾਇਗਨੌਸਿਸ:** ਲੇਟ ਬਲਾਈਟ / ਫਰूट ਰੋਟ। 
+    "ਮੇਰੇ ਟਮਾਟਰਾਂ ਨੂੰ ਕੀ ਹੋਇਆ?": "🍅 **ਡਾਇਗਨੌਸਿਸ:** ਲੇਟ ਬਲਾਈਟ / ਫਰूट ਰੋਟ। ਲਾਗ ਵਾਲੇ ਫਲ ਨੂੰ ਹਟਾਓ।",
+    "నా టమాటాలకు ఏమైంది?": "🍅 **రోగ నిర్ధారణ:** లేట్ బ్లైట్ / ఫ్రూట్ రాట్. సోకిన పండ్లను తొలగ
