@@ -105,7 +105,7 @@ MANDI_CROPS = {
     "Cumin / Jeera (जीरा)": 25000, "Fennel / Saunf (सौंफ)": 10000, "Fenugreek / Methi (मेथी)": 5500, "Black Pepper (काली मिर्च)": 50000,
     "Cardamom (इलायची)": 120000, "Tea (चाय पत्ती)": 20000, "Coffee (कॉफी)": 18000, "Coconut (नारियल)": 3000,
     "Banana (केला)": 2000, "Mango (आम)": 4500, "Apple (सेब)": 8000, "Orange (संतरा)": 4000,
-    "Grapes (अंगूर)": 6000, "Papaya (पपीता)": 2500, "Pomegranate (अनार)": 9000, "Guava (अमरूद)": 3500,
+    "Grapes (अंगूर)": 6000, "Papaya (পपीता)": 2500, "Pomegranate (अनार)": 9000, "Guava (अमरूद)": 3500,
     "Pineapple (अनानास)": 3000, "Jackfruit (कठहल)": 2000
 }
 
@@ -179,9 +179,9 @@ INSTANT_ANSWERS = {
     "how to grow rice": "🌾 **Rice Cultivation Guide:** Use clayey or loam soil, raise nursery seedlings for 25-30 days, transplant into puddled fields, and maintain 2-5 cm of standing water.",
     "how to grow wheat": "🌾 **Wheat Cultivation Guide:** Best grown in well-drained loamy soil, sow in mid-November, and provide 4-6 crucial irrigations starting from crown root initiation.",
     "what is the best type of fertilzer": "🧪 **Best Fertilizer Guide:** Balanced NPK (19:19:19) for general crop growth, Urea for nitrogen boost, and organic vermicompost/FYM for long-term soil health.",
-    "चावल कैसे उगाएं": "🌾 **चावल गाइड:** चिकनी मिट्टी का प्रयोग करें, 25-30 दिनों के लिए नर्सरी तैयार करें, और खेतों में 2-5 सेमी पानी बनाए रखें।",
-    "गेहूं कैसे उगाएं": "🌾 **गेहूं गाइड:** अच्छी जल निकासी वाली दोमट मिट्टी का उपयोग करें, 25-30 दिनों के लिए नर्सरी तैयार करें, और खेतों में 2-5 सेमी पानी बनाए रखें।",
-    "गेहूं कैसे उगाएं": "🌾 **गेहूं गाइड:** अच्छी जल निकासी वाली दोमट मिट्टी का उपयोग करें, मध्य नवंबर में बुवाई करें और 4-6 सिंचाई दें।",
+    "चावल कैसे उगाएं": "🌾 **चावल गाइड:** चिकनी मिट्टी का प्रयोग करें, 25-30 दिनों के लिए नर्सरी तैयार करें, और खेतों में 2-5 सेमी पानी बनाए रखें。",
+    "गेहूं कैसे उगाएं": "🌾 **गेहूं गाइड:** अच्छी जल निकासी वाली दोमट मिट्टी का उपयोग करें, 25-30 दिनों के लिए नर्सरी तैयार करें, और खेतों में 2-5 सेमी पानी बनाए रखें。",
+    "गेहूं कैसे उगाएं": "🌾 **गेहूं गाइड:** अच्छी जल निकासी वाली दोमट मिट्टी का उपयोग करें, मध्य नवंबर में बुवाई करें और 4-6 सिंचाई दें。",
     "सबसे अच्छा उर्वरक कौन सा है": "🧪 **सर्वोत्तम उर्वरक:** सामान्य वृद्धि के लिए संतुलित NPK (19:19:19) और मिट्टी की सेहत के लिए जैविक खाद।"
 }
 
@@ -207,7 +207,7 @@ def ask_openrouter(prompt_text):
         req = urllib.request.Request("https://openrouter.ai/api/v1/chat/completions", 
             headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
             data=json.dumps({
-                "model": "openrouter/free", 
+                "model": "meta-llama/llama-3.1-8b-instruct:free", 
                 "messages": [{"role": "user", "content": prompt_text}],
                 "max_tokens": 250,
                 "temperature": 0.3
@@ -248,7 +248,6 @@ with tab1:
 
     if st.button(t['btn_ai']):
         normalized_q = q.strip().lower()
-        # Check if typed query matches any instant answers
         matched_ans = None
         for k, v in INSTANT_ANSWERS.items():
             if k.lower() in normalized_q:
