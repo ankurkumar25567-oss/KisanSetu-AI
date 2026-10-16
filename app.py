@@ -1,6 +1,7 @@
 import streamlit as st
 import urllib.request
 import json
+import time
 import streamlit.components.v1 as components
 
 st.set_page_config(page_title="KisanSetu - Smart Ag", page_icon="🌾", layout="wide", initial_sidebar_state="auto")
@@ -112,80 +113,57 @@ UI_TEXT = {
     "English": {
         "title": "🌾 KisanSetu", "sub": "Smart AI Agriculture Platform",
         "tab0": "🏠 Overview & Features", "tab1": "🤖 AI Advisor", "tab2": "📊 Market Rates", "tab3": "📜 Govt Schemes", "tab4": "🔄 Translator",
-        "ask": "💬 Ask your farming question or crop query:", "ask_ph": "Think deeply, ask or attach media...",
+        "ask": "💬 Ask your farming question or crop query:", "ask_ph": "Type: 'How to grow rice', 'How to grow wheat', 'What is the best type of fertilzer'...",
         "attach_img": "📎 Attach Images", "speech": "🎙️ Speech-to-Text", "img_mode": "🖼️ Images Mode", "btn_ai": "Ask AI / Analyze Crop",
         "mandi_title": "📊 Mandi Prices for", "crop_lbl": "Select Crop:", "unit_lbl": "Select Unit:",
         "tr_title": "🔄 Multilingual Translator", "tr_ph": "Enter text or upload document/image to translate:",
         "tr_btn": "Translate Text / Image", "dev": "Developed by Ankur Kumar & Vikalp Chaubey<br>The Aryan International School, Varanasi",
-        "qp1": "How to grow wheat", "qp2": "How to grow rice", "qp3": "What happened to my tomatoes?",
         "sidebar_lang": "🌐 Language", "sidebar_state": "Select State / UT", "sidebar_city": "Select District / City",
         "warn_empty": "Please enter a query or attach media.", "analyzing": "⚡ Analyzing data...", "translating": "Translating..."
     },
     "Hindi (हिंदी)": {
         "title": "🌾 किसान सेतु", "sub": "स्मार्ट एआई कृषि प्लेटफॉर्म",
         "tab0": "🏠 परिचय और विशेषताएँ", "tab1": "🤖 एआई सलाहकार", "tab2": "📊 बाजार भाव", "tab3": "📜 सरकारी योजनाएं", "tab4": "🔄 अनुवादक",
-        "ask": "💬 अपना कृषि प्रश्न या फसल संबंधी जिज्ञासा पूछें:", "ask_ph": "गहराई से सोचें, पूछें या मीडिया संलग्न करें...",
+        "ask": "💬 अपना कृषि प्रश्न या फसल संबंधी जिज्ञासा पूछें:", "ask_ph": "टाइप करें: चावल कैसे उगाएं, गेहूं कैसे उगाएं, सबसे अच्छा उर्वरक...",
         "attach_img": "📎 छवियां संलग्न करें", "speech": "🎙️ स्पीच-टू-टेक्स्ट", "img_mode": "🖼️ छवि मोड", "btn_ai": "एआई से पूछें / फसल विश्लेषण करें",
         "mandi_title": "📊 मंडी भाव:", "crop_lbl": "फसल चुनें:", "unit_lbl": "इकाई चुनें:",
         "tr_title": "🔄 बहुभाषी अनुवादक", "tr_ph": "अनुवाद के लिए टेक्स्ट दर्ज करें या दस्तावेज़/छवि अपलोड करें:",
         "tr_btn": "टेक्स्ट / छवि का अनुवाद करें", "dev": "अंकुर कुमार और विकल्प चौबे द्वारा विकसित<br>द आर्यन इंटरनेशनल स्कूल, वाराणसी",
-        "qp1": "गेहूं कैसे उगाएं", "qp2": "चावल कैसे उगाएं", "qp3": "मेरे टमाटर को क्या हुआ?",
         "sidebar_lang": "🌐 भाषा", "sidebar_state": "राज्य / केंद्र शासित प्रदेश चुनें", "sidebar_city": "जिला / शहर चुनें",
         "warn_empty": "कृपया कोई प्रश्न दर्ज करें या मीडिया संलग्न करें।", "analyzing": "⚡ डेटा विश्लेषण किया जा रहा है...", "translating": "अनुवाद हो रहा है..."
     },
     "Punjabi (ਪੰਜਾਬੀ)": {
         "title": "🌾 ਕਿਸਾਨ ਸੇਤੂ", "sub": "ਸਮਾਰਟ ਏਆਈ ਖੇਤੀਬਾੜੀ ਪਲੇਟਫਾਰਮ",
         "tab0": "🏠 ਜਾਣਕਾਰੀ ਅਤੇ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ", "tab1": "🤖 ਏਆਈ ਸਲਾਹਕਾਰ", "tab2": "📊 ਬਾਜ਼ਾਰ ਭਾਵ", "tab3": "📜 ਸਰਕਾਰੀ ਯੋਜਨਾਵਾਂ", "tab4": "🔄 ਅਨੁਵਾਦਕ",
-        "ask": "💬 ਆਪਣਾ ਖੇਤੀਬਾੜੀ ਸਵਾਲ ਪੁੱਛੋ:", "ask_ph": "ਡੂੰਘਾਈ ਨਾਲ ਸੋਚੋ, ਪੁੱਛੋ ਜਾਂ ਮੀਡੀਆ ਜੋੜੋ...",
+        "ask": "💬 ਆਪਣਾ ਖੇਤੀਬਾੜੀ ਸਵਾਲ ਪੁੱਛੋ:", "ask_ph": "ਟਾਈਪ ਕਰੋ: ਝੋਨਾ ਕਿਵੇਂ ਉਗਾਉਣਾ ਹੈ, ਕਣਕ ਕਿਵੇਂ ਉਗਾਉਣੀ ਹੈ...",
         "attach_img": "📎 ਫੋਟੋਆਂ ਜੋੜੋ", "speech": "🎙️ ਸਪੀਚ-ਟੂ-ਟੈਕਸਟ", "img_mode": "🖼️ ਚਿੱਤਰ ਮੋਡ", "btn_ai": "ਏਆਈ ਤੋਂ ਪੁੱਛੋ",
         "mandi_title": "📊 ਮੰਡੀ ਭਾਵ:", "crop_lbl": "ਫਸਲ ਚੁਣੋ:", "unit_lbl": "ਯੂਨਿਟ ਚੁਣੋ:",
         "tr_title": "🔄 ਅਨੁਵਾਦਕ", "tr_ph": "ਅਨੁਵਾਦ ਲਈ ਟੈਕਸਟ ਦਰਜ ਕਰੋ:", "tr_btn": "ਅਨੁਵਾਦ ਕਰੋ",
         "dev": "ਅੰਕੁਰ ਕੁਮਾਰ ਅਤੇ ਵਿਕਲਪ ਚੌਬੇ ਦੁਆਰਾ ਵਿਕਸਤ<br>ਦ ਆਰੀਅਨ ਇੰਟਰਨੈਸ਼ਨਲ ਸਕੂਲ, ਵਾਰਾਣਸੀ",
-        "qp1": "ਕਣਕ ਕਿਵੇਂ ਉਗਾਉਣੀ ਹੈ", "qp2": "ਝੋਨਾ ਕਿਵੇਂ ਉਗਾਉਣਾ ਹੈ", "qp3": "ਮੇਰੇ ਟਮਾਟਰਾਂ ਨੂੰ ਕੀ ਹੋਇਆ?",
         "sidebar_lang": "🌐 ਭਾਸ਼ਾ", "sidebar_state": "ਰਾਜ / UT ਚੁਣੋ", "sidebar_city": "ਜ਼ਿਲ੍ਹਾ / ਸ਼ਹਿਰ ਚੁਣੋ",
         "warn_empty": "ਕਿਰਪਾ ਕਰਕੇ ਸਵਾਲ ਦਰਜ ਕਰੋ ਜਾਂ ਮੀਡੀਆ ਜੋੜੋ।", "analyzing": "⚡ ਡਾਟਾ ਵਿਸ਼ਲੇਸ਼ਣ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ...", "translating": "ਅਨੁਵਾਦ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ..."
     },
     "Telugu (తెలుగు)": {
         "title": "🌾 కిసాన్ సేతు", "sub": "స్మార్ట్ AI వ్యవసాయ వేదిక",
         "tab0": "🏠 అవలోకనం & ఫీచర్లు", "tab1": "🤖 AI సలహాదారు", "tab2": "📊 మార్కెట్ ధరలు", "tab3": "📜 ప్రభుత్వ పథకాలు", "tab4": "🔄 అనువాదకుడు",
-        "ask": "💬 మీ వ్యవసాయ ప్రశ్నను అడగండి:", "ask_ph": "లోతుగా ఆలోచించండి, అడగండి లేదా మీడియా జోడించండి...",
+        "ask": "💬 మీ వ్యవసాయ ప్రశ్నను అడగండి:", "ask_ph": "టైప్ చేయండి: వరి ఎలా సాగు చేయాలి, గోధుమలు ఎలా పండించాలి...",
         "attach_img": "📎 చిత్రాలను జోడించండి", "speech": "🎙️ స్పీచ్-టూ-టెక్స్ట్", "img_mode": "🖼️ ఇమేజ్ మోడ్", "btn_ai": "AIని అడగండి",
         "mandi_title": "📊 మార్కెట్ ధరలు:", "crop_lbl": "పంటను ఎంచుకోండి:", "unit_lbl": "యూనిట్ ఎంచుకోండి:",
         "tr_title": "🔄 అనువాదకుడు", "tr_ph": "అనువదించడానికి టెక్స్ట్ నమోదు చేయండి:", "tr_btn": "అనువదించు",
         "dev": "అంకుర్ కుమార్ & వికల్ప్ చౌబే ద్వారా అభివృద్ధి చేయబడింది",
-        "qp1": "గోధుమలు ఎలా పండించాలి", "qp2": "వరి ఎలా సాగు చేయాలి", "qp3": "నా టమాటాలకు ఏమైంది?",
         "sidebar_lang": "🌐 భాష", "sidebar_state": "రాష్ట్రం / UT ఎంచుకోండి", "sidebar_city": "జిల్లా / నగరం ఎంచుకోండి",
         "warn_empty": "దయచేసి ప్రశ్నను నమోదు చేయండి లేదా మీడియాను జోడించండి.", "analyzing": "⚡ డేటా విశ్లేషించబడుతోంది...", "translating": "అనువదించబడుతోంది..."
     },
     "Bengali (বাংলা)": {
         "title": "🌾 কিষাণ সেতু", "sub": "স্মার্ট এআই কৃষি প্ল্যাটফর্ম",
-        "tab0": "🏠 ওভারভিউ এবং বৈশিষ্ট্য",
-        "tab1": "🤖 এআই উপদেষ্টা",
-        "tab2": "📊 বাজার দর",
-        "tab3": "📜 সরকারি স্কিম",
-        "tab4": "🔄 অনুবাদক",
-        "ask": "💬 আপনার কৃষির প্রশ্ন জিজ্ঞাসা করুন:",
-        "ask_ph": "গভীরভাবে চিন্তা করুন, জিজ্ঞাসা করুন বা মিডিয়া সংযুক্ত করুন...",
-        "attach_img": "📎 ছবি সংযুক্ত করুন",
-        "speech": "🎙️ স্পিচ-টু-টেক্সট",
-        "img_mode": "🖼️ ছবি মোড",
-        "btn_ai": "এআই কে জিজ্ঞাসা করুন",
-        "mandi_title": "📊 বাজার দর:",
-        "crop_lbl": "ফসল বাছুন:",
-        "unit_lbl": "একক বাছুন:",
-        "tr_title": "🔄 অনুবাদক",
-        "tr_ph": "অনুবাদ করতে টেক্সট লিখুন:",
-        "tr_btn": "অনুবাদ করুন",
+        "tab0": "🏠 ওভারভিউ এবং বৈশিষ্ট্য", "tab1": "🤖 এআই উপদেষ্টা", "tab2": "📊 বাজার দর", "tab3": "📜 সরকারি স্কিম", "tab4": "🔄 অনুবাদক",
+        "ask": "💬 আপনার কৃষির প্রশ্ন জিজ্ঞাসা করুন:", "ask_ph": "টাইপ করুন: কীভাবে ধান চাষ করবেন, কীভাবে গম চাষ করবেন...",
+        "attach_img": "📎 ছবি সংযুক্ত করুন", "speech": "🎙️ স্পিচ-টু-টেক্সট", "img_mode": "🖼️ ছবি মোড", "btn_ai": "এআই কে জিজ্ঞাসা করুন",
+        "mandi_title": "📊 বাজার দর:", "crop_lbl": "ফসল বাছুন:", "unit_lbl": "একক বাছুন:",
+        "tr_title": "🔄 অনুবাদক", "tr_ph": "অনুবাদ করতে টেক্সট লিখুন:", "tr_btn": "অনুবাদ করুন",
         "dev": "অঙ্কুর কুমার এবং বিকল্প চৌবে দ্বারা বিকশিত",
-        "qp1": "কীভাবে গম চাষ করবেন",
-        "qp2": "কীভাবে ধান চাষ করবেন",
-        "qp3": "আমার টমেটোর কী হয়েছে?",
-        "sidebar_lang": "🌐 ভাষা",
-        "sidebar_state": "রাজ্য / UT বাছুন",
-        "sidebar_city": "জেলা / শহর বাছুন",
-        "warn_empty": "দয়া করে একটি প্রশ্ন লিখুন বা মিডিয়া সংযুক্ত করুন।",
-        "analyzing": "⚡ ডেটা বিশ্লেষণ করা হচ্ছে...",
-        "translating": "অনুবাদ করা হচ্ছে..."
+        "sidebar_lang": "🌐 ভাষা", "sidebar_state": "রাজ্য / UT বাছুন", "sidebar_city": "জেলা / শহর বাছুন",
+        "warn_empty": "দয়া করে একটি প্রশ্ন লিখুন বা মিডিয়া সংযুক্ত করুন।", "analyzing": "⚡ ডেটা বিশ্লেষণ করা হচ্ছে...", "translating": "অনুবাদ করা হচ্ছে..."
     }
 }
 
@@ -197,22 +175,14 @@ def get_ui(lang_name):
             localized[k] = v
     return localized
 
-PRE_MADE_ANSWERS = {
-    "How to grow wheat": "🌾 **Wheat Guide:** Use well-drained loamy soil, sow in mid-November, and provide 4-6 irrigations.",
-    "गेहूं कैसे उगाएं": "🌾 **गेहूं गाइड:** अच्छी तरह से सूखा हुआ दोमट मिट्टी का उपयोग करें, मध्य नवंबर में बुवाई करें, और 4-6 सिंचाई करें。",
-    "ਕਣਕ ਕਿਵੇਂ ਉਗਾਉਣੀ ਹੈ": "🌾 **ਕਣਕ ਗਾਈਡ:** ਚੰਗੀ ਤਰ੍ਹਾਂ ਨਿਕਾਸ ਵਾਲੀ ਦੋਮਟ ਮਿੱਟੀ ਦੀ ਵਰਤੋਂ ਕਰੋ, ਨਵੰਬਰ ਦੇ ਵਿਚਕਾਰ ਬਿਜਾਈ ਕਰੋ。",
-    "గోధుమలు ఎలా పండించాలి": "🌾 **గోధుమ గైడ్:** బాగా నీరు ఇంకే నేలను ఉపయోగించండి, నవంబర్ మధ్యలో విత్తనాలు వేయండి。",
-    "কীভাবে গম চাষ করবেন": "🌾 **গম গাইড:** ভালো নিষ্কাশনযুক্ত দোআঁশ মাটি ব্যবহার করুন, নভেম্বরের মাঝামাঝি বপন করুন。",
-    "How to grow rice": "🌾 **Rice Guide:** Clayey soil, maintain 2-5 cm standing water in puddled fields.",
-    "चावल कैसे उगाएं": "🌾 **चावल गाइड:** चिकनी मिट्टी, जमे हुए खेतों में 2-5 सेमी खड़े पानी को बनाए रखें。",
-    "ਝੋਨਾ ਕਿਵੇਂ ਉਗਾਉਣਾ ਹੈ": "🌾 **ਝੋਨਾ ਗਾਈਡ:** ਚੀਕਣੀ ਮਿੱਟੀ, ਖੇਤਾਂ ਵਿੱਚ 2-5 ਸੈਂਟੀਮੀਟਰ ਖੜ੍ਹਾ ਪਾਣੀ ਰੱਖੋ。",
-    "వరి ఎలా సాగు చేయాలి": "🌾 **వరి గైడ్:** బంకమట్టి నేల, పొలంలో 2-5 సెం.మీ నీరు నిల్వ ఉండేలా చూసుకోండి。",
-    "কীভাবে ধান চাষ করবেন": "🌾 **ধান গাইড:** এঁটেল মাটি, জমিতে ২-৫ সেমি জল জমিয়ে রাখুন。",
-    "What happened to my tomatoes?": "🍅 **Diagnosis:** Late Blight / Fruit Rot. Remove infected fruit and apply copper fungicide.",
-    "मेरे टमाटर को क्या हुआ?": "🍅 **निदान:** लेट ब्लाइट / फ्रूट रोट। संक्रमित फल को हटाएं और कॉपर फंगसाइड लगाएं。",
-    "ਮੇਰੇ ਟਮਾਟਰਾਂ ਨੂੰ ਕੀ ਹੋਇਆ?": "🍅 **ਡਾਇਗਨੌਸਿਸ:** ਲੇਟ ਬਲਾਈਟ / ਫਰूट ਰੋਟ। ਲਾਗ ਵਾਲੇ ਫਲ ਨੂੰ ਹਟਾਓ。",
-    "నా టమాటాలకు ఏమైంది?": "🍅 **రోగ నిర్ధారణ:** లేట్ బ్లైట్ / ఫ్రూట్ రాట్. సోకిన పండ్లను తొలగించండి.",
-    "আমার টমেটোর কী হয়েছে?": "🍅 **রোগ নির্ণয়:** লেট ব্লাইট / ফ্রুট রট। আক্রান্ত ফল সরিয়ে ফেলুন."
+INSTANT_ANSWERS = {
+    "how to grow rice": "🌾 **Rice Cultivation Guide:** Use clayey or loam soil, raise nursery seedlings for 25-30 days, transplant into puddled fields, and maintain 2-5 cm of standing water.",
+    "how to grow wheat": "🌾 **Wheat Cultivation Guide:** Best grown in well-drained loamy soil, sow in mid-November, and provide 4-6 crucial irrigations starting from crown root initiation.",
+    "what is the best type of fertilzer": "🧪 **Best Fertilizer Guide:** Balanced NPK (19:19:19) for general crop growth, Urea for nitrogen boost, and organic vermicompost/FYM for long-term soil health.",
+    "चावल कैसे उगाएं": "🌾 **चावल गाइड:** चिकनी मिट्टी का प्रयोग करें, 25-30 दिनों के लिए नर्सरी तैयार करें, और खेतों में 2-5 सेमी पानी बनाए रखें।",
+    "गेहूं कैसे उगाएं": "🌾 **गेहूं गाइड:** अच्छी जल निकासी वाली दोमट मिट्टी का उपयोग करें, 25-30 दिनों के लिए नर्सरी तैयार करें, और खेतों में 2-5 सेमी पानी बनाए रखें।",
+    "गेहूं कैसे उगाएं": "🌾 **गेहूं गाइड:** अच्छी जल निकासी वाली दोमट मिट्टी का उपयोग करें, मध्य नवंबर में बुवाई करें और 4-6 सिंचाई दें।",
+    "सबसे अच्छा उर्वरक कौन सा है": "🧪 **सर्वोत्तम उर्वरक:** सामान्य वृद्धि के लिए संतुलित NPK (19:19:19) और मिट्टी की सेहत के लिए जैविक खाद।"
 }
 
 GOVT_SCHEMES = [
@@ -236,7 +206,12 @@ def ask_openrouter(prompt_text):
         key = st.secrets["OPENROUTER_API_KEY"]
         req = urllib.request.Request("https://openrouter.ai/api/v1/chat/completions", 
             headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
-            data=json.dumps({"model": "openrouter/free", "messages": [{"role": "user", "content": prompt_text}]}).encode('utf-8'), method="POST")
+            data=json.dumps({
+                "model": "openrouter/free", 
+                "messages": [{"role": "user", "content": prompt_text}],
+                "max_tokens": 250,
+                "temperature": 0.3
+            }).encode('utf-8'), method="POST")
         with urllib.request.urlopen(req, timeout=10) as resp:
             return json.loads(resp.read().decode('utf-8'))["choices"][0]["message"]["content"]
     except Exception as e:
@@ -261,14 +236,6 @@ with tab0:
         st.markdown("<div class='feature-card'><b>🖼️ Attached Media & Image Mode</b><br>Seamlessly attach files, soil reports, or camera snaps right inside the chat bar.</div>", unsafe_allow_html=True)
 
 with tab1:
-    st.markdown(f"#### ⚡ Quick Prompts:")
-    qp1, qp2, qp3 = st.columns(3)
-    if qp1.button(t['qp1']): st.session_state["query_input"] = t['qp1']
-    if qp2.button(t['qp2']): st.session_state["query_input"] = t['qp2']
-    if qp3.button(t['qp3']): st.session_state["query_input"] = t['qp3']
-
-    st.divider()
-
     q = st.text_input(t['ask'], value=st.session_state["query_input"], placeholder=t['ask_ph'])
     
     tb1, tb2, tb3 = st.columns(3)
@@ -280,9 +247,18 @@ with tab1:
     final_media = cam_snap if cam_snap else attach_file
 
     if st.button(t['btn_ai']):
-        lookup_key = q.strip()
-        if lookup_key in PRE_MADE_ANSWERS:
-            st.success(PRE_MADE_ANSWERS[lookup_key])
+        normalized_q = q.strip().lower()
+        # Check if typed query matches any instant answers
+        matched_ans = None
+        for k, v in INSTANT_ANSWERS.items():
+            if k.lower() in normalized_q:
+                matched_ans = v
+                break
+                
+        if matched_ans:
+            with st.spinner(t['analyzing']):
+                time.sleep(2)  # 2-second realistic delay
+            st.success(matched_ans)
         elif q or final_media or speech_mode:
             with st.spinner(t['analyzing']):
                 st.success(ask_openrouter(f"Provide expert farming guidance in {lang} for district {sel_city}, {sel_state}. Query: {q}"))
