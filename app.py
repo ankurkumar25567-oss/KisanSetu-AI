@@ -105,7 +105,7 @@ MANDI_CROPS = {
     "Cumin / Jeera (जीरा)": 25000, "Fennel / Saunf (सौंफ)": 10000, "Fenugreek / Methi (मेथी)": 5500, "Black Pepper (काली मिर्च)": 50000,
     "Cardamom (इलायची)": 120000, "Tea (चाय पत्ती)": 20000, "Coffee (कॉफी)": 18000, "Coconut (नारियल)": 3000,
     "Banana (केला)": 2000, "Mango (आम)": 4500, "Apple (सेब)": 8000, "Orange (संतरा)": 4000,
-    "Grapes (अंगूर)": 6000, "Papaya (পपीता)": 2500, "Pomegranate (अनार)": 9000, "Guava (अमरूद)": 3500,
+    "Grapes (अंगूर)": 6000, "Papaya (पपीता)": 2500, "Pomegranate (अनार)": 9000, "Guava (अमरूद)": 3500,
     "Pineapple (अनानास)": 3000, "Jackfruit (कठहल)": 2000
 }
 
@@ -202,20 +202,39 @@ with st.sidebar:
     sel_city = st.selectbox(t['sidebar_city'], valid_cities)
 
 def ask_openrouter(prompt_text):
-    try:
-        key = st.secrets["OPENROUTER_API_KEY"]
-        req = urllib.request.Request("https://openrouter.ai/api/v1/chat/completions", 
-            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
-            data=json.dumps({
-                "model": "meta-llama/llama-3.1-8b-instruct:free", 
-                "messages": [{"role": "user", "content": prompt_text}],
-                "max_tokens": 250,
-                "temperature": 0.3
-            }).encode('utf-8'), method="POST")
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            return json.loads(resp.read().decode('utf-8'))["choices"][0]["message"]["content"]
-    except Exception as e:
-        return f"Error: {str(e)}"
+    models_to_try = [
+        "meta-llama/llama-3.1-8b-instruct:free",
+        "google/gemma-2-9b-it:free",
+        "mistralai/mistral-7b-instruct:free"
+    ]
+    key = st.secrets["OPENROUTER_API_KEY"]
+    
+    for model_id in models_to_try:
+        try:
+            req = urllib.request.Request(
+                "https://openrouter.ai/api/v1/chat/completions", 
+                headers={
+                    "Authorization": f"Bearer {key}", 
+                    "Content-Type": "application/json",
+                    "HTTP-Referer": "https://streamlit.io",
+                    "X-Title": "KisanSetu"
+                },
+                data=json.dumps({
+                    "model": model_id, 
+                    "messages": [{"role": "user", "content": prompt_text}],
+                    "max_tokens": 250,
+                    "temperature": 0.3
+                }).encode('utf-8'), 
+                method="POST"
+            )
+            with urllib.request.urlopen(req, timeout=8) as resp:
+                data = json.loads(resp.read().decode('utf-8'))
+                if "choices" in data and len(data["choices"]) > 0:
+                    return data["choices"][0]["message"]["content"]
+        except Exception:
+            continue
+            
+    return "Error: All backup models are currently busy or unavailable. Please try again in a moment."
 
 st.markdown(f"<div class='main-header'>{t['title']}</div><div class='sub-header'>{t['sub']}</div>", unsafe_allow_html=True)
 
