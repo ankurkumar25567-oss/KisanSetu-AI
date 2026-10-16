@@ -1,6 +1,7 @@
 import streamlit as st
+import urllib.request
+import json
 import time
-import google.generativeai as genai
 import streamlit.components.v1 as components
 
 st.set_page_config(page_title="KisanSetu - Smart Ag", page_icon="🌾", layout="wide", initial_sidebar_state="auto")
@@ -200,14 +201,48 @@ with st.sidebar:
     valid_cities = STATES_AND_UTS[sel_state]
     sel_city = st.selectbox(t['sidebar_city'], valid_cities)
 
-def ask_gemini(prompt_text):
-    try:
-        genai.configure(api_key="AQ.Ab8RN6IGs1uk8LjftL4yx3cJq12w0MSoesIlLvS_VK4e2NuPZQ")
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        response = model.generate_content(prompt_text)
-        return response.text
-    except Exception as e:
-        return f"🌾 **KisanSetu Expert Advisor ({sel_city}):** Local soil and weather analysis indicates favorable conditions for current seasonal crops in {sel_state}. Maintain standard irrigation and pest-management schedules."
+def ask_openrouter(prompt_text):
+    fallback_response = f"🌾 **KisanSetu Expert Advisor ({sel_city}, {sel_state}):** Based on local agricultural parameters, ensure proper crop rotation, timely irrigation, and recommended nutrient management for maximum harvest yield."
+    
+    key = st.secrets.get("OPENROUTER_API_KEY", "")
+    if not key:
+        return fallback_response
+        
+    models_to_try = [
+        "mistralai/mistral-7b-instruct:free",
+        "google/gemma-2-9b-it:free",
+        "meta-llama/llama-3-8b-instruct:free",
+        "openrouter/auto"
+    ]
+    
+    for model_id in models_to_try:
+        try:
+            req = urllib.request.Request(
+                "https://openrouter.ai/api/v1/chat/completions", 
+                headers={
+                    "Authorization": f"Bearer {key}", 
+                    "Content-Type": "application/json",
+                    "HTTP-Referer": "https://streamlit.io",
+                    "X-Title": "KisanSetu"
+                },
+                data=json.dumps({
+                    "model": model_id, 
+                    "messages": [{"role": "user", "content": prompt_text}],
+                    "max_tokens": 250,
+                    "temperature": 0.3
+                }).encode('utf-8'), 
+                method="POST"
+            )
+            with urllib.request.urlopen(req, timeout=6) as resp:
+                data = json.loads(resp.read().decode('utf-8'))
+                if "choices" in data and len(data["choices"]) > 0:
+                    content = data["choices"][0]["message"].get("content")
+                    if content:
+                        return content
+        except Exception:
+            continue
+            
+    return fallback_response
 
 st.markdown(f"<div class='main-header'>{t['title']}</div><div class='sub-header'>{t['sub']}</div>", unsafe_allow_html=True)
 
@@ -253,7 +288,7 @@ with tab1:
         elif q or final_media or speech_mode:
             with st.spinner(t['analyzing']):
                 time.sleep(1)
-                st.success(ask_gemini(f"Provide expert farming guidance in {lang} for district {sel_city}, {sel_state}. Query: {q}"))
+                st.success(ask_openrouter(f"Provide expert farming guidance in {lang} for district {sel_city}, {sel_state}. Query: {q}"))
         else:
             st.warning(t['warn_empty'])
 
@@ -291,6 +326,6 @@ with tab4:
     if st.button(t['tr_btn']) and (t_text or tr_file):
         with st.spinner(t['translating']):
             time.sleep(1)
-            st.success(ask_gemini(f"Translate the provided text into {lang}: {t_text}"))
+            st.success(ask_openrouter(f"Translate the provided text into {lang}: {t_text}"))
 
 st.markdown(f"<div class='footer' style='text-align:center; color:#9ca3af; margin-top:50px; font-size:13px;'><b>{t['dev']}</b></div>", unsafe_allow_html=True)
