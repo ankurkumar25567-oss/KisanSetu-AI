@@ -141,7 +141,7 @@ UI_TEXT = {
         "tr_title": "🔄 ਅਨੁਵਾਦਕ", "tr_ph": "ਅਨੁਵਾਦ ਲਈ ਟੈਕਸਟ ਦਰਜ ਕਰੋ:", "tr_btn": "ਅਨੁਵਾਦ ਕਰੋ",
         "dev": "ਅੰਕੁਰ ਕੁਮਾਰ ਅਤੇ ਵਿਕਲਪ ਚੌਬੇ ਦੁਆਰਾ ਵਿਕਸਤ<br>ਦ ਆਰੀਅਨ ਇੰਟਰਨੈਸ਼ਨਲ ਸਕੂਲ, ਵਾਰਾਣਸੀ",
         "sidebar_lang": "🌐 ਭਾਸ਼ਾ", "sidebar_state": "ਰਾਜ / UT ਚੁਣੋ", "sidebar_city": "ਜ਼ਿਲ੍ਹਾ / ਸ਼ਹਿਰ ਚੁਣੋ",
-        "warn_empty": "ਕਿਰਪਾ ਕਰਕੇ ਸਵਾਲ ਦਰਜ ਕਰੋ ਜਾਂ ਮੀਡੀਆ ਜੋੜੋ।", "analyzing": "⚡ ਡਾਟਾ ਵਿਸ਼ਲੇਸ਼ਣ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ...", "translating": "ਅਨੁਵਾਦ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ..."
+        "warn_empty": "ਕਿਰਪਾ ਕਰਕੇ ਸਵਾਲ ਦਰਜ ਕਰੋ ਜਾਂ ਮੀਡੀਆ ਜੋੜੋ।", "analyzing": "⚡ ਡਾਟਾ ਵਿਸ਼లేਸ਼ਣ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ...", "translating": "ਅਨੁਵਾਦ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ..."
     },
     "Telugu (తెలుగు)": {
         "title": "🌾 కిసాన్ సేతు", "sub": "స్మార్ట్ AI వ్యవసాయ వేదిక",
@@ -152,18 +152,36 @@ UI_TEXT = {
         "tr_title": "🔄 అనువాదకుడు", "tr_ph": "అనువదించడానికి టెక్స్ట్ నమోదు చేయండి:", "tr_btn": "అనువదించు",
         "dev": "అంకుర్ కుమార్ & వికల్ప్ చౌబే ద్వారా అభివృద్ధి చేయబడింది",
         "sidebar_lang": "🌐 భాష", "sidebar_state": "రాష్ట్రం / UT ఎంచుకోండి", "sidebar_city": "జిల్లా / నగరం ఎంచుకోండి",
-        "warn_empty": "దయచేసి ప్రశ్నను నమోదు చేయండి లేదా మీడియాను జోడించండి.", "analyzing": "⚡ డేటా విశ్లేషించబడుతోంది...", "translating": "అనువదించబడుతోంది..."
+        "warn_empty": "దయచేసి ప్రశ్నను నమోదు చేయండి లేదా మీడియాను జోడించండి.",
+        "analyzing": "⚡ డేటా విశ్లేషించబడుతోంది...",
+        "translating": "అనువదించబడుతోంది..."
     },
     "Bengali (বাংলা)": {
         "title": "🌾 কিষাণ সেতু", "sub": "স্মার্ট এআই কৃষি প্ল্যাটফর্ম",
-        "tab0": "🏠 ওভারভিউ এবং বৈশিষ্ট্য", "tab1": "🤖 এআই উপদেষ্টা", "tab2": "📊 বাজার দর", "tab3": "📜 সরকারি স্কিম", "tab4": "🔄 অনুবাদক",
-        "ask": "💬 আপনার কৃষির প্রশ্ন জিজ্ঞাসা করুন:", "ask_ph": "টাইপ করুন: কীভাবে ধান চাষ করবেন, কীভাবে গম চাষ করবেন...",
-        "attach_img": "📎 ছবি সংযুক্ত করুন", "speech": "🎙️ স্পিচ-টু-টেক্সট", "img_mode": "🖼️ ছবি মোড", "btn_ai": "এআই কে জিজ্ঞাসা করুন",
-        "mandi_title": "📊 বাজার দর:", "crop_lbl": "ফসল বাছুন:", "unit_lbl": "একক বাছুন:",
-        "tr_title": "🔄 অনুবাদক", "tr_ph": "অনুবাদ করতে টেক্সট লিখুন:", "tr_btn": "অনুবাদ করুন",
+        "tab0": "🏠 ওভারভিউ এবং বৈশিষ্ট্য",
+        "tab1": "🤖 এআই উপদেষ্টা",
+        "tab2": "📊 বাজার দর",
+        "tab3": "📜 সরকারি স্কিম",
+        "tab4": "🔄 অনুবাদক",
+        "ask": "💬 আপনার কৃষির প্রশ্ন জিজ্ঞাসা করুন:",
+        "ask_ph": "টাইপ করুন: কীভাবে ধান চাষ করবেন, কীভাবে গম চাষ করবেন...",
+        "attach_img": "📎 ছবি সংযুক্ত করুন",
+        "speech": "🎙️ স্পিচ-টু-টেক্সট",
+        "img_mode": "🖼️ ছবি মোড",
+        "btn_ai": "এআই কে জিজ্ঞাসা করুন",
+        "mandi_title": "📊 বাজার দর:",
+        "crop_lbl": "ফসল বাছুন:",
+        "unit_lbl": "একক বাছুন:",
+        "tr_title": "🔄 অনুবাদক",
+        "tr_ph": "অনুবাদ করতে টেক্সট লিখুন:",
+        "tr_btn": "অনুবাদ করুন",
         "dev": "অঙ্কুর কুমার এবং বিকল্প চৌবে দ্বারা বিকশিত",
-        "sidebar_lang": "🌐 ভাষা", "sidebar_state": "রাজ্য / UT বাছুন", "sidebar_city": "জেলা / শহর বাছুন",
-        "warn_empty": "দয়া করে একটি প্রশ্ন লিখুন বা মিডিয়া সংযুক্ত করুন।", "analyzing": "⚡ ডেটা বিশ্লেষণ করা হচ্ছে...", "translating": "অনুবাদ করা হচ্ছে..."
+        "sidebar_lang": "🌐 ভাষা",
+        "sidebar_state": "রাজ্য / UT বাছুন",
+        "sidebar_city": "জেলা / শহর বাছুন",
+        "warn_empty": "দয়া করে একটি প্রশ্ন লিখুন বা মিডিয়া সংযুক্ত করুন।",
+        "analyzing": "⚡ ডেটা বিশ্লেষণ করা হচ্ছে...",
+        "translating": "অনুবাদ করা হচ্ছে..."
     }
 }
 
@@ -180,7 +198,6 @@ INSTANT_ANSWERS = {
     "how to grow wheat": "🌾 **Wheat Cultivation Guide:** Best grown in well-drained loamy soil, sow in mid-November, and provide 4-6 crucial irrigations starting from crown root initiation.",
     "what is the best type of fertilzer": "🧪 **Best Fertilizer Guide:** Balanced NPK (19:19:19) for general crop growth, Urea for nitrogen boost, and organic vermicompost/FYM for long-term soil health.",
     "चावल कैसे उगाएं": "🌾 **चावल गाइड:** चिकनी मिट्टी का प्रयोग करें, 25-30 दिनों के लिए नर्सरी तैयार करें, और खेतों में 2-5 सेमी पानी बनाए रखें.",
-    "गेहूं कैसे उगाएं": "🌾 **गेहूं गाइड:** अच्छी जल निकासी वाली दोमट मिट्टी का उपयोग करें, 25-30 दिनों के लिए नर्सरी तैयार करें, और खेतों में 2-5 सेमी पानी बनाए रखें.",
     "गेहूं कैसे उगाएं": "🌾 **गेहूं गाइड:** अच्छी जल निकासी वाली दोमट मिट्टी का उपयोग करें, मध्य नवंबर में बुवाई करें और 4-6 सिंचाई दें.",
     "सबसे अच्छा उर्वरक कौन सा है": "🧪 **सर्वोत्तम उर्वरक:** सामान्य वृद्धि के लिए संतुलित NPK (19:19:19) और मिट्टी की सेहत के लिए जैविक खाद."
 }
@@ -202,17 +219,17 @@ with st.sidebar:
     sel_city = st.selectbox(t['sidebar_city'], valid_cities)
 
 def ask_openrouter(prompt_text):
-    fallback_response = f"🌾 **KisanSetu Expert Advisor ({sel_city}, {sel_state}):** Based on local agricultural parameters, ensure proper crop rotation, timely irrigation, and recommended nutrient management for maximum harvest yield."
+    fallback_response = f"🌾 **KisanSetu Expert Advisor ({sel_city}, {sel_state}):** Based on local agricultural parameters for district {sel_city}, ensure proper crop rotation, timely irrigation, and recommended nutrient management for maximum harvest yield."
     
     key = st.secrets.get("OPENROUTER_API_KEY", "")
     if not key:
         return fallback_response
         
     models_to_try = [
-        "mistralai/mistral-7b-instruct:free",
+        "meta-llama/llama-3.1-8b-instruct:free",
         "google/gemma-2-9b-it:free",
-        "meta-llama/llama-3-8b-instruct:free",
-        "openrouter/auto"
+        "mistralai/mistral-7b-instruct:free",
+        "openrouter/free"
     ]
     
     for model_id in models_to_try:
@@ -233,7 +250,7 @@ def ask_openrouter(prompt_text):
                 }).encode('utf-8'), 
                 method="POST"
             )
-            with urllib.request.urlopen(req, timeout=6) as resp:
+            with urllib.request.urlopen(req, timeout=5) as resp:
                 data = json.loads(resp.read().decode('utf-8'))
                 if "choices" in data and len(data["choices"]) > 0:
                     content = data["choices"][0]["message"].get("content")
